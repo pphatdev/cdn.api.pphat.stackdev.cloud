@@ -24,7 +24,7 @@ cdn.api.pphat.stackdev.cloud/
 │   └── app.ts                    # Express app setup
 ├── dist/                         # Compiled output directory (after build)
 ├── package.json                  # Project metadata and dependencies
-├── tsconfig.json                 # TypeScript configuration
+├── tsenv.json                 # TypeScript configuration
 ├── README.md                     # Project documentation
 └── .gitignore                    # Git ignore file
 ```
@@ -54,10 +54,10 @@ npm install
 ```
 
 ### Configuration
-1. Create a configuration file (e.g., `config.json`) in the root directory to specify source directories and other settings.
+1. Create a configuration file (e.g., `env.json`) in the root directory to specify source directories and other settings.
 2. Define the source directories where images are stored.
 
-### Example `config.json`:
+### Example `env.json`:
 ```json
 {
   "port": 3000,
