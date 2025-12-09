@@ -7,10 +7,25 @@ interface EnvConfig {
     port: number;
 }
 
+/**
+ * Get port from env.json
+ * @returns number
+*/
+export const getPort = (): number => {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const envPath = path.resolve(__dirname, '../../env.json');
+    const envData = JSON.parse(fs.readFileSync(envPath, 'utf-8')) as EnvConfig;
+    return envData.port;
+}
+
+/**
+ * Configured settings
+*/
 export const configured = {
     directories: getDirectories(),
-    port: 3000,
-}
+    port: getPort(),
+};
 
 /**
  * Get destination directories from env.json
