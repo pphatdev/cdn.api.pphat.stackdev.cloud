@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "outDir": "dist",
+        // "allowJs": true,
+        "declaration": true,
+        "target": "es6",
+        "esModuleInterop": true,
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+    },
+    "include": ["./src/**/*.ts"]
+}

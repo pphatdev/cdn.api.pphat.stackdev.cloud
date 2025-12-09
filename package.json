@@ -1,0 +1,25 @@
+{
+  "name": "images-optimize-service",
+  "version": "1.0.0",
+  "description": "Images Free Sizes",
+  "type": "module",
+  "main": "./src/app.ts",
+  "module": "./src/app.ts",
+  "scripts": {
+    "dev": "node --watch --no-warnings=ExperimentalWarning --loader ts-node/esm ./src/app.ts",
+    "build": "tsc",
+    "start": "node ./dist/app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/express": "^5.0.6",
+    "express": "^5.2.1",
+    "fs-extra": "^11.3.2",
+    "sharp": "^0.34.5",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4"
+  }
+}
