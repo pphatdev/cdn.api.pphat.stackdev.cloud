@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import { configured } from './utils/config.js';
 import { getImage, uploadImages } from './controllers/images.controller.js';
 import { FilesController, uploadFiles } from './controllers/files.controller.js';
-import { sendNotFound } from './utils/response.js';
+import { sendNotFound, sendSuccess } from './utils/response.js';
 
 const app = express();
 
@@ -10,12 +10,7 @@ const app = express();
  * Default End point
 */
 app.get('/', (request: Request, response: Response) => {
-    response.send({
-        status: 200,
-        method: request.method,
-        message: "Welcome! This is Image Optimize Service.",
-        query: request.query,
-    });
+    sendSuccess(response, request.query, 'Welcome to Assets Service', 200);
 });
 
 /**
@@ -51,7 +46,7 @@ app.post('/file/upload', uploadFiles);
 
 /**
  * File search endpoint
- * GET /file/search?q=
+ * GET /file/search?q=&type
  *
  * Query Parameters:
  * - q: Name of the file to search
