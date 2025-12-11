@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { configured } from './utils/config.js';
 import { getImage, uploadImages } from './controllers/images.controller.js';
 import { uploadFiles } from './controllers/files.controller.js';
+import { sendNotFound } from './utils/response.js';
 
 const app = express();
 
@@ -52,12 +53,7 @@ app.post('/file/upload', uploadFiles);
  * Catch-all route for undefined endpoints
 */
 app.use((request: Request, response: Response) => {
-    response.send({
-        status: 404,
-        method: request.method,
-        message: "Welcome! This is Image Optimize Service.",
-        query: request.query,
-    });
+    sendNotFound(response, 'Oops! The endpoint you are looking for does not exist.');
 });
 
 /**

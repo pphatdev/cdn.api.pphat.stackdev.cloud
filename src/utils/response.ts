@@ -11,8 +11,8 @@ export class Response {
     */
     static sendSuccess(response: ExpressResponse, result: any, message = 'Success', status = 200) {
         response.status(status).send({
-            message,
             status,
+            message,
             result,
         });
     }
@@ -26,8 +26,8 @@ export class Response {
     */
     static sendError(response: ExpressResponse, error: any, message = 'Error', status = 500) {
         response.status(status).send({
-            message,
             status,
+            message,
             error,
         });
     }
@@ -39,8 +39,8 @@ export class Response {
      */
     static sendNotFound(response: ExpressResponse, message = 'Not Found') {
         response.status(404).send({
-            message,
             status: 404,
+            message,
         });
     }
 
@@ -51,8 +51,8 @@ export class Response {
     */
     static sendBadRequest(response: ExpressResponse, message = 'Bad Request') {
         response.status(400).send({
-            message,
             status: 400,
+            message,
         });
     }
 
@@ -63,8 +63,8 @@ export class Response {
     */
     static sendUnauthorized(response: ExpressResponse, message = 'Unauthorized') {
         response.status(401).send({
-            message,
             status: 401,
+            message,
         });
     }
 
@@ -75,8 +75,8 @@ export class Response {
     */
     static sendForbidden(response: ExpressResponse, message = 'Forbidden') {
         response.status(403).send({
-            message,
             status: 403,
+            message,
         });
     }
 }

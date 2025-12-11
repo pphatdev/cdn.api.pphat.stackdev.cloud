@@ -8,25 +8,20 @@ This project is an Image Optimization Service built using Node.js and Express. I
 - Caching mechanism to store and retrieve optimized images
 - Configurable source directories for image retrieval
 
-## Structure
+## Folder Structure
 
 ```diff
-cdn.api.pphat.stackdev.cloud/
-├── images/                         # Static assets (if any)
-├── uploads/                        # Static assets (if any)
-├── src/
-│   ├── controllers/                # Main controller handling image requests and processing
-│   │   └── images.controller.ts    # Image processing logic using Sharp
-│   ├── utils/
-│   │   ├── config.ts               # Configuration utilities for source directories
-│   │   ├── files.ts                # File handling utilities
-│   │   └── image-cache.ts          # Caching utilities for optimized images
-│   └── app.ts                      # Express app setup
-├── dist/                           # Compiled output directory (after build)
-├── package.json                    # Project metadata and dependencies
-├── env.json                        # Environment configuration
-├── README.md                       # Project documentation
-└── .gitignore                      # Git ignore file
+IMAGES-OPTIMIZE-SERVICE
+├───.cache-local
+├───src
+│   ├───controllers
+│   └───utils
+└───storage
+    ├───example
+    │   └───kopy
+    │       └───foldername
+    ├───customize-upload-names-1
+    └───customize-upload-names-2
 ```
 
 
