@@ -38,12 +38,12 @@ IMAGES-OPTIMIZE-SERVICE
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/pphatdev/cdn.api.pphat.stackdev.cloud.git
+git clone https://github.com/turbotechlabs/images-service.git
 ```
 
 2. Navigate to the project directory:
 ```bash
-cd cdn.api.pphat.stackdev.cloud
+cd images-service
 ```
 
 3. Install the dependencies:
