@@ -1,8 +1,11 @@
-import { Request, Response } from 'express';
 import sharp from 'sharp';
+import { NextFunction, Request, Response } from 'express';
 import { createReadStream, promises as fs } from 'fs';
 import { ImageCache } from '../utils/image-cache.js';
 import { findFileInDirectories } from '../utils/config.js';
+import multer from 'multer'
+import path from 'path/win32';
+import crypto from 'crypto';
 
 interface ImageQueryParams {
     fm?: string;
@@ -12,7 +15,13 @@ interface ImageQueryParams {
     fit?: string;
 }
 
+interface ImageValidateCallback {
+    (error: Error | null, acceptFile: boolean): void;
+}
+
 export class ImagesController {
+
+    static limitSize = 500 * 1024 * 1024; // 500 MB
 
     /**
      * Get and optimize image
@@ -62,9 +71,8 @@ export class ImagesController {
                 const width = w ? parseInt(w as string, 10) : 300;
                 const height = h ? parseInt(h as string, 10) : width;
                 transform = sharp({ create: { width, height, channels: 4, background: { r: 200, g: 200, b: 200, alpha: 1 } } })
-                .composite([{ input: ImagesController.notFoundImage({ width, height }), top: 0, left: 0 }]);
+                    .composite([{ input: ImagesController.notFoundImage({ width, height }), top: 0, left: 0 }]);
             }
-
 
             if (w || h) {
                 transform = transform.resize({
@@ -84,7 +92,7 @@ export class ImagesController {
             /**
              * Create a buffer from the transformed image
             */
-            let imageBuffer : Buffer;
+            let imageBuffer: Buffer;
             if (fileStream) {
                 imageBuffer = await fileStream.pipe(transform).toBuffer();
             } else {
@@ -109,7 +117,6 @@ export class ImagesController {
         }
     }
 
-
     /**
      * Generate a simple SVG placeholder for not found images
      * @param option Object with width and height
@@ -127,9 +134,142 @@ export class ImagesController {
             </svg>
         `);
     }
+
+    /**
+     * Upload image handler
+     * @param req Request
+     * @param res Response
+    */
+    static uploadImage = async (req: Request, res: Response): Promise<void> => {
+        const dir = req.header('dir') || 'assets';
+
+        const single = multer({
+            storage: ImagesController.storage(dir),
+            limits: { fileSize: ImagesController.limitSize },
+            fileFilter: ImagesController.validateImage
+        }).single('image');
+
+        /**
+         * Handle the upload
+        */
+        single(req, res, (err: any) => {
+            const file = req.file;
+
+            if (err instanceof multer.MulterError) {
+                const field = err.field || 'image';
+                res.status(400).json({
+                    status: 400,
+                    message: field == "image" ? err.message : `${field} is ${err.message}, Please change to: image`,
+                });
+            } else if (err) {
+                res.status(400).json({
+                    status: 400,
+                    message: err.message
+                });
+            } else if (!file) {
+                res.status(400).json({
+                    status: 400,
+                    message: 'No file uploaded.'
+                });
+            } else {
+                const { fieldname, ...fileData } = file;
+                res.status(200).json({
+                    message: 'Image uploaded successfully',
+                    status: 200,
+                    result: fileData || {}
+                });
+            }
+        });
+    };
+
+    /**
+     * Upload multiple images handler
+     * @param req Request
+     * @param res Response
+    */
+    static uploadImages = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+
+        const dir = req.header('dir') || 'assets';
+
+        const multiple = multer({
+            storage: ImagesController.storage(dir),
+            limits: { fileSize: ImagesController.limitSize },
+            fileFilter: ImagesController.validateImage
+        }).array('images', 10); // Allow up to 10 images
+
+        /**
+         * Handle the upload
+        */
+        multiple(req, res, (err: any) => {
+            const files = req.files;
+            if (err instanceof multer.MulterError) {
+                const field = err.field || 'images';
+                res.status(400).json({
+                    status: 400,
+                    message: field == "images" ? err.message : `${field} is ${err.message}, Please change to: images`,
+                });
+            } else if (err) {
+                res.status(400).json({
+                    status: 400,
+                    message: err.message
+                });
+                next();
+            } else if (!files || files.length === 0) {
+                res.status(400).json({
+                    status: 400,
+                    message: 'No files uploaded.'
+                });
+            } else {
+                const sanitizedFiles = (files as Express.Multer.File[]).map(({ fieldname, ...fileData }) => fileData);
+                res.status(200).json({
+                    message: 'Images uploaded successfully',
+                    status: 200,
+                    result: sanitizedFiles || []
+                });
+                next();
+            }
+        });
+    };
+
+    /**
+     * Multer storage configuration
+     * @param dir Directory to store images
+    */
+    static storage = (dir: string) => {
+        return multer.diskStorage({
+            destination: dir,
+            filename: (req: Request, file: Express.Multer.File, callback: (error: Error | null, filename: string) => void) => {
+                const uniqueId = crypto.randomUUID()
+                callback(null, uniqueId + path.extname(file.originalname))
+            }
+        })
+    }
+
+    /**
+     * Validate uploaded image file type
+     * @param req Request
+     * @param file Uploaded file
+     * @param callback Callback function
+    */
+    static validateImage = (req: Request, file: Express.Multer.File, callback: ImageValidateCallback) => {
+        const allowedTypes = [
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+            'image/webp',
+            'image/jpg'
+        ];
+        if (allowedTypes.includes(file.mimetype)) {
+            callback(null, true)
+        } else {
+            callback(new Error('Invalid file type. Only JPEG, PNG, GIF and WebP allowed.'), false)
+        }
+    }
 }
 
 export const {
     getImage,
-    notFoundImage
+    notFoundImage,
+    uploadImage,
+    uploadImages,
 } = ImagesController;
