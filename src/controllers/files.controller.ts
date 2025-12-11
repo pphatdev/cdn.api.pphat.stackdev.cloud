@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { configured } from '../utils/config.js';
 import { UploadController } from './upload.controller.js';
 import { sendBadRequest, sendNotFound, sendSuccess } from '../utils/response.js';
+import fs from 'fs';
 
 interface FileValidateCallback {
     (error: Error | null, acceptFile: boolean): void;
@@ -70,8 +71,67 @@ export class FilesController {
             callback(new Error('Invalid file type. Only PDF and Office files are allowed.'), false);
         }
     };
+
+    /**
+     * Search for a file by name
+     * @param request Request
+     * @param response Response
+    */
+    static searchFileByName = async (request: Request, response: Response): Promise<void> => {
+        const { q, type } = request.query;
+
+        const data = []
+
+        // get all directories from config
+        const storage = configured.directories;
+
+        // search for the file in each directory
+        for (const dir of storage) {
+            if (fs.existsSync(dir)) {
+                const files = fs.readdirSync(dir);
+                const matches = files.filter(file => {
+                    const matchesQuery = file.toLowerCase().includes((q as string).toLowerCase());
+                    if (type) {
+                        const ext = file.split('.').pop()?.toLowerCase();
+                        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+                        const officeExtensions = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pdf'];
+
+                        if (type === 'image') {
+                            return matchesQuery && ext && imageExtensions.includes(ext);
+                        } else if (type === 'office') {
+                            return matchesQuery && ext && officeExtensions.includes(ext);
+                        }
+                        return matchesQuery && ext === (type as string).toLowerCase();
+                    }
+                    return matchesQuery;
+                });
+
+                matches.forEach(file => {
+                    const filePath = `${dir}/${file}`.replace(/\\/g, '/');
+                    const stats = fs.statSync(filePath);
+                    data.push({
+                        dir: dir,
+                        name: file,
+                        size: stats.size,
+                        createdAt: stats.birthtime,
+                        modifiedAt: stats.mtime,
+                        relativePath: filePath,
+                        previewUrl: type === 'image' ? `/source/v1/files/image/${file}` : null
+                    });
+                });
+            }
+        }
+
+        if (data.length === 0) {
+            sendNotFound(response, 'No files matched the search criteria.');
+            return;
+        }
+        sendSuccess(response, data, 'Files retrieved successfully', 200);
+    };
+
 }
 
 export const {
-    uploadFiles
+    uploadFiles,
+    searchFileByName
 } = FilesController;

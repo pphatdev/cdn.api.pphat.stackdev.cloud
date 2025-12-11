@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { configured } from './utils/config.js';
 import { getImage, uploadImages } from './controllers/images.controller.js';
-import { uploadFiles } from './controllers/files.controller.js';
+import { FilesController, uploadFiles } from './controllers/files.controller.js';
 import { sendNotFound } from './utils/response.js';
 
 const app = express();
@@ -48,6 +48,17 @@ app.post('/image/upload', uploadImages);
  * - files: File to upload
 */
 app.post('/file/upload', uploadFiles);
+
+/**
+ * File search endpoint
+ * GET /file/search?q=
+ *
+ * Query Parameters:
+ * - q: Name of the file to search
+ * - type: {image, office} Type of files to search (optional)
+ */
+app.get('/file/search', FilesController.searchFileByName);
+
 
 /**
  * Catch-all route for undefined endpoints

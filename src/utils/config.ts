@@ -33,7 +33,11 @@ export const getPort = (): number => {
  * Configured settings
 */
 export const configured = {
-    directories: getDirectories(),
+    directories: [
+        // can be dynamic directories via env.json
+        ...getDirectories(),
+        "./storage/**/**"
+    ],
     port: getPort(),
     baseDirectory: 'storage',
     defaultStoragePath: 'files',
