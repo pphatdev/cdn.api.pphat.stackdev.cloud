@@ -2,9 +2,19 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 
+interface FileSettings {
+    maxSize: number;
+    maxFilesUpload: number;
+    allowedTypes: string[];
+}
+
 interface EnvConfig {
     directories: string[];
     port: number;
+    baseDirectory: string;
+    defaultStoragePath: string;
+    files: FileSettings;
+    images: FileSettings;
 }
 
 /**
@@ -25,7 +35,36 @@ export const getPort = (): number => {
 export const configured = {
     directories: getDirectories(),
     port: getPort(),
+    baseDirectory: 'storage',
+    defaultStoragePath: 'files',
+    files: {
+        maxSize: 500 * 1024 * 1024, // 500MB
+        maxFilesUpload: 10,
+        allowedTypes: [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+        ]
+    },
+    images: {
+        maxSize: 50 * 1024 * 1024, // 50MB
+        maxFilesUpload: 10,
+        allowedTypes: [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'image/gif',
+            'image/tiff',
+            'image/bmp',
+            'image/svg+xml'
+        ]
+    }
 };
+
 
 /**
  * Get destination directories from env.json
@@ -88,7 +127,6 @@ export function getDirectories(): string[] {
         if (/\\/g.test(dir) && !dir.startsWith('./')) {
             dir = "./" + dir;
         }
-
         const toRightPath = dir.replace(/\\/g, '/').replace(/\/+$/g, '/');
 
         if (!uniqueDirs.includes(toRightPath)) {
