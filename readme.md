@@ -32,7 +32,8 @@ cdn.api.pphat.stackdev.cloud/
 ## Process Flow
 
 <div style="text-align: center; padding: 20px; background-color: #121212;">
-<img src="./storage/example/flow.drawio.svg" alt="Process Flow Diagram" style="padding: 20px; width: 95%;"/>
+    <img src="./storage/example/store.drawio.svg" alt="Process Flow Diagram" style="padding: 20px; width: 95%;"/>
+    <img src="./storage/example/get.drawio.svg" alt="Process Flow Diagram" style="padding: 20px; width: 95%;"/>
 </div>
 
 
