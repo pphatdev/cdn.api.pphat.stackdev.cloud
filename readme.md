@@ -12,22 +12,28 @@ This project is an Image Optimization Service built using Node.js and Express. I
 
 ```diff
 cdn.api.pphat.stackdev.cloud/
-├── images/                       # Static assets (if any)
-├── uploads/                      # Static assets (if any)
+├── images/                         # Static assets (if any)
+├── uploads/                        # Static assets (if any)
 ├── src/
-│   ├── controllers/              # Main controller handling image requests and processing
-│   │   └── images.controller.ts  # Image processing logic using Sharp
+│   ├── controllers/                # Main controller handling image requests and processing
+│   │   └── images.controller.ts    # Image processing logic using Sharp
 │   ├── utils/
-│   │   ├── config.ts             # Configuration utilities for source directories
-│   │   ├── files.ts              # File handling utilities
-│   │   └── image-cache.ts        # Caching utilities for optimized images
-│   └── app.ts                    # Express app setup
-├── dist/                         # Compiled output directory (after build)
-├── package.json                  # Project metadata and dependencies
-├── tsenv.json                 # TypeScript configuration
-├── README.md                     # Project documentation
-└── .gitignore                    # Git ignore file
+│   │   ├── config.ts               # Configuration utilities for source directories
+│   │   ├── files.ts                # File handling utilities
+│   │   └── image-cache.ts          # Caching utilities for optimized images
+│   └── app.ts                      # Express app setup
+├── dist/                           # Compiled output directory (after build)
+├── package.json                    # Project metadata and dependencies
+├── env.json                        # Environment configuration
+├── README.md                       # Project documentation
+└── .gitignore                      # Git ignore file
 ```
+
+## Process Flow
+
+<div style="text-align: center; padding: 20px; background-color: #121212;">
+<img src="./storage/example/flow.drawio.svg" alt="Process Flow Diagram" style="padding: 20px; width: 95%;"/>
+</div>
 
 
 ## Getting Started
