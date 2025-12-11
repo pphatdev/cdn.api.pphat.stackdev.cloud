@@ -39,6 +39,10 @@ IMAGES-OPTIMIZE-SERVICE
 
 ```bash
 git clone https://github.com/turbotechlabs/images-service.git
+
+# Or from gitlab
+
+git clone git@gitlab-01.turbotech.com:tt-addons/images-service.git
 ```
 
 2. Navigate to the project directory:
