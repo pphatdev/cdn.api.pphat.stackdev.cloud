@@ -29,13 +29,6 @@ cdn.api.pphat.stackdev.cloud/
 └── .gitignore                      # Git ignore file
 ```
 
-## Process Flow
-
-<div style="text-align: center; padding: 20px; background-color: #121212;">
-    <img src="./storage/example/store.drawio.svg" alt="Process Flow Diagram" style="padding: 20px; width: 95%;"/>
-    <img src="./storage/example/get.drawio.svg" alt="Process Flow Diagram" style="padding: 20px; width: 95%;"/>
-</div>
-
 
 ## Getting Started
 
@@ -98,3 +91,12 @@ npm start
 
 
 The server will start on the configured port (default is 3000). You can access the service at `http://localhost:3000`.
+
+
+
+## Process Flow
+
+<div style="text-align: center; padding: 20px; background-color: #121212;">
+    <img src="./storage/example/store.drawio.svg" alt="Process Flow Diagram" style="padding: 20px; width: 95%;"/>
+    <img src="./storage/example/get.drawio.svg" alt="Process Flow Diagram" style="padding: 20px; width: 95%;"/>
+</div>
