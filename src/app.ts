@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { configured } from './utils/config.js';
 import { getImage, uploadImages } from './controllers/images.controller.js';
 import { FilesController, uploadFiles } from './controllers/files.controller.js';
+import { FolderController } from './controllers/folder.controller.js';
 import { sendNotFound, sendSuccess } from './utils/response.js';
 
 const app = express();
@@ -31,7 +32,7 @@ app.get('/source/v1/files/image/:filename', getImage);
  *
  * POST /image/upload
  * Form Data:
- * - images: Image file to upload
+ * - images: Images file to upload
 */
 app.post('/image/upload', uploadImages);
 
@@ -40,7 +41,7 @@ app.post('/image/upload', uploadImages);
  *
  * POST /file/upload
  * Form Data:
- * - files: File to upload
+ * - files: Files to upload
 */
 app.post('/file/upload', uploadFiles);
 
@@ -54,6 +55,23 @@ app.post('/file/upload', uploadFiles);
  */
 app.get('/file/search', FilesController.searchFileByName);
 
+
+/**
+ * Get folder structure dynamically based on the route
+ * GET /folder
+ * Dynamic Path:
+ * - /folder/ -> Shows top-level folders and files in `storage`
+ */
+app.get('/folder', FolderController.getFolderStructure);
+
+/**
+ * Get folder structure dynamically based on the route
+ * GET /folder/*
+ * Dynamic Path:
+ * - /folder/ -> Shows top-level folders and files in `storage`
+ * - /folder/folder1 -> Shows contents of `folder1`
+ */
+app.get('/folder/*path', FolderController.getFolderStructure);
 
 /**
  * Catch-all route for undefined endpoints
