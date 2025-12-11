@@ -66,7 +66,7 @@ export class ImagesController {
                 /**
                  * Generate placeholder if file not found
                 */
-                const width = w ? parseInt(w as string, 10) : 300;
+                const width = w ? parseInt(w as string, 10) : 512;
                 const height = h ? parseInt(h as string, 10) : width;
                 transform = sharp({ create: { width, height, channels: 4, background: { r: 200, g: 200, b: 200, alpha: 1 } } })
                     .composite([{ input: ImagesController.notFoundImage({ width, height }), top: 0, left: 0 }]);
@@ -120,7 +120,7 @@ export class ImagesController {
      * @param option Object with width and height
      * @returns Buffer
     */
-    static notFoundImage(option: { width: number; height: number } = { width: 300, height: 300 }): Buffer {
+    static notFoundImage(option: { width: number; height: number } = { width: 512, height: 512 }): Buffer {
         const { width, height } = option;
         return Buffer.from(`
             <svg width="${width}" height="${height}" viewBox="0 0 100 100" fill="none">

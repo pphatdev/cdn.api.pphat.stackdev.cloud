@@ -1,4 +1,7 @@
 ## Introduction
+
+![Cover](./storage/example/get-image.png)
+
 This project is an Image Optimization Service built using Node.js and Express. It leverages the Sharp library to perform image transformations such as format conversion, resizing, and quality adjustments. The service is designed to efficiently serve optimized images based on client requests, improving load times and reducing bandwidth usage.
 
 ## Features
