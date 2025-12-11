@@ -1,7 +1,7 @@
 {
-  "name": "images-optimize-service",
+  "name": "assets-service",
   "version": "1.0.0",
-  "description": "Images Free Sizes",
+  "description": "Image optimization and asset management service",
   "type": "module",
   "main": "./src/app.ts",
   "module": "./src/app.ts",

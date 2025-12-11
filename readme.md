@@ -2,7 +2,7 @@
 
 ![Cover](./storage/example/get-image.png)
 
-This project is an Image Optimization Service built using Node.js and Express. It leverages the Sharp library to perform image transformations such as format conversion, resizing, and quality adjustments. The service is designed to efficiently serve optimized images based on client requests, improving load times and reducing bandwidth usage.
+This project is an Assets Service built using Node.js and Express. It leverages the Sharp library to perform image transformations such as format conversion, resizing, and quality adjustments. The service is designed to efficiently serve optimized images based on client requests, improving load times and reducing bandwidth usage.
 
 ## Features
 - Dynamic image format conversion (e.g., JPEG, PNG, WebP, AVIF)
@@ -90,10 +90,7 @@ Start the server using the following command:
 npm start
 ```
 
-
-
 The server will start on the configured port (default is 3000). You can access the service at `http://localhost:3000`.
-
 
 
 ## Process Flow
