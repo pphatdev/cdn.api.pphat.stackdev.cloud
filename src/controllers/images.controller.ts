@@ -168,6 +168,14 @@ export class ImagesController {
                 return;
             }
             const sanitizedFiles = (files as Express.Multer.File[]).map(({ fieldname, ...fileData }) => fileData);
+
+            // reduce value of key "path" to be relative to storage directory
+            sanitizedFiles.forEach(file => {
+                if (file.path) {
+                    file.path = file.path.replace(/\\/g, '/');
+                }
+            });
+
             sendSuccess(response, sanitizedFiles, 'Files uploaded successfully', 200);
         });
     };
