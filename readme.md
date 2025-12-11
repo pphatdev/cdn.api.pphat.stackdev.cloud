@@ -60,11 +60,10 @@ npm install
 ### Example `env.json`:
 ```json
 {
-  "port": 3000,
-  "sourceDirectories": [
-    "./images",
-    "./uploads"
-  ]
+    "directories": [
+        "./assets/**/**"
+    ],
+    "port": 3101
 }
 ```
 
