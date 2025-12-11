@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
-import { getImage, uploadImage, uploadImages } from './controllers/images.controller.js';
 import { configured } from './utils/config.js';
-import { uploadFile, uploadFiles } from './controllers/files.controller.js';
+import { getImage, uploadImages } from './controllers/images.controller.js';
+import { uploadFiles } from './controllers/files.controller.js';
 
 const app = express();
 
@@ -35,36 +35,18 @@ app.get('/source/v1/files/image/:filename', getImage);
  *
  * POST /image/upload
  * Form Data:
- * - image: Image file to upload
+ * - images: Image file to upload
 */
-app.post('/image/upload', uploadImage);
-
-/**
- * Multiple Image upload endpoint
- *
- * POST /image/uploads
- * Form Data:
- * - images: Multiple image files to upload
-*/
-app.post('/image/uploads', uploadImages);
+app.post('/image/upload', uploadImages);
 
 /**
  * File upload endpoint
  *
  * POST /file/upload
  * Form Data:
- * - file: File to upload
+ * - files: File to upload
 */
-app.post('/file/upload', uploadFile);
-
-/**
- * File upload endpoint
- *
- * POST /file/upload
- * Form Data:
- * - files: Files to uploads
-*/
-app.post('/file/uploads', uploadFiles);
+app.post('/file/upload', uploadFiles);
 
 /**
  * Catch-all route for undefined endpoints
