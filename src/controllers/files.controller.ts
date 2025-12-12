@@ -129,6 +129,26 @@ export class FilesController {
         sendSuccess(response, data, 'Files retrieved successfully', 200);
     };
 
+    /**
+     * Download a file by filename
+     * @param request Request
+     * @param response Response
+    */
+    static downloadFile = async (request: Request, response: Response): Promise<void> => {
+        const { filename } = request.params;
+        // find the file in configured directories
+        const storage = configured.directories;
+
+        for (const dir of storage) {
+            const filePath = `${dir}/${filename}`.replace(/\\/g, '/');
+            if (fs.existsSync(filePath)) {
+                response.download(filePath);
+                return;
+            }
+        }
+        sendNotFound(response, 'File not found.');
+    };
+
 }
 
 export const {

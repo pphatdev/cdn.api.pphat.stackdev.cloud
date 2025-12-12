@@ -4,6 +4,7 @@ import { getImage, uploadImages } from './controllers/images.controller.js';
 import { FilesController, uploadFiles } from './controllers/files.controller.js';
 import { FolderController } from './controllers/folder.controller.js';
 import { sendNotFound, sendSuccess } from './utils/response.js';
+import { PreviewController } from './controllers/preview.controller.js';
 
 const app = express();
 
@@ -54,6 +55,21 @@ app.post('/file/upload', uploadFiles);
  * - type: {image, office} Type of files to search (optional)
  */
 app.get('/file/search', FilesController.searchFileByName);
+
+
+/**
+ * File download endpoint
+ *
+ * GET /file/download/:filename
+*/
+app.get('/file/download/:filename', FilesController.downloadFile);
+
+/**
+ * File preview endpoint
+ *
+ * GET /file/preview/:filename
+*/
+app.get('/file/preview/:filename', PreviewController.files);
 
 
 /**

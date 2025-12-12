@@ -41,7 +41,7 @@ export const configured = {
     port: getPort(),
     baseDirectory: 'storage',
     defaultStoragePath: 'files',
-    uploadOriginalName: true,
+    uploadOriginalName: false,
     files: {
         maxSize: 500 * 1024 * 1024, // 500MB
         maxFilesUpload: 10,
