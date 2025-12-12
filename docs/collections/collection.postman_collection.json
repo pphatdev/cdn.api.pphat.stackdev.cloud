@@ -1,0 +1,572 @@
+{
+	"info": {
+		"_postman_id": "de321795-bd82-4762-a982-45ce9763123f",
+		"name": "Images",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16827919",
+		"_collection_link": "https://sophatdesife.postman.co/workspace/285d337e-84e8-45bd-8a1f-0a3d363b961e/collection/16827919-de321795-bd82-4762-a982-45ce9763123f?action=share&source=collection_link&creator=16827919"
+	},
+	"item": [
+		{
+			"name": "Upload Only Image",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "storage",
+						"value": "/images/",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "images",
+							"type": "file",
+							"src": "/C:/Users/front-end.01/Downloads/photo_2025-11-10_13-23-05.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/image/upload",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"image",
+						"upload"
+					]
+				},
+				"description": "## Image upload endpoint\n\n**Endpoint:**  \n`POST /image/upload`\n\n**Description:**  \nThis endpoint allows you to upload one or more image files to the server.\n\n### Form Data\n\n| Key | Type | Description |\n| --- | --- | --- |\n| images | File | The image file(s) to upload |\n\n### Example Request in Postman\n\n1. Set the request method to **POST**.\n    \n2. Set the URL to: `{{url}}/image/upload`\n    \n3. In the **Body** tab, select **form-data**.\n    \n4. Add a key named `images` and set its type to **File**.\n    \n5. Choose the image file(s) you want to upload.\n    \n6. (Optional) Add any required headers (e.g., `storage: smarterp`).\n    \n7. Click **Send** to upload the image file(s).\n    \n\n### Example cURL\n\n``` sh\ncurl -X POST \"{{url}}/image/upload\"\n    -H \"storage: folder/smarterp\"\n    -F \"images=@/path/to/your/image.png\"\n\n ```\n\n### Example Response\n\n``` json\n{\n    \"message\": \"Images uploaded successfully\",\n    \"status\": 200,\n    \"result\": [\n        {\n            \"originalname\": \"image1.png\",\n            \"encoding\": \"7bit\",\n            \"mimetype\": \"image/png\",\n            \"destination\": \"storage/smarterp\",\n            \"filename\": \"a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6.png\",\n            \"path\": \"storage\\\\smarterp\\\\a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6.png\",\n            \"size\": 123456\n        }\n    ]\n}\n\n ```"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "storage",
+								"value": "/images/",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "images",
+									"type": "file",
+									"src": "/C:/Users/front-end.01/Downloads/photo_2025-11-10_13-23-05.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/image/upload",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"image",
+								"upload"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "327"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"147-IZiirYKqaL2RsiCJCSU6UdKuaEw\""
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 11 Dec 2025 11:32:51 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"status\": 200,\n    \"message\": \"Files uploaded successfully\",\n    \"result\": [\n        {\n            \"originalname\": \"photo_2025-11-10_13-23-05.jpg\",\n            \"encoding\": \"7bit\",\n            \"mimetype\": \"image/jpeg\",\n            \"destination\": \"storage/images/\",\n            \"filename\": \"1765452771418-photo_2025-11-10_13-23-05.jpg\",\n            \"path\": \"storage/images/1765452771418-photo_2025-11-10_13-23-05.jpg\",\n            \"size\": 102028\n        }\n    ]\n}"
+				}
+			]
+		},
+		{
+			"name": "Upload only Office Files",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "storage",
+						"value": "smarterp",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "files",
+							"type": "file",
+							"src": "/N:/ADU/Document Request/Plan Modify Accounting .pdf"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/file/upload",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"file",
+						"upload"
+					]
+				},
+				"description": "## How to Use: File Upload Endpoint\n\n**Endpoint:**  \n`POST /file/upload`\n\n**Description:**  \nThis endpoint allows you to upload one or more files to the server.\n\n### Form Data\n\n| Key | Type | Description |\n| --- | --- | --- |\n| files | File | The file(s) to upload |\n\n### Example Request in Postman\n\n1. Set the request method to **POST**.\n    \n2. Set the URL to: `{{url}}/file/upload`\n    \n3. In the **Body** tab, select **form-data**.\n    \n4. Add a key named `files` and set its type to **File**.\n    \n5. Choose the file(s) you want to upload.\n    \n6. (Optional) Add any required headers (e.g., `storage: smarterp`).\n    \n7. Click **Send** to upload the file(s).\n    \n\n### Example cURL\n\n``` sh\ncurl -X POST \"{{url}}/file/upload\"\n    -H \"storage: smarterp\"\n    -F \"files=@/path/to/your/file.png\"\n\n ```\n\n### Example Response\n\n``` json\n{\n    \"message\": \"Files uploaded successfully\",\n    \"status\": 200,\n    \"result\": [\n        {\n            \"originalname\": \"_CV Template.docx\",\n            \"encoding\": \"7bit\",\n            \"mimetype\": \"application/vnd.openxmlformats-officedocument.wordprocessingml.document\",\n            \"destination\": \"storage/smarterp\",\n            \"filename\": \"40d018f6-6638-4c93-a677-4d3126c9002c.docx\",\n            \"path\": \"storage\\\\smarterp\\\\40d018f6-6638-4c93-a677-4d3126c9002c.docx\",\n            \"size\": 234685\n        }\n    ]\n}\n\n ```"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "storage",
+								"value": "smarterp",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "files",
+									"type": "file",
+									"src": "/D:/Project/_CV Template.docx"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/file/upload",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"file",
+								"upload"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "355"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"163-xxrAG1pgrwa5Pn9RDRYrB6nWot8\""
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 11 Dec 2025 12:47:42 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"status\": 200,\n    \"message\": \"Files uploaded successfully\",\n    \"result\": [\n        {\n            \"originalname\": \"_CV Template.docx\",\n            \"encoding\": \"7bit\",\n            \"mimetype\": \"application/vnd.openxmlformats-officedocument.wordprocessingml.document\",\n            \"destination\": \"storage/smarterp\",\n            \"filename\": \"1765457262345-_CV_Template.docx\",\n            \"path\": \"storage/smarterp/1765457262345-_CV_Template.docx\",\n            \"size\": 234685\n        }\n    ]\n}"
+				}
+			]
+		},
+		{
+			"name": "Get Image",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/source/v1/files/image/:filename?fm=webp&q&w=200&h",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"source",
+						"v1",
+						"files",
+						"image",
+						":filename"
+					],
+					"query": [
+						{
+							"key": "fm",
+							"value": "webp"
+						},
+						{
+							"key": "q",
+							"value": null,
+							"description": "1-100"
+						},
+						{
+							"key": "w",
+							"value": "200"
+						},
+						{
+							"key": "h",
+							"value": null
+						}
+					],
+					"variable": [
+						{
+							"key": "filename",
+							"value": "example.png"
+						}
+					]
+				},
+				"description": "## Image optimization endpoint\n\n**Endpoint:**  \n`GET /source/v1/files/image/:filename`\n\n**Description:**  \nThis endpoint allows you to retrieve and optimize an image file stored on the server by specifying the filename as a URL parameter. You can apply various optimization options through query parameters.\n\n### URL Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| filename | String | The name of the image file to retrieve and optimize |\n\n### Query Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| fm | String | (Optional) Format (e.g., jpg, png, webp) |\n| q | Number | (Optional) Quality (e.g., 80) |\n| w | Number | (Optional) Width (e.g., 300) |\n| h | Number | (Optional) Height (e.g., 300) |\n| fit | String | (Optional) Fit mode (e.g., cover, contain) |\n\n### Example Request in Postman\n\n1. Set the request method to **GET**.\n    \n2. Set the URL to: `{{url}}/source/v1/files/image/sample.png?fm=webp&q=80&w=300&h=300&fit=cover`\n    \n3. (Optional) Add any required headers.\n    \n4. Click **Send** to retrieve and optimize the image.\n    \n\n### Example cURL\n\n``` sh\ncurl -X GET \"{{url}}/source/v1/files/image/sample.png?fm=webp&q=80&w=300&h=300&fit=cover\"\n\n ```\n\n### Example Response\n\nThe response will be the optimized image file. The content type will depend on the requested format (e.g., `image/webp` for WebP format).\n\n``` http\nHTTP/1.1 200 OK\nContent-Type: image/webp\nContent-Length: 12345\n(binary image data)\n\n ```"
+			},
+			"response": []
+		},
+		{
+			"name": "Search File Name",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/file/search?q=10_13-23-05",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"file",
+						"search"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "10_13-23-05",
+							"description": "name"
+						},
+						{
+							"key": "type",
+							"value": "office",
+							"description": "image,office",
+							"disabled": true
+						}
+					]
+				},
+				"description": "## File search endpoint\n\n**Endpoint:**  \n`GET /file/search?q=&type`\n\n**Description:**  \nThis endpoint allows you to search for files by their filename and type.\n\n### Query Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| q | String | The search query for the filename |\n| type | String | (Optional) The type of file (e.g., image, document) |\n\n### Example Request in Postman\n\n1. Set the request method to **GET**.\n    \n2. Set the URL to: `{{url}}/file/search?q=sample&type=image`\n    \n3. (Optional) Add any required headers.\n    \n4. Click **Send** to search for files.\n    \n\n### Example cURL\n\n``` sh\ncurl -X GET \"{{url}}/file/search?q=sample&type=image\"\n\n ```\n\n### Example Response\n\n``` json\n{\n    \"message\": \"Files retrieved successfully\",\n    \"status\": 200,\n    \"result\": [\n        {\n            \"originalname\": \"sample.png\",\n            \"encoding\": \"7bit\",\n            \"mimetype\": \"image/png\",\n            \"destination\": \"storage/images\",\n            \"filename\": \"123e4567-e89b-12d3-a456-426614174000.png\",\n            \"path\": \"storage\\\\images\\\\123e4567-e89b-12d3-a456-426614174000.png\",\n            \"size\": 204800\n        }\n    ]\n}\n\n ```"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/file/search?q=10_13-23-05",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"file",
+								"search"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "10_13-23-05",
+									"description": "name"
+								},
+								{
+									"key": "type",
+									"value": "office",
+									"description": "image,office",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "1977"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"7b9-MSGHs/6mWfjR0AITmOIle8hqi5k\""
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 11 Dec 2025 12:54:03 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"status\": 200,\n    \"message\": \"Files retrieved successfully\",\n    \"result\": [\n        {\n            \"dir\": \"./storage/images\",\n            \"name\": \"1765452768180-photo_2025-11-10_13-23-05.jpg\",\n            \"size\": 102028,\n            \"createdAt\": \"2025-12-11T11:32:48.184Z\",\n            \"modifiedAt\": \"2025-12-11T11:32:48.205Z\",\n            \"relativePath\": \"./storage/images/1765452768180-photo_2025-11-10_13-23-05.jpg\",\n            \"previewUrl\": null\n        },\n        {\n            \"dir\": \"./storage/images\",\n            \"name\": \"1765452768958-photo_2025-11-10_13-23-05.jpg\",\n            \"size\": 102028,\n            \"createdAt\": \"2025-12-11T11:32:48.959Z\",\n            \"modifiedAt\": \"2025-12-11T11:32:48.960Z\",\n            \"relativePath\": \"./storage/images/1765452768958-photo_2025-11-10_13-23-05.jpg\",\n            \"previewUrl\": null\n        },\n        {\n            \"dir\": \"./storage/images\",\n            \"name\": \"1765452769805-photo_2025-11-10_13-23-05.jpg\",\n            \"size\": 102028,\n            \"createdAt\": \"2025-12-11T11:32:49.808Z\",\n            \"modifiedAt\": \"2025-12-11T11:32:49.809Z\",\n            \"relativePath\": \"./storage/images/1765452769805-photo_2025-11-10_13-23-05.jpg\",\n            \"previewUrl\": null\n        },\n        {\n            \"dir\": \"./storage/images\",\n            \"name\": \"1765452770607-photo_2025-11-10_13-23-05.jpg\",\n            \"size\": 102028,\n            \"createdAt\": \"2025-12-11T11:32:50.609Z\",\n            \"modifiedAt\": \"2025-12-11T11:32:50.609Z\",\n            \"relativePath\": \"./storage/images/1765452770607-photo_2025-11-10_13-23-05.jpg\",\n            \"previewUrl\": null\n        },\n        {\n            \"dir\": \"./storage/images\",\n            \"name\": \"1765452771418-photo_2025-11-10_13-23-05.jpg\",\n            \"size\": 102028,\n            \"createdAt\": \"2025-12-11T11:32:51.420Z\",\n            \"modifiedAt\": \"2025-12-11T11:32:51.420Z\",\n            \"relativePath\": \"./storage/images/1765452771418-photo_2025-11-10_13-23-05.jpg\",\n            \"previewUrl\": null\n        },\n        {\n            \"dir\": \"./storage/images/kopy/1\",\n            \"name\": \"1765451217717-photo_2025-11-10_13-23-05.jpg\",\n            \"size\": 102028,\n            \"createdAt\": \"2025-12-11T11:06:57.720Z\",\n            \"modifiedAt\": \"2025-12-11T11:06:57.721Z\",\n            \"relativePath\": \"./storage/images/kopy/1/1765451217717-photo_2025-11-10_13-23-05.jpg\",\n            \"previewUrl\": null\n        },\n        {\n            \"dir\": \"./storage/images/kopy/1\",\n            \"name\": \"1765451249514-photo_2025-11-10_13-23-05.jpg\",\n            \"size\": 102028,\n            \"createdAt\": \"2025-12-11T11:07:29.517Z\",\n            \"modifiedAt\": \"2025-12-11T11:07:29.518Z\",\n            \"relativePath\": \"./storage/images/kopy/1/1765451249514-photo_2025-11-10_13-23-05.jpg\",\n            \"previewUrl\": null\n        }\n    ]\n}"
+				}
+			]
+		},
+		{
+			"name": "Get File Stracture",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/folder/:subfolder",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"folder",
+						":subfolder"
+					],
+					"variable": [
+						{
+							"key": "subfolder",
+							"value": "images/kopy",
+							"description": "folder/subfolder/subfolder"
+						}
+					]
+				},
+				"description": "## Get folder structure dynamically based on the route\n\n**Endpoint:**  \n`GET /folder/\\*path`\n\n**Description:**  \nThis endpoint allows you to retrieve the structure of folders and files dynamically based on the specified path.\n\n### Dynamic Path\n\n| Path | Description |\n| --- | --- |\n| /folder/ | Shows top-level folders and files in `storage` |\n| /folder/folder1 | Shows contents of `folder1` |\n\n### Example Request in Postman\n\n1. Set the request method to **GET**.\n    \n2. Set the URL to: `{{url}}/folder/folder1`\n    \n3. (Optional) Add any required headers.\n    \n4. Click **Send** to retrieve the folder structure.\n    \n\n### Example cURL\n\n``` sh\ncurl -X GET \"{{url}}/folder/folder1\"\n\n ```\n\n### Example Response\n\n``` json\n{\n    \"message\": \"Folder structure retrieved successfully\",\n    \"status\": 200,\n    \"result\": {\n        \"folderName\": \"folder1\",\n        \"files\": [\n            {\n                \"filename\": \"example1.png\",\n                \"path\": \"storage/folder1/example1.png\",\n                \"size\": 204800\n            },\n            {\n                \"filename\": \"example2.docx\",\n                \"path\": \"storage/folder1/example2.docx\",\n                \"size\": 102400\n            }\n        ],\n        \"subfolders\": [\n            {\n                \"folderName\": \"subfolder1\",\n                \"path\": \"storage/folder1/subfolder1\"\n            }\n        ]\n    }\n}\n\n ```"
+			},
+			"response": [
+				{
+					"name": "Sucess",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/folder",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"folder"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "1559"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"617-yRnW7F5HU7ltyR4hADuns9+i10A\""
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 11 Dec 2025 12:54:18 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"status\": 200,\n    \"message\": \"Folder structure retrieved successfully.\",\n    \"result\": [\n        {\n            \"name\": \"example\",\n            \"type\": \"folder\",\n            \"children\": [\n                {\n                    \"name\": \"example.png\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"flow.drawio.svg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"get-image.png\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"get.drawio.svg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"store.drawio.svg\",\n                    \"type\": \"file\"\n                }\n            ]\n        },\n        {\n            \"name\": \"files\",\n            \"type\": \"folder\",\n            \"children\": [\n                {\n                    \"name\": \"82d548b6-0bf5-4445-b2fe-f55bddcc9d8f.docx\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"9e680cb2-40e5-4da4-928c-54c071cec06b.docx\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"a7ae022e-0674-4df2-89c1-58d8f14b61b0.docx\",\n                    \"type\": \"file\"\n                }\n            ]\n        },\n        {\n            \"name\": \"images\",\n            \"type\": \"folder\",\n            \"children\": [\n                {\n                    \"name\": \"012a5abb-1166-44cd-8ac9-58d100352899.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"1765452768180-photo_2025-11-10_13-23-05.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"1765452768958-photo_2025-11-10_13-23-05.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"1765452769805-photo_2025-11-10_13-23-05.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"1765452770607-photo_2025-11-10_13-23-05.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"1765452771418-photo_2025-11-10_13-23-05.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"497f379a-009b-44e2-843c-d85a726db3bf.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"a09ff19d-4f39-48d0-894d-6f9e1f62767e.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"kopy\",\n                    \"type\": \"folder\",\n                    \"children\": [\n                        {\n                            \"name\": \"1\",\n                            \"type\": \"folder\",\n                            \"children\": [\n                                {\n                                    \"name\": \"1765451217717-photo_2025-11-10_13-23-05.jpg\",\n                                    \"type\": \"file\"\n                                },\n                                {\n                                    \"name\": \"1765451249514-photo_2025-11-10_13-23-05.jpg\",\n                                    \"type\": \"file\"\n                                },\n                                {\n                                    \"name\": \"f3c97c74-dcbf-4217-859c-40b98241aa74.jpg\",\n                                    \"type\": \"file\"\n                                }\n                            ]\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"name\": \"smarterp\",\n            \"type\": \"folder\",\n            \"children\": [\n                {\n                    \"name\": \"1765457262345-_CV_Template.docx\",\n                    \"type\": \"file\"\n                }\n            ]\n        }\n    ]\n}"
+				}
+			]
+		},
+		{
+			"name": "Download File",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/file/download/:name",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"file",
+						"download",
+						":name"
+					],
+					"variable": [
+						{
+							"key": "name",
+							"value": "224eedd5-ecb2-4adf-ae2d-fb72a4cb342e.docx"
+						}
+					]
+				},
+				"description": "## Get folder structure dynamically based on the route\n\n**Endpoint:**  \n`GET /folder/\\*path`\n\n**Description:**  \nThis endpoint allows you to retrieve the structure of folders and files dynamically based on the specified path.\n\n### Dynamic Path\n\n| Path | Description |\n| --- | --- |\n| /folder/ | Shows top-level folders and files in `storage` |\n| /folder/folder1 | Shows contents of `folder1` |\n\n### Example Request in Postman\n\n1. Set the request method to **GET**.\n    \n2. Set the URL to: `{{url}}/folder/folder1`\n    \n3. (Optional) Add any required headers.\n    \n4. Click **Send** to retrieve the folder structure.\n    \n\n### Example cURL\n\n``` sh\ncurl -X GET \"{{url}}/folder/folder1\"\n\n ```\n\n### Example Response\n\n``` json\n{\n    \"message\": \"Folder structure retrieved successfully\",\n    \"status\": 200,\n    \"result\": {\n        \"folderName\": \"folder1\",\n        \"files\": [\n            {\n                \"filename\": \"example1.png\",\n                \"path\": \"storage/folder1/example1.png\",\n                \"size\": 204800\n            },\n            {\n                \"filename\": \"example2.docx\",\n                \"path\": \"storage/folder1/example2.docx\",\n                \"size\": 102400\n            }\n        ],\n        \"subfolders\": [\n            {\n                \"folderName\": \"subfolder1\",\n                \"path\": \"storage/folder1/subfolder1\"\n            }\n        ]\n    }\n}\n\n ```"
+			},
+			"response": [
+				{
+					"name": "Sucess",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/folder",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"folder"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "1559"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"617-yRnW7F5HU7ltyR4hADuns9+i10A\""
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 11 Dec 2025 12:54:18 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"status\": 200,\n    \"message\": \"Folder structure retrieved successfully.\",\n    \"result\": [\n        {\n            \"name\": \"example\",\n            \"type\": \"folder\",\n            \"children\": [\n                {\n                    \"name\": \"example.png\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"flow.drawio.svg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"get-image.png\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"get.drawio.svg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"store.drawio.svg\",\n                    \"type\": \"file\"\n                }\n            ]\n        },\n        {\n            \"name\": \"files\",\n            \"type\": \"folder\",\n            \"children\": [\n                {\n                    \"name\": \"82d548b6-0bf5-4445-b2fe-f55bddcc9d8f.docx\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"9e680cb2-40e5-4da4-928c-54c071cec06b.docx\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"a7ae022e-0674-4df2-89c1-58d8f14b61b0.docx\",\n                    \"type\": \"file\"\n                }\n            ]\n        },\n        {\n            \"name\": \"images\",\n            \"type\": \"folder\",\n            \"children\": [\n                {\n                    \"name\": \"012a5abb-1166-44cd-8ac9-58d100352899.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"1765452768180-photo_2025-11-10_13-23-05.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"1765452768958-photo_2025-11-10_13-23-05.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"1765452769805-photo_2025-11-10_13-23-05.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"1765452770607-photo_2025-11-10_13-23-05.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"1765452771418-photo_2025-11-10_13-23-05.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"497f379a-009b-44e2-843c-d85a726db3bf.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"a09ff19d-4f39-48d0-894d-6f9e1f62767e.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"kopy\",\n                    \"type\": \"folder\",\n                    \"children\": [\n                        {\n                            \"name\": \"1\",\n                            \"type\": \"folder\",\n                            \"children\": [\n                                {\n                                    \"name\": \"1765451217717-photo_2025-11-10_13-23-05.jpg\",\n                                    \"type\": \"file\"\n                                },\n                                {\n                                    \"name\": \"1765451249514-photo_2025-11-10_13-23-05.jpg\",\n                                    \"type\": \"file\"\n                                },\n                                {\n                                    \"name\": \"f3c97c74-dcbf-4217-859c-40b98241aa74.jpg\",\n                                    \"type\": \"file\"\n                                }\n                            ]\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"name\": \"smarterp\",\n            \"type\": \"folder\",\n            \"children\": [\n                {\n                    \"name\": \"1765457262345-_CV_Template.docx\",\n                    \"type\": \"file\"\n                }\n            ]\n        }\n    ]\n}"
+				}
+			]
+		}
+	]
+}
