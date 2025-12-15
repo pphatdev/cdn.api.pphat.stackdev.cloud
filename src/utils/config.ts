@@ -52,7 +52,14 @@ export const configured = {
             'application/vnd.ms-excel',
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'application/vnd.ms-powerpoint',
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'image/gif',
+            'image/tiff',
+            'image/bmp',
+            'image/svg+xml'
         ]
     },
     images: {
