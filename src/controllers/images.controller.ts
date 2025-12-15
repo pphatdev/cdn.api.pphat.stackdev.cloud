@@ -177,7 +177,8 @@ export class ImagesController {
                     fileName: file.originalname,
                     pathFile: file.path,
                     type: file.mimetype,
-                    name: file.filename
+                    name: file.filename,
+                    extension: file.originalname.split('.').pop()
                 };
                 Object.assign(file, sanitizedFile);
             });
