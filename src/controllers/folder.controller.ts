@@ -14,9 +14,6 @@ export class FolderController {
         const dynamicPath = String(request.params.path || '');
         const currentDirectory = path.join(basePath, dynamicPath).replace(/\\/g, '/').replace(/,+/g, '/');
 
-        console.log(currentDirectory);
-
-
         try {
             if (!fs.existsSync(currentDirectory)) {
                 sendNotFound(response, `Directory '${currentDirectory}' does not exist.`);

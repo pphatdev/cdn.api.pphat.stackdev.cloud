@@ -35,7 +35,7 @@ export class PreviewController {
         for (let f of tiffs) {
             const buffer = await f.async("uint8array");
             const tiff = new Tiff({ buffer });
-            const blob = await new Promise<Blob>((res) => tiff.toCanvas().toBlob((blob) => res(blob!), "image/png"));
+            const blob = await new Promise<Blob>((res) => tiff.toCanvas().toBlob((blob: Blob | null) => res(blob!), "image/png"));
             zip.file(f.name, blob);
         }
 
