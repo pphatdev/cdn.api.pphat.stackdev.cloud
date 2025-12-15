@@ -48,10 +48,17 @@ export class FilesController {
 
             // reduce value of key "path" to be relative to storage directory
             sanitizedFiles.forEach(file => {
-                if (file.path) {
-                    file.path = file.path.replace(/\\/g, '/');
-                }
+                const sanitizedFile: any = {
+                    ...file,
+                    path: file.path.replace(/\\/g, '/'),
+                    fileName: file.originalname,
+                    pathFile: file.path,
+                    type: file.mimetype,
+                    name: file.filename
+                };
+                Object.assign(file, sanitizedFile);
             });
+
 
             sendSuccess(response, sanitizedFiles, 'Files uploaded successfully', 200);
         });
