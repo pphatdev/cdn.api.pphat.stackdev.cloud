@@ -5,6 +5,7 @@ import { UploadController } from './upload.controller.js';
 import { sendBadRequest, sendNotFound, sendSuccess } from '../utils/response.js';
 import fs from 'fs';
 import { reloadPM2Service } from '../utils/pm2.js';
+import { FileUtils } from '../utils/files.js';
 
 interface FileValidateCallback {
     (error: Error | null, acceptFile: boolean): void;
@@ -44,18 +45,16 @@ export class FilesController {
 
         // Ensure target directory exists with full permissions
         if (!fs.existsSync(storage)) {
-            fs.mkdirSync(storage, { recursive: true, mode: 0o777 });
+            await FileUtils.ensureDirectoryWithPermissions(storage);
         }
 
         const destPath = `${storage}/${filename}`.replace(/\\/g, '/');
 
-        if (destPath === sourcePath) {
-            sendBadRequest(response, 'Source and destination paths are the same.');
-            return;
-        }
-
         try {
             fs.renameSync(sourcePath, destPath);
+            // Set proper permissions for both file and directory
+            await FileUtils.setProperPermissions(destPath, false);
+            await FileUtils.setProperPermissions(storage, true);
             sendSuccess(response, { oldPath: sourcePath, newPath: destPath }, 'File moved successfully', 200);
             reloadPM2Service();
         } catch (err: any) {
