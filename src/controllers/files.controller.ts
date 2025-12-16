@@ -20,7 +20,7 @@ export class FilesController {
 
         const { filename } = request.params;
         // target directory from headers
-        const storage = request.headers.storage as string;
+        const storage = `${configured.baseDirectory}/${request.headers.storage as string}`;
 
         if (!filename || !storage) {
             sendBadRequest(response, 'filename and targetDir are required.');
@@ -47,7 +47,7 @@ export class FilesController {
             fs.mkdirSync(storage, { recursive: true, mode: 0o777 });
         }
 
-        const destPath = `./${configured.baseDirectory}/${storage}/${filename}`.replace(/\\/g, '/');
+        const destPath = `${storage}/${filename}`.replace(/\\/g, '/');
 
         if (destPath === sourcePath) {
             sendBadRequest(response, 'Source and destination paths are the same.');
