@@ -48,6 +48,12 @@ export class FilesController {
         }
 
         const destPath = `./${configured.baseDirectory}/${storage}/${filename}`.replace(/\\/g, '/');
+
+        if (destPath === sourcePath) {
+            sendBadRequest(response, 'Source and destination paths are the same.');
+            return;
+        }
+
         try {
             fs.renameSync(sourcePath, destPath);
             sendSuccess(response, { oldPath: sourcePath, newPath: destPath }, 'File moved successfully', 200);
