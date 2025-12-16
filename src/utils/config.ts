@@ -107,8 +107,21 @@ export function getDirectories(): string[] {
                     const entries = fs.readdirSync(currentPath, { withFileTypes: true });
 
                     for (const entry of entries) {
-                        if (entry.isDirectory()) {
+                        if (entry.isDirectory() || entry.isSymbolicLink()) {
                             const fullPath = path.join(currentPath, entry.name);
+                            
+                            // Check if symbolic link points to a directory
+                            if (entry.isSymbolicLink()) {
+                                try {
+                                    const stat = fs.statSync(fullPath);
+                                    if (!stat.isDirectory()) {
+                                        continue; // Skip if symlink doesn't point to a directory
+                                    }
+                                } catch (error) {
+                                    continue; // Skip broken symlinks
+                                }
+                            }
+                            
                             const relativePath = path.relative(cwdPath, fullPath);
 
                             // Check if this matches the end pattern
