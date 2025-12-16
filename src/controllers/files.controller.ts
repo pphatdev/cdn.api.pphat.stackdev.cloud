@@ -42,9 +42,9 @@ export class FilesController {
             return;
         }
 
-        // Ensure target directory exists
+        // Ensure target directory exists with full permissions
         if (!fs.existsSync(storage)) {
-            fs.mkdirSync(storage, { recursive: true });
+            fs.mkdirSync(storage, { recursive: true, mode: 0o777 });
         }
 
         const destPath = `./${configured.baseDirectory}/${storage}/${filename}`.replace(/\\/g, '/');
