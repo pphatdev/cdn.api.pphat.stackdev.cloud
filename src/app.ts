@@ -56,6 +56,13 @@ app.post('/file/upload', uploadFiles);
  */
 app.get('/file/search', FilesController.searchFileByName);
 
+/**
+ * Move file to directory endpoint
+ *
+ * PUT /file/move/:filename
+ */
+app.put('/file/move/:filename', FilesController.moveFileToDir);
+
 
 /**
  * File download endpoint

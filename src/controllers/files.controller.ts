@@ -10,6 +10,51 @@ interface FileValidateCallback {
 }
 
 export class FilesController {
+    /**
+     * Move a file by name to a specified directory
+     * @param request Request
+     * @param response Response
+     */
+    static moveFileToDir = async (request: Request, response: Response): Promise<void> => {
+
+        const { filename } = request.params;
+        // target directory from headers
+        const storage = request.headers.storage as string;
+
+        if (!filename || !storage) {
+            sendBadRequest(response, 'filename and targetDir are required.');
+            return;
+        }
+
+        const storages = configured.directories;
+        let sourcePath = null;
+        for (const dir of storages) {
+            const filePath = `${dir}/${filename}`.replace(/\\/g, '/');
+            if (fs.existsSync(filePath)) {
+                sourcePath = filePath;
+                break;
+            }
+        }
+
+        if (!sourcePath) {
+            sendNotFound(response, 'File not found.');
+            return;
+        }
+
+        // Ensure target directory exists
+        if (!fs.existsSync(storage)) {
+            fs.mkdirSync(storage, { recursive: true });
+        }
+
+        const destPath = `./${configured.baseDirectory}/${storage}/${filename}`.replace(/\\/g, '/');
+        try {
+            fs.renameSync(sourcePath, destPath);
+            sendSuccess(response, { oldPath: sourcePath, newPath: destPath }, 'File moved successfully', 200);
+        } catch (err: any) {
+            sendBadRequest(response, err.message || 'Failed to move file.');
+        }
+    };
+
 
     /**
      * Upload multiple files handler
@@ -162,4 +207,5 @@ export class FilesController {
 export const {
     uploadFiles,
     searchFileByName
+    ,moveFileToDir
 } = FilesController;
