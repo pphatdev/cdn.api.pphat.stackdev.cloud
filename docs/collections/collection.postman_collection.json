@@ -4,7 +4,7 @@
 		"name": "Images",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "16827919",
-		"_collection_link": "https://sophatdesife.postman.co/workspace/285d337e-84e8-45bd-8a1f-0a3d363b961e/collection/16827919-de321795-bd82-4762-a982-45ce9763123f?action=share&source=collection_link&creator=16827919"
+		"_collection_link": "https://sophatdesife.postman.co/workspace/Image-Service~285d337e-84e8-45bd-8a1f-0a3d363b961e/collection/16827919-de321795-bd82-4762-a982-45ce9763123f?action=share&source=collection_link&creator=16827919"
 	},
 	"item": [
 		{
@@ -14,7 +14,7 @@
 				"header": [
 					{
 						"key": "storage",
-						"value": "/images/",
+						"value": "/images/sdfs/sdfs/df",
 						"type": "text"
 					}
 				],
@@ -24,7 +24,7 @@
 						{
 							"key": "images",
 							"type": "file",
-							"src": "/C:/Users/front-end.01/Downloads/photo_2025-11-10_13-23-05.jpg"
+							"src": "/C:/Users/front-end.01/Downloads/angkor-wat-cambodia(1).jpg"
 						}
 					]
 				},
@@ -128,7 +128,7 @@
 						{
 							"key": "files",
 							"type": "file",
-							"src": "/N:/ADU/Document Request/Plan Modify Accounting .pdf"
+							"src": "/C:/Users/front-end.01/Downloads/angkor-wat-cambodia(1).jpg"
 						}
 					]
 				},
@@ -234,7 +234,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{url}}/source/v1/files/image/:filename?fm=webp&q&w=200&h",
+					"raw": "{{url}}/source/v1/files/image/:filename?w=100",
 					"host": [
 						"{{url}}"
 					],
@@ -248,21 +248,69 @@
 					"query": [
 						{
 							"key": "fm",
-							"value": "webp"
+							"value": "webp",
+							"disabled": true
 						},
 						{
 							"key": "q",
 							"value": null,
-							"description": "1-100"
+							"description": "1-100",
+							"disabled": true
 						},
 						{
 							"key": "w",
-							"value": "200"
+							"value": "100"
 						},
 						{
 							"key": "h",
-							"value": null
+							"value": null,
+							"disabled": true
 						}
+					],
+					"variable": [
+						{
+							"key": "filename",
+							"value": "0b143d1d-a363-463c-a3de-bcd931cd1cf8.jpg"
+						}
+					]
+				},
+				"description": "## Image optimization endpoint\n\n**Endpoint:**  \n`GET /source/v1/files/image/:filename`\n\n**Description:**  \nThis endpoint allows you to retrieve and optimize an image file stored on the server by specifying the filename as a URL parameter. You can apply various optimization options through query parameters.\n\n### URL Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| filename | String | The name of the image file to retrieve and optimize |\n\n### Query Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| fm | String | (Optional) Format (e.g., jpg, png, webp) |\n| q | Number | (Optional) Quality (e.g., 80) |\n| w | Number | (Optional) Width (e.g., 300) |\n| h | Number | (Optional) Height (e.g., 300) |\n| fit | String | (Optional) Fit mode (e.g., cover, contain) |\n\n### Example Request in Postman\n\n1. Set the request method to **GET**.\n    \n2. Set the URL to: `{{url}}/source/v1/files/image/sample.png?fm=webp&q=80&w=300&h=300&fit=cover`\n    \n3. (Optional) Add any required headers.\n    \n4. Click **Send** to retrieve and optimize the image.\n    \n\n### Example cURL\n\n``` sh\ncurl -X GET \"{{url}}/source/v1/files/image/sample.png?fm=webp&q=80&w=300&h=300&fit=cover\"\n\n ```\n\n### Example Response\n\nThe response will be the optimized image file. The content type will depend on the requested format (e.g., `image/webp` for WebP format).\n\n``` http\nHTTP/1.1 200 OK\nContent-Type: image/webp\nContent-Length: 12345\n(binary image data)\n\n ```"
+			},
+			"response": []
+		},
+		{
+			"name": "Move File",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "storage",
+						"value": "example",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/file/move/:filename",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"file",
+						"move",
+						":filename"
 					],
 					"variable": [
 						{
@@ -270,8 +318,7 @@
 							"value": "example.png"
 						}
 					]
-				},
-				"description": "## Image optimization endpoint\n\n**Endpoint:**  \n`GET /source/v1/files/image/:filename`\n\n**Description:**  \nThis endpoint allows you to retrieve and optimize an image file stored on the server by specifying the filename as a URL parameter. You can apply various optimization options through query parameters.\n\n### URL Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| filename | String | The name of the image file to retrieve and optimize |\n\n### Query Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| fm | String | (Optional) Format (e.g., jpg, png, webp) |\n| q | Number | (Optional) Quality (e.g., 80) |\n| w | Number | (Optional) Width (e.g., 300) |\n| h | Number | (Optional) Height (e.g., 300) |\n| fit | String | (Optional) Fit mode (e.g., cover, contain) |\n\n### Example Request in Postman\n\n1. Set the request method to **GET**.\n    \n2. Set the URL to: `{{url}}/source/v1/files/image/sample.png?fm=webp&q=80&w=300&h=300&fit=cover`\n    \n3. (Optional) Add any required headers.\n    \n4. Click **Send** to retrieve and optimize the image.\n    \n\n### Example cURL\n\n``` sh\ncurl -X GET \"{{url}}/source/v1/files/image/sample.png?fm=webp&q=80&w=300&h=300&fit=cover\"\n\n ```\n\n### Example Response\n\nThe response will be the optimized image file. The content type will depend on the requested format (e.g., `image/webp` for WebP format).\n\n``` http\nHTTP/1.1 200 OK\nContent-Type: image/webp\nContent-Length: 12345\n(binary image data)\n\n ```"
+				}
 			},
 			"response": []
 		},
@@ -294,7 +341,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{url}}/file/search?q=10_13-23-05",
+					"raw": "{{url}}/file/search?q=f6534ba9-25a3-4565-84c8-2b126948b275",
 					"host": [
 						"{{url}}"
 					],
@@ -304,15 +351,14 @@
 					],
 					"query": [
 						{
-							"key": "q",
-							"value": "10_13-23-05",
-							"description": "name"
-						},
-						{
 							"key": "type",
 							"value": "office",
 							"description": "image,office",
 							"disabled": true
+						},
+						{
+							"key": "q",
+							"value": "f6534ba9-25a3-4565-84c8-2b126948b275"
 						}
 					]
 				},
@@ -416,7 +462,7 @@
 					"variable": [
 						{
 							"key": "subfolder",
-							"value": "images/kopy",
+							"value": "rae-backend/driver/banner",
 							"description": "folder/subfolder/subfolder"
 						}
 					]
@@ -508,7 +554,98 @@
 					"variable": [
 						{
 							"key": "name",
-							"value": "224eedd5-ecb2-4adf-ae2d-fb72a4cb342e.docx"
+							"value": "14bb4bef-3c69-41c4-b71e-94e661cd3c9c.docx"
+						}
+					]
+				},
+				"description": "## Get folder structure dynamically based on the route\n\n**Endpoint:**  \n`GET /folder/\\*path`\n\n**Description:**  \nThis endpoint allows you to retrieve the structure of folders and files dynamically based on the specified path.\n\n### Dynamic Path\n\n| Path | Description |\n| --- | --- |\n| /folder/ | Shows top-level folders and files in `storage` |\n| /folder/folder1 | Shows contents of `folder1` |\n\n### Example Request in Postman\n\n1. Set the request method to **GET**.\n    \n2. Set the URL to: `{{url}}/folder/folder1`\n    \n3. (Optional) Add any required headers.\n    \n4. Click **Send** to retrieve the folder structure.\n    \n\n### Example cURL\n\n``` sh\ncurl -X GET \"{{url}}/folder/folder1\"\n\n ```\n\n### Example Response\n\n``` json\n{\n    \"message\": \"Folder structure retrieved successfully\",\n    \"status\": 200,\n    \"result\": {\n        \"folderName\": \"folder1\",\n        \"files\": [\n            {\n                \"filename\": \"example1.png\",\n                \"path\": \"storage/folder1/example1.png\",\n                \"size\": 204800\n            },\n            {\n                \"filename\": \"example2.docx\",\n                \"path\": \"storage/folder1/example2.docx\",\n                \"size\": 102400\n            }\n        ],\n        \"subfolders\": [\n            {\n                \"folderName\": \"subfolder1\",\n                \"path\": \"storage/folder1/subfolder1\"\n            }\n        ]\n    }\n}\n\n ```"
+			},
+			"response": [
+				{
+					"name": "Sucess",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/folder",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"folder"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "1559"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"617-yRnW7F5HU7ltyR4hADuns9+i10A\""
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 11 Dec 2025 12:54:18 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"status\": 200,\n    \"message\": \"Folder structure retrieved successfully.\",\n    \"result\": [\n        {\n            \"name\": \"example\",\n            \"type\": \"folder\",\n            \"children\": [\n                {\n                    \"name\": \"example.png\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"flow.drawio.svg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"get-image.png\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"get.drawio.svg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"store.drawio.svg\",\n                    \"type\": \"file\"\n                }\n            ]\n        },\n        {\n            \"name\": \"files\",\n            \"type\": \"folder\",\n            \"children\": [\n                {\n                    \"name\": \"82d548b6-0bf5-4445-b2fe-f55bddcc9d8f.docx\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"9e680cb2-40e5-4da4-928c-54c071cec06b.docx\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"a7ae022e-0674-4df2-89c1-58d8f14b61b0.docx\",\n                    \"type\": \"file\"\n                }\n            ]\n        },\n        {\n            \"name\": \"images\",\n            \"type\": \"folder\",\n            \"children\": [\n                {\n                    \"name\": \"012a5abb-1166-44cd-8ac9-58d100352899.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"1765452768180-photo_2025-11-10_13-23-05.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"1765452768958-photo_2025-11-10_13-23-05.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"1765452769805-photo_2025-11-10_13-23-05.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"1765452770607-photo_2025-11-10_13-23-05.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"1765452771418-photo_2025-11-10_13-23-05.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"497f379a-009b-44e2-843c-d85a726db3bf.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"a09ff19d-4f39-48d0-894d-6f9e1f62767e.jpg\",\n                    \"type\": \"file\"\n                },\n                {\n                    \"name\": \"kopy\",\n                    \"type\": \"folder\",\n                    \"children\": [\n                        {\n                            \"name\": \"1\",\n                            \"type\": \"folder\",\n                            \"children\": [\n                                {\n                                    \"name\": \"1765451217717-photo_2025-11-10_13-23-05.jpg\",\n                                    \"type\": \"file\"\n                                },\n                                {\n                                    \"name\": \"1765451249514-photo_2025-11-10_13-23-05.jpg\",\n                                    \"type\": \"file\"\n                                },\n                                {\n                                    \"name\": \"f3c97c74-dcbf-4217-859c-40b98241aa74.jpg\",\n                                    \"type\": \"file\"\n                                }\n                            ]\n                        }\n                    ]\n                }\n            ]\n        },\n        {\n            \"name\": \"smarterp\",\n            \"type\": \"folder\",\n            \"children\": [\n                {\n                    \"name\": \"1765457262345-_CV_Template.docx\",\n                    \"type\": \"file\"\n                }\n            ]\n        }\n    ]\n}"
+				}
+			]
+		},
+		{
+			"name": "Preview File",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/file/preview/:name",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"file",
+						"preview",
+						":name"
+					],
+					"variable": [
+						{
+							"key": "name",
+							"value": "91537b20-7d96-4c02-b468-7a140b3c059c.pdf"
 						}
 					]
 				},
