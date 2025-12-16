@@ -4,6 +4,7 @@ import { configured } from '../utils/config.js';
 import { UploadController } from './upload.controller.js';
 import { sendBadRequest, sendNotFound, sendSuccess } from '../utils/response.js';
 import fs from 'fs';
+import { reloadPM2Service } from '../utils/pm2.js';
 
 interface FileValidateCallback {
     (error: Error | null, acceptFile: boolean): void;
@@ -50,6 +51,7 @@ export class FilesController {
         try {
             fs.renameSync(sourcePath, destPath);
             sendSuccess(response, { oldPath: sourcePath, newPath: destPath }, 'File moved successfully', 200);
+            reloadPM2Service();
         } catch (err: any) {
             sendBadRequest(response, err.message || 'Failed to move file.');
         }
@@ -107,6 +109,7 @@ export class FilesController {
 
 
             sendSuccess(response, sanitizedFiles, 'Files uploaded successfully', 200);
+            reloadPM2Service();
         });
     };
 

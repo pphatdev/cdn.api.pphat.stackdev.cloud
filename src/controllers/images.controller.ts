@@ -6,6 +6,7 @@ import { ImageCache } from '../utils/image-cache.js';
 import { configured, findFileInDirectories } from '../utils/config.js';
 import { UploadController } from './upload.controller.js';
 import { sendBadRequest, sendNotFound, sendSuccess } from '../utils/response.js';
+import { reloadPM2Service } from '../utils/pm2.js';
 
 interface ImageQueryParams {
     fm?: string;
@@ -184,6 +185,7 @@ export class ImagesController {
             });
 
             sendSuccess(response, sanitizedFiles, 'Files uploaded successfully', 200);
+            reloadPM2Service();
         });
     };
 
