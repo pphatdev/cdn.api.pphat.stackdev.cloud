@@ -12,14 +12,11 @@ export class PreviewController {
         const ext = filename.split('.').pop()?.toLowerCase();
 
         const previewableExtensions = [
-            'pdf',
             'docx',
-            // 'doc',
-            // 'pptx',
+            'doc',
         ];
         if (!ext || !previewableExtensions.includes(ext)) {
-            sendNotFound(response, 'Preview not supported for this file type.');
-            return;
+            return PreviewController.all(request, response);
         }
 
         return PreviewController?.[ext]?.(request, response);
@@ -43,13 +40,12 @@ export class PreviewController {
     }
 
 
-
     /**
      * Preview a file by filename
      * @param request Request
      * @param response Response
     */
-    static pdf = async (request: Request, response: Response): Promise<void> => {
+    static all = async (request: Request, response: Response): Promise<void> => {
         const { filename } = request.params;
         // find the file in configured directories
         const storage = configured.directories;
