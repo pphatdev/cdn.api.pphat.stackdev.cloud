@@ -1,7 +1,9 @@
 import { exec } from 'child_process';
+import { appEnv } from './config.js';
 
 export function reloadPM2Service(): void {
-    exec('pm2 reload 0', (error, stdout, stderr) => {
+
+    appEnv.env === 'production' && exec('pm2 reload 0', (error, stdout, stderr) => {
         if (error) {
             console.error(`PM2 reload error: ${error.message}`);
             return;

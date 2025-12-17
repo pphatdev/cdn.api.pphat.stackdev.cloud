@@ -179,3 +179,19 @@ export const findFileInDirectories = (filename: string): string | null => {
     }
     return null;
 }
+
+interface AppEnv {
+    name: string;
+    env: string;
+}
+
+/**
+ * Get application environment info
+*/
+export const appEnv: AppEnv = (() => {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const envPath = path.resolve(__dirname, '../../env.json');
+    const envData = JSON.parse(fs.readFileSync(envPath, 'utf-8')) as any;
+    return envData.app || { name: 'app', env: 'development' };
+})();
