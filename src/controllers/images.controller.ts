@@ -174,9 +174,9 @@ export class ImagesController {
             sanitizedFiles.forEach(file => {
                 const sanitizedFile: any = {
                     ...file,
-                    path: file.path.replace(/\\/g, '/'),
                     fileName: file.originalname,
-                    pathFile: file.path,
+                    path: `/source/v1/files/image/${file.filename}`,
+                    pathFile: `/source/v1/files/image/${file.filename}`,
                     type: file.mimetype,
                     name: file.filename,
                     extension: file.originalname.split('.').pop()

@@ -102,9 +102,10 @@ export class FilesController {
             sanitizedFiles.forEach(file => {
                 const sanitizedFile: any = {
                     ...file,
-                    path: file.path.replace(/\\/g, '/'),
+                    // path: file.path.replace(/\\/g, '/'),
                     fileName: file.originalname,
-                    pathFile: file.path,
+                    path: `/file/preview/${file.filename}`,
+                    pathFile: `/file/preview/${file.filename}`,
                     type: file.mimetype,
                     name: file.filename,
                     extension: file.originalname.split('.').pop()
