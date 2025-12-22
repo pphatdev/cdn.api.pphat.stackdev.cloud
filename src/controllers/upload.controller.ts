@@ -13,15 +13,17 @@ export class UploadController {
         const directoryPath = configured.baseDirectory + (dir.startsWith('/') ? dir : `/${dir}`);
 
         const fileName = (request: Request, file: Express.Multer.File, callback: (error: Error | null, filename: string) => void) => {
-
-            if (configured.uploadOriginalName) {
-                const date = new Date();
-                const timestamp = date.getTime();
-                callback(null, `${timestamp}-` + (file.originalname).replace(/\s+/g, '_'));
+            const useOriginalFilename = request.get('X-Prefix') ?? null;
+            
+            if (useOriginalFilename) {
+                const uniqueId = crypto.randomUUID();
+                callback(null, `${useOriginalFilename}_${uniqueId}${path.extname(file.originalname)}`);
                 return;
             }
 
-            const uniqueId = crypto.randomUUID()
+            const date = new Date();
+            const prefix = date.toJSON({ year: 'numeric', month: '2-digit', day: '2-digit', }).split('T')[0];
+            const uniqueId = prefix + "_" + crypto.randomUUID()
             callback(null, uniqueId + path.extname(file.originalname))
         }
 
