@@ -15,11 +15,12 @@ export class PreviewController {
             'docx',
             'doc',
         ];
-        if (!ext || !previewableExtensions.includes(ext)) {
-            return PreviewController.all(request, response);
-        }
 
-        return PreviewController?.[ext]?.(request, response);
+        if (ext && previewableExtensions.includes(ext)) {
+            return PreviewController?.[ext]?.(request, response);
+        }
+        return PreviewController.all(request, response);
+
     }
 
     static async preprocessTiff(blob: Blob): Promise<Blob> {
@@ -121,7 +122,6 @@ export class PreviewController {
                 response.send(htmlContent);
                 return;
             }
-            sendNotFound(response, 'File not found.');
         }
 
         sendNotFound(response, 'File not found.');
