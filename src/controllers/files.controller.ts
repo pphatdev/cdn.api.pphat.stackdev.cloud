@@ -3,9 +3,8 @@ import { Request, Response } from 'express';
 import { configured } from '../utils/config.js';
 import { UploadController } from './upload.controller.js';
 import { sendBadRequest, sendNotFound, sendSuccess } from '../utils/response.js';
-import fs from 'fs';
-import { reloadPM2Service } from '../utils/pm2.js';
 import { FileUtils } from '../utils/files.js';
+import fs from 'fs';
 
 interface FileValidateCallback {
     (error: Error | null, acceptFile: boolean): void;
@@ -56,7 +55,6 @@ export class FilesController {
             await FileUtils.setProperPermissions(destPath, false);
             await FileUtils.setProperPermissions(storage, true);
             sendSuccess(response, { oldPath: sourcePath, newPath: destPath }, 'File moved successfully', 200);
-            reloadPM2Service();
         } catch (err: any) {
             sendBadRequest(response, err.message || 'Failed to move file.');
         }
@@ -99,6 +97,9 @@ export class FilesController {
             const filePath = `${dirPath}/${filename}`.replace(/\\/g, '/');
             await FileUtils.createFileWithPermissions(filePath, buffer);
 
+            // Sync file after upload
+            await FilesController.syncFile(filePath);
+
             // Prepare response info
             const fileInfo = {
                 fileName: filename,
@@ -111,18 +112,17 @@ export class FilesController {
             };
 
             sendSuccess(response, fileInfo, 'File uploaded successfully', 200);
-            reloadPM2Service();
         } catch (err: any) {
             sendBadRequest(response, err.message || 'Failed to upload file as base64.');
         }
     };
 
 
-        /**
-     * Upload multiple files as base64
-     * @param request Request
-     * @param response Response
-     */
+    /**
+ * Upload multiple files as base64
+ * @param request Request
+ * @param response Response
+ */
     static uploadMultipleFilesBase64 = async (request: Request, response: Response): Promise<void> => {
         try {
             const { files, storage: storageHeader } = request.body;
@@ -155,6 +155,10 @@ export class FilesController {
                     const buffer = Buffer.from(base64Data, 'base64');
                     const filePath = `${dirPath}/${filename}`.replace(/\\/g, '/');
                     await FileUtils.createFileWithPermissions(filePath, buffer);
+
+                    // Sync file after upload
+                    await FilesController.syncFile(filePath);
+
                     results.push({
                         fileName: filename,
                         path: `/file/preview/${filename}`,
@@ -170,7 +174,6 @@ export class FilesController {
                 }
             }
             sendSuccess(response, results, 'Multiple files processed', 200);
-            reloadPM2Service();
         } catch (err: any) {
             sendBadRequest(response, err.message || 'Failed to upload files as base64.');
         }
@@ -195,7 +198,7 @@ export class FilesController {
         /**
          * Handle the upload
         */
-        multiple(request, response, (err: any) => {
+        multiple(request, response, async (err: any) => {
             const files = request.files;
             if (!files || files.length === 0) {
                 sendNotFound(response, 'No files uploaded.');
@@ -213,7 +216,7 @@ export class FilesController {
             const sanitizedFiles = (files as Express.Multer.File[]).map(({ fieldname, ...fileData }) => fileData);
 
             // reduce value of key "path" to be relative to storage directory
-            sanitizedFiles.forEach(file => {
+            for (const file of sanitizedFiles) {
                 const sanitizedFile: any = {
                     ...file,
                     // path: file.path.replace(/\\/g, '/'),
@@ -225,13 +228,56 @@ export class FilesController {
                     extension: file.originalname.split('.').pop()
                 };
                 Object.assign(file, sanitizedFile);
-            });
 
+                // Sync file after upload
+                await FilesController.syncFile(file.path);
+            }
 
             sendSuccess(response, sanitizedFiles, 'Files uploaded successfully', 200);
-            reloadPM2Service();
         });
     };
+
+    /**
+     * Sync a file after upload
+     * @param filePath Path to the file to sync
+     */
+    static async syncFile(filePath: string): Promise<void> {
+        try {
+            // Get the actual file path on disk
+            const actualFilePath = filePath.startsWith(configured.baseDirectory) ? filePath : `${configured.baseDirectory}${filePath}`;
+
+            // Extract folder structure from the file path
+            const relativePath = actualFilePath.replace(configured.baseDirectory, '').replace(/\\/g, '/');
+            const folderPath = relativePath.substring(0, relativePath.lastIndexOf('/'));
+
+            // Check if file exists
+            if (!fs.existsSync(actualFilePath)) {
+                console.error(`File not found for sync: ${actualFilePath}`);
+                return;
+            }
+
+            // Get file stats
+            const stats = fs.statSync(actualFilePath);
+
+            // Ensure proper permissions are set
+            await FileUtils.setProperPermissions(actualFilePath, false);
+
+            // Log sync information
+            console.log(`File synced successfully:`, {
+                path: actualFilePath,
+                folder: folderPath,
+                size: stats.size,
+                syncedAt: new Date().toISOString()
+            });
+
+            // Optional: Create a sync record or backup based on folder
+            // This could be extended to copy files to a backup location
+            // based on the folder structure
+
+        } catch (error: any) {
+            console.error(`Error syncing file ${filePath}:`, error.message);
+        }
+    }
 
     /**
      * Validate uploaded file type

@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "node --watch --no-warnings=ExperimentalWarning --loader ts-node/esm ./src/app.ts",
     "build": "tsc",
-    "start": "node --no-warnings=ExperimentalWarning --loader ts-node/esm ./src/app.ts"
+    "start": "node ./dist/app.js"
   },
   "author": "",
   "license": "ISC",

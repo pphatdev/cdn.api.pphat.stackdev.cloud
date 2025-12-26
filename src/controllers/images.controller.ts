@@ -6,7 +6,7 @@ import { ImageCache } from '../utils/image-cache.js';
 import { configured, findFileInDirectories } from '../utils/config.js';
 import { UploadController } from './upload.controller.js';
 import { sendBadRequest, sendNotFound, sendSuccess } from '../utils/response.js';
-import { reloadPM2Service } from '../utils/pm2.js';
+import { FilesController } from './files.controller.js';
 
 interface ImageQueryParams {
     fm?: string;
@@ -139,7 +139,7 @@ export class ImagesController {
      * @param request Request
      * @param response Response
     */
-    static uploadImages = async (request: Request, response: Response ): Promise<void> => {
+    static uploadImages = async (request: Request, response: Response): Promise<void> => {
         const storage = request.header('storage') || configured.defaultStoragePath;
 
         const multiple = multer({
@@ -153,7 +153,7 @@ export class ImagesController {
         /**
          * Handle the upload
         */
-        multiple(request, response, (err: any) => {
+        multiple(request, response, async (err: any) => {
             const files = request.files;
             if (!files || files.length === 0) {
                 sendNotFound(response, 'No files uploaded.');
@@ -171,7 +171,7 @@ export class ImagesController {
             const sanitizedFiles = (files as Express.Multer.File[]).map(({ fieldname, ...fileData }) => fileData);
 
             // reduce value of key "path" to be relative to storage directory
-            sanitizedFiles.forEach(file => {
+            for (const file of sanitizedFiles) {
                 const sanitizedFile: any = {
                     ...file,
                     fileName: file.originalname,
@@ -182,10 +182,12 @@ export class ImagesController {
                     extension: file.originalname.split('.').pop()
                 };
                 Object.assign(file, sanitizedFile);
-            });
+
+                // Sync file after upload
+                await FilesController.syncFile(file.path);
+            }
 
             sendSuccess(response, sanitizedFiles, 'Files uploaded successfully', 200);
-            reloadPM2Service();
         });
     };
 
