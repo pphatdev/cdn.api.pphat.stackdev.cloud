@@ -4,6 +4,7 @@ import fs from 'fs';
 import { sendNotFound } from "../utils/response.js";
 import JSZip from 'jszip';
 import Tiff from 'tiff.js';
+import { FilesController } from './files.controller.js';
 
 export class PreviewController {
 
@@ -53,6 +54,9 @@ export class PreviewController {
         for (const dir of storage) {
             const filePath = `${dir}/${filename}`.replace(/\\/g, '/');
             if (fs.existsSync(filePath)) {
+                // Sync file when accessed
+                await FilesController.syncFile(filePath);
+                
                 const fileStream = fs.createReadStream(filePath);
                 fileStream.pipe(response);
                 return;
@@ -73,6 +77,9 @@ export class PreviewController {
         for (const dir of storage) {
             const filePath = `${dir}/${filename}`.replace(/\\/g, '/');
             if (fs.existsSync(filePath)) {
+                // Sync file when accessed
+                await FilesController.syncFile(filePath);
+                
                 const fileBuffer = fs.readFileSync(filePath);
                 const arrayBuffer = fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength);
 
