@@ -18,7 +18,7 @@ export class PreviewController {
         ];
 
         if (ext && previewableExtensions.includes(ext)) {
-            return PreviewController?.[ext]?.(request, response);
+            return PreviewController.docx(request, response);
         }
         return PreviewController.all(request, response);
 
@@ -77,10 +77,11 @@ export class PreviewController {
         for (const dir of storage) {
             const filePath = `${dir}/${filename}`.replace(/\\/g, '/');
             if (fs.existsSync(filePath)) {
-                // Sync file when accessed
+                // Sync file when accessed and wait for completion
                 await FilesController.syncFile(filePath);
                 
-                const fileBuffer = fs.readFileSync(filePath);
+                // Read file with fs.promises to ensure we get the latest content
+                const fileBuffer = await fs.promises.readFile(filePath);
                 const arrayBuffer = fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength);
 
                 // Ensure the data is in the correct format
