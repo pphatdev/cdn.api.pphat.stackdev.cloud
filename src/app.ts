@@ -136,7 +136,7 @@ app.get('/file/download/:filename', FilesController.downloadFile);
  *
  * @method GET /file/preview/:filename
 */
-app.get('/file/preview/:filename', PreviewController.files);
+app.get('/file/preview/:filename', PreviewController.all);
 
 
 /**

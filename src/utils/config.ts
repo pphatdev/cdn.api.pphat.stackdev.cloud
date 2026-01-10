@@ -167,7 +167,7 @@ export function getDirectories(): string[] {
  * @param filename string
  * @returns string | null
 */
-export const findFileInDirectories = (filename: string): string | null => {
+export const findFileInDirectories =  async (filename: string): Promise<string | null> => {
     const directories = getDirectories();
     for (const dir of directories) {
 

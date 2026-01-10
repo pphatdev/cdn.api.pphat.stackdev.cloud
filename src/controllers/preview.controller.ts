@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { configured } from "../utils/config.js";
+import { configured, findFileInDirectories } from "../utils/config.js";
 import fs from 'fs';
 import { sendNotFound } from "../utils/response.js";
 import JSZip from 'jszip';
@@ -12,14 +12,14 @@ export class PreviewController {
         const { filename } = request.params;
         const ext = filename.split('.').pop()?.toLowerCase();
 
-        const previewableExtensions = [
-            'docx',
-            'doc',
-        ];
+        // const previewableExtensions = [
+        //     'docx',
+        //     'doc',
+        // ];
 
-        if (ext && previewableExtensions.includes(ext)) {
-            return PreviewController.docx(request, response);
-        }
+        // if (ext && previewableExtensions.includes(ext)) {
+        //     return PreviewController.docx(request, response);
+        // }
         return PreviewController.all(request, response);
 
     }
@@ -50,17 +50,15 @@ export class PreviewController {
     static all = async (request: Request, response: Response): Promise<void> => {
         const { filename } = request.params;
         // find the file in configured directories
-        const storage = configured.directories;
-        for (const dir of storage) {
-            const filePath = `${dir}/${filename}`.replace(/\\/g, '/');
-            if (fs.existsSync(filePath)) {
-                // Sync file when accessed
-                await FilesController.syncFile(filePath);
-                
-                const fileStream = fs.createReadStream(filePath);
-                fileStream.pipe(response);
-                return;
-            }
+        const fullPath = await findFileInDirectories(filename);
+
+        if (fullPath) {
+
+            // Sync file when accessed and wait for completion
+            await FilesController.syncFile(fullPath);
+            const fileStream = fs.createReadStream(fullPath);
+            fileStream.pipe(response);
+            return;
         }
         sendNotFound(response, 'File not found.');
     };

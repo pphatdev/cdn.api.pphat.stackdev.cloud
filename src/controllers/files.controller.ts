@@ -119,10 +119,10 @@ export class FilesController {
 
 
     /**
- * Upload multiple files as base64
- * @param request Request
- * @param response Response
- */
+     * Upload multiple files as base64
+     * @param request Request
+     * @param response Response
+     */
     static uploadMultipleFilesBase64 = async (request: Request, response: Response): Promise<void> => {
         try {
             const { files, storage: storageHeader } = request.body;
@@ -306,7 +306,6 @@ export class FilesController {
 
         // get all directories from config
         const storage = configured.directories;
-
         // search for the file in each directory
         for (const dir of storage) {
             if (fs.existsSync(dir)) {

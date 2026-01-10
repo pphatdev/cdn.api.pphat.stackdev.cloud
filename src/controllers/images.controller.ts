@@ -56,7 +56,7 @@ export class ImagesController {
             /**
              * Find the file in configured directories
             */
-            const filePath = findFileInDirectories(filename);
+            const filePath = await findFileInDirectories(filename);
 
             let transform = sharp();
             let fileStream: NodeJS.ReadableStream | undefined;
