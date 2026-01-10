@@ -15,6 +15,30 @@ app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 
 /**
+ * Middleware to parse JSON bodies
+*/
+app.use((req, res, next) => {
+    const allowedOrigins = [
+        /^https?:\/\/([a-zA-Z0-9-]+\.)*red-ant.app(:\d+)?$/,
+    ];
+
+    const origin = req.headers.origin;
+    if (origin) {
+        const isAllowed = allowedOrigins.some(allowed =>
+            typeof allowed === 'string' ? allowed === origin : allowed.test(origin)
+        );
+
+        if (isAllowed) {
+            res.header('Access-Control-Allow-Origin', origin);
+        }
+    }
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
+
+    next()
+})
+
+/**
  * Default End point
  * @method GET /
 */
