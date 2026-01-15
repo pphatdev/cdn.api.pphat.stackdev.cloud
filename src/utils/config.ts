@@ -15,6 +15,41 @@ interface EnvConfig {
     defaultStoragePath: string;
     files: FileSettings;
     images: FileSettings;
+    allow?: {
+        patterns?: string[];
+        origins?: string[];
+    };
+}
+
+/**
+ * Get Allow Origin (merge exact origins and regex patterns) from env.json
+ * @returns (string|RegExp)[]
+*/
+export const getAllowOrigin = (): (string | RegExp)[] => {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const envPath = path.resolve(__dirname, '../../env.json');
+    const envData = JSON.parse(fs.readFileSync(envPath, 'utf-8')) as EnvConfig;
+
+    const origins = (envData.allow && Array.isArray(envData.allow.origins)) ? envData.allow.origins : [];
+    const patterns = (envData.allow && Array.isArray(envData.allow.patterns)) ? envData.allow.patterns : [];
+
+    const regexes = patterns.map(p => {
+        try { return new RegExp(p); } catch (err) { return null; }
+    }).filter((r): r is RegExp => r !== null);
+
+    return [...origins, ...regexes];
+}
+
+export const getAllowPatterns = (): RegExp[] => {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const envPath = path.resolve(__dirname, '../../env.json');
+    const envData = JSON.parse(fs.readFileSync(envPath, 'utf-8')) as EnvConfig;
+    const patterns = (envData.allow && Array.isArray(envData.allow.patterns)) ? envData.allow.patterns : [];
+    return patterns.map(p => {
+        try { return new RegExp(p); } catch (err) { return null; }
+    }).filter((r): r is RegExp => r !== null);
 }
 
 /**
