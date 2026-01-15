@@ -19,7 +19,12 @@ app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 */
 app.use((req, res, next) => {
     const allowedOrigins = [
-        /^https?:\/\/([a-zA-Z0-9-]+\.)*red-ant.app(:\d+)?$/,
+        /^https?:\/\/([a-zA-Z0-9-]+\.)*red-ant\.app(:\d+)?$/,
+        /^https?:\/\/([a-zA-Z0-9-]+\.)*smarterp\.app(:\d+)?$/,
+        /^https?:\/\/([a-zA-Z0-9-]+\.)*turbotech\.com(:\d+)?$/,
+        /^https?:\/\/([a-zA-Z0-9-]+\.)*turbotech\.com\.kh(:\d+)?$/,
+        /^https?:\/\/localhost(:\d+)?$/,
+        /^https?:\/\/127\.0\.0\.1(:\d+)?$/
     ];
 
     const origin = req.headers.origin;
