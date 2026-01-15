@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { configured } from './utils/config.js';
+import { configured, getAllowOrigin } from './utils/config.js';
 import { getImage, uploadImages } from './controllers/images.controller.js';
 import { FilesController, uploadFiles } from './controllers/files.controller.js';
 import { FolderController } from './controllers/folder.controller.js';
@@ -18,14 +18,7 @@ app.use(express.urlencoded({ extended: true, limit: '500mb' }));
  * Middleware to parse JSON bodies
 */
 app.use((req, res, next) => {
-    const allowedOrigins = [
-        /^https?:\/\/([a-zA-Z0-9-]+\.)*red-ant\.app(:\d+)?$/,
-        /^https?:\/\/([a-zA-Z0-9-]+\.)*smarterp\.app(:\d+)?$/,
-        /^https?:\/\/([a-zA-Z0-9-]+\.)*turbotech\.com(:\d+)?$/,
-        /^https?:\/\/([a-zA-Z0-9-]+\.)*turbotech\.com\.kh(:\d+)?$/,
-        /^https?:\/\/localhost(:\d+)?$/,
-        /^https?:\/\/127\.0\.0\.1(:\d+)?$/
-    ];
+    const allowedOrigins = getAllowOrigin();
 
     const origin = req.headers.origin;
     if (origin) {
