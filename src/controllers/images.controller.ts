@@ -3,10 +3,11 @@ import multer from 'multer';
 import { Request, Response } from 'express';
 import { createReadStream, promises as fs } from 'fs';
 import { ImageCache } from '../utils/image-cache.js';
-import { configured, findFileInDirectories } from '../utils/config.js';
+import { configured } from '../utils/config.js';
 import { UploadController } from './upload.controller.js';
 import { sendBadRequest, sendNotFound, sendSuccess } from '../utils/response.js';
 import { FilesController } from './files.controller.js';
+import { findFileInDirectories } from '../utils/directories.js';
 
 interface ImageQueryParams {
     fm?: string;
