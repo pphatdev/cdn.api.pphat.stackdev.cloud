@@ -1,0 +1,12 @@
+stages:
+  - build
+
+build:
+  stage: build
+  image: node:18-alpine
+  before_script:
+    - npm install
+  script:
+    - npm run build
+  only:
+    - v1

@@ -1,7 +1,7 @@
 {
-  "name": "images-optimize-service",
+  "name": "assets-service",
   "version": "1.0.0",
-  "description": "Images Free Sizes",
+  "description": "Image optimization and asset management service",
   "type": "module",
   "main": "./src/app.ts",
   "module": "./src/app.ts",
@@ -14,12 +14,17 @@
   "license": "ISC",
   "dependencies": {
     "@types/express": "^5.0.6",
+    "docx-preview": "^0.3.7",
     "express": "^5.2.1",
     "fs-extra": "^11.3.2",
+    "multer": "^2.0.2",
+    "puppeteer": "^24.33.0",
     "sharp": "^0.34.5",
+    "tiff.js": "^1.0.0",
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
-    "@types/fs-extra": "^11.0.4"
+    "@types/fs-extra": "^11.0.4",
+    "@types/multer": "^2.0.0"
   }
 }

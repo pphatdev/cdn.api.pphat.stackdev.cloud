@@ -1,5 +1,8 @@
 ## Introduction
-This project is an Image Optimization Service built using Node.js and Express. It leverages the Sharp library to perform image transformations such as format conversion, resizing, and quality adjustments. The service is designed to efficiently serve optimized images based on client requests, improving load times and reducing bandwidth usage.
+
+![Cover](./storage/example/get-image.png)
+
+This project is an Assets Service built using Node.js and Express. It leverages the Sharp library to perform image transformations such as format conversion, resizing, and quality adjustments. The service is designed to efficiently serve optimized images based on client requests, improving load times and reducing bandwidth usage.
 
 ## Features
 - Dynamic image format conversion (e.g., JPEG, PNG, WebP, AVIF)
@@ -8,25 +11,20 @@ This project is an Image Optimization Service built using Node.js and Express. I
 - Caching mechanism to store and retrieve optimized images
 - Configurable source directories for image retrieval
 
-## Structure
+## Folder Structure
 
 ```diff
-cdn.api.pphat.stackdev.cloud/
-├── images/                       # Static assets (if any)
-├── uploads/                      # Static assets (if any)
-├── src/
-│   ├── controllers/              # Main controller handling image requests and processing
-│   │   └── images.controller.ts  # Image processing logic using Sharp
-│   ├── utils/
-│   │   ├── config.ts             # Configuration utilities for source directories
-│   │   ├── files.ts              # File handling utilities
-│   │   └── image-cache.ts        # Caching utilities for optimized images
-│   └── app.ts                    # Express app setup
-├── dist/                         # Compiled output directory (after build)
-├── package.json                  # Project metadata and dependencies
-├── tsenv.json                 # TypeScript configuration
-├── README.md                     # Project documentation
-└── .gitignore                    # Git ignore file
+IMAGES-OPTIMIZE-SERVICE
+├───.cache-local
+├───src
+│   ├───controllers
+│   └───utils
+└───storage
+    ├───example
+    │   └───kopy
+    │       └───foldername
+    ├───customize-upload-names-1
+    └───customize-upload-names-2
 ```
 
 
@@ -40,12 +38,16 @@ cdn.api.pphat.stackdev.cloud/
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/pphatdev/cdn.api.pphat.stackdev.cloud.git
+git clone https://github.com/turbotechlabs/images-service.git
+
+# Or from gitlab
+
+git clone git@gitlab-01.turbotech.com:tt-addons/images-service.git
 ```
 
 2. Navigate to the project directory:
 ```bash
-cd cdn.api.pphat.stackdev.cloud
+cd images-service
 ```
 
 3. Install the dependencies:
@@ -60,11 +62,10 @@ npm install
 ### Example `env.json`:
 ```json
 {
-  "port": 3000,
-  "sourceDirectories": [
-    "./images",
-    "./uploads"
-  ]
+    "directories": [
+        "./assets/**/**"
+    ],
+    "port": 3101
 }
 ```
 
@@ -89,6 +90,12 @@ Start the server using the following command:
 npm start
 ```
 
-
-
 The server will start on the configured port (default is 3000). You can access the service at `http://localhost:3000`.
+
+
+## Process Flow
+
+<div style="text-align: center; padding: 20px; background-color: #121212;">
+    <img src="./storage/example/store.drawio.svg" alt="Process Flow Diagram" style="padding: 20px; width: 95%;"/>
+    <img src="./storage/example/get.drawio.svg" alt="Process Flow Diagram" style="padding: 20px; width: 95%;"/>
+</div>

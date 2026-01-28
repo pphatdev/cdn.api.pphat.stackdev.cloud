@@ -1,8 +1,13 @@
-import { Request, Response } from 'express';
 import sharp from 'sharp';
+import multer from 'multer';
+import { Request, Response } from 'express';
 import { createReadStream, promises as fs } from 'fs';
 import { ImageCache } from '../utils/image-cache.js';
-import { findFileInDirectories } from '../utils/config.js';
+import { configured } from '../utils/config.js';
+import { UploadController } from './upload.controller.js';
+import { sendBadRequest, sendNotFound, sendSuccess } from '../utils/response.js';
+import { FilesController } from './files.controller.js';
+import { findFileInDirectories } from '../utils/directories.js';
 
 interface ImageQueryParams {
     fm?: string;
@@ -10,6 +15,10 @@ interface ImageQueryParams {
     w?: string;
     h?: string;
     fit?: string;
+}
+
+interface ImageValidateCallback {
+    (error: Error | null, acceptFile: boolean): void;
 }
 
 export class ImagesController {
@@ -48,7 +57,7 @@ export class ImagesController {
             /**
              * Find the file in configured directories
             */
-            const filePath = findFileInDirectories(filename);
+            const filePath = await findFileInDirectories(filename);
 
             let transform = sharp();
             let fileStream: NodeJS.ReadableStream | undefined;
@@ -59,12 +68,11 @@ export class ImagesController {
                 /**
                  * Generate placeholder if file not found
                 */
-                const width = w ? parseInt(w as string, 10) : 300;
+                const width = w ? parseInt(w as string, 10) : 512;
                 const height = h ? parseInt(h as string, 10) : width;
                 transform = sharp({ create: { width, height, channels: 4, background: { r: 200, g: 200, b: 200, alpha: 1 } } })
-                .composite([{ input: ImagesController.notFoundImage({ width, height }), top: 0, left: 0 }]);
+                    .composite([{ input: ImagesController.notFoundImage({ width, height }), top: 0, left: 0 }]);
             }
-
 
             if (w || h) {
                 transform = transform.resize({
@@ -84,7 +92,7 @@ export class ImagesController {
             /**
              * Create a buffer from the transformed image
             */
-            let imageBuffer : Buffer;
+            let imageBuffer: Buffer;
             if (fileStream) {
                 imageBuffer = await fileStream.pipe(transform).toBuffer();
             } else {
@@ -109,13 +117,12 @@ export class ImagesController {
         }
     }
 
-
     /**
      * Generate a simple SVG placeholder for not found images
      * @param option Object with width and height
      * @returns Buffer
     */
-    static notFoundImage(option: { width: number; height: number } = { width: 300, height: 300 }): Buffer {
+    static notFoundImage(option: { width: number; height: number } = { width: 512, height: 512 }): Buffer {
         const { width, height } = option;
         return Buffer.from(`
             <svg width="${width}" height="${height}" viewBox="0 0 100 100" fill="none">
@@ -127,9 +134,82 @@ export class ImagesController {
             </svg>
         `);
     }
+
+    /**
+     * Upload multiple images handler
+     * @param request Request
+     * @param response Response
+    */
+    static uploadImages = async (request: Request, response: Response): Promise<void> => {
+        const storage = request.header('storage') || configured.defaultStoragePath;
+
+        const multiple = multer({
+            storage: UploadController.storage(storage),
+            limits: {
+                fileSize: configured.images.maxSize
+            },
+            fileFilter: ImagesController.validateImage
+        }).array('images', configured.images.maxFilesUpload);
+
+        /**
+         * Handle the upload
+        */
+        multiple(request, response, async (err: any) => {
+            const files = request.files;
+            if (!files || files.length === 0) {
+                sendNotFound(response, 'No files uploaded.');
+                return;
+            }
+
+            if (err instanceof multer.MulterError) {
+                const field = err.field || 'files';
+                sendBadRequest(response, field == "files" ? err.message : `${field} is ${err.message}, Please change to: files`);
+                return;
+            } else if (err) {
+                sendBadRequest(response, err.message);
+                return;
+            }
+            const sanitizedFiles = (files as Express.Multer.File[]).map(({ fieldname, ...fileData }) => fileData);
+
+            // reduce value of key "path" to be relative to storage directory
+            for (const file of sanitizedFiles) {
+                const sanitizedFile: any = {
+                    ...file,
+                    fileName: file.originalname,
+                    path: `/source/v1/files/image/${file.filename}`,
+                    pathFile: `/source/v1/files/image/${file.filename}`,
+                    type: file.mimetype,
+                    name: file.filename,
+                    extension: file.originalname.split('.').pop()
+                };
+                Object.assign(file, sanitizedFile);
+
+                // Sync file after upload
+                await FilesController.syncFile(file.path);
+            }
+
+            sendSuccess(response, sanitizedFiles, 'Files uploaded successfully', 200);
+        });
+    };
+
+    /**
+     * Validate uploaded image file type
+     * @param req Request
+     * @param file Uploaded file
+     * @param callback Callback function
+    */
+    static validateImage = (req: Request, file: Express.Multer.File, callback: ImageValidateCallback) => {
+        const allowedTypes = configured.images.allowedTypes;
+        if (allowedTypes.includes(file.mimetype)) {
+            callback(null, true)
+        } else {
+            callback(new Error('Invalid file type. Only JPEG, PNG, GIF and WebP allowed.'), false)
+        }
+    }
 }
 
 export const {
     getImage,
-    notFoundImage
+    notFoundImage,
+    uploadImages,
 } = ImagesController;

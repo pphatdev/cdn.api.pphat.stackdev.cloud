@@ -1,0 +1,127 @@
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+export interface FileSettings {
+    maxSize: number;
+    maxFilesUpload: number;
+    allowedTypes: string[];
+}
+
+export interface EnvConfig {
+    directories: string[];
+    port: number;
+    baseDirectory: string;
+    defaultStoragePath: string;
+    files: FileSettings;
+    images: FileSettings;
+    allow?: {
+        patterns?: string[];
+        origins?: string[];
+    };
+}
+
+
+
+/**
+ * Find file in configured directories
+ * @param filename string
+ * @returns string | null
+*/
+export const findFileInDirectories = async (filename: string): Promise<string | null> => {
+    const directories = getDirectories();
+    for (const dir of directories) {
+
+        const cwdPath = process.cwd();
+        const filePath = path.join(cwdPath, `${dir}`, filename);
+        if (fs.existsSync(filePath)) {
+            return filePath;
+        }
+    }
+    return null;
+}
+
+
+/**
+ * Get destination directories from env.json
+ * @returns string[]
+*/
+export function getDirectories(): string[] {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const envPath = path.resolve(__dirname, '../../env.json');
+    const envData = JSON.parse(fs.readFileSync(envPath, 'utf-8')) as EnvConfig;
+
+    const expandedDirectories: string[] = [];
+
+    for (const dir of envData.directories) {
+        if (dir.includes('**')) {
+            // Pattern like /dir/**/**/path - find all matching folders
+            const parts = dir.split('**');
+            const basePath = parts[0].replace(/\/$/, '');
+            const endPath = parts[parts.length - 1].replace(/^\//, '');
+
+            const cwdPath = process.cwd();
+            const fullBasePath = path.join(cwdPath, basePath);
+
+            if (fs.existsSync(fullBasePath)) {
+                const findMatchingDirs = (currentPath: string, depth: number = 0): void => {
+                    if (depth > 10) return; // Prevent infinite recursion
+
+                    const entries = fs.readdirSync(currentPath, { withFileTypes: true });
+
+                    for (const entry of entries) {
+                        if (entry.isDirectory() || entry.isSymbolicLink()) {
+                            const fullPath = path.join(currentPath, entry.name);
+
+                            // Check if symbolic link points to a directory
+                            if (entry.isSymbolicLink()) {
+                                try {
+                                    const stat = fs.statSync(fullPath);
+                                    if (!stat.isDirectory()) {
+                                        continue; // Skip if symlink doesn't point to a directory
+                                    }
+                                } catch (error) {
+                                    continue; // Skip broken symlinks
+                                }
+                            }
+
+                            const relativePath = path.relative(cwdPath, fullPath);
+
+                            // Check if this matches the end pattern
+                            if (endPath) {
+                                const potentialMatch = path.join(relativePath, endPath);
+                                if (fs.existsSync(path.join(cwdPath, potentialMatch))) {
+                                    expandedDirectories.push(potentialMatch);
+                                }
+                            } else {
+                                expandedDirectories.push(relativePath);
+                            }
+
+                            // Continue searching recursively
+                            findMatchingDirs(fullPath, depth + 1);
+                        }
+                    }
+                };
+
+                findMatchingDirs(fullBasePath);
+            }
+        } else {
+            expandedDirectories.push(dir);
+        }
+    }
+
+    return expandedDirectories.reduce(
+        (uniqueDirs, dir) => {
+            if (/\\/g.test(dir) && !dir.startsWith('./')) {
+                dir = "./" + dir;
+            }
+            const toRightPath = dir.replace(/\\/g, '/').replace(/\/+$/g, '/');
+
+            if (!uniqueDirs.includes(toRightPath)) {
+                uniqueDirs.push(toRightPath);
+            }
+            return uniqueDirs;
+        }, [] as string[]
+    );
+}

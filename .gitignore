@@ -3,3 +3,6 @@ node_modules
 env.json
 .cache-*/
 .vscode
+
+storage/*
+!storage/example/
