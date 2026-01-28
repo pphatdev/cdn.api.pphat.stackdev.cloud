@@ -40,8 +40,22 @@ export class ImagesController {
 
             /**
              * Determine content type based on format
+             * Validate and normalize format parameter
             */
-            const format = fm || 'png';
+            const validFormats = ['heic', 'heif', 'avif', 'jpeg', 'jpg', 'jpe', 'tile', 'dz', 'png', 'raw', 'tiff', 'tif', 'webp', 'gif', 'jp2', 'jpx', 'j2k', 'j2c', 'jxl'];
+            let format = fm || 'png';
+
+            // Fix common typos/mistakes
+            if (format === 'web') {
+                format = 'webp';
+            }
+
+            // Validate format
+            if (!validFormats.includes(format)) {
+                res.status(400).json({ error: `Invalid format '${format}'. Allowed formats: ${validFormats.join(', ')}` });
+                return;
+            }
+
             const contentType = `image/${format === 'jpg' ? 'jpeg' : format}`;
 
             /**
