@@ -84,7 +84,7 @@ export class ImagesController {
 
             transform = transform.png();
             if (fm) {
-                transform = transform.toFormat(fm as any, {
+                transform = transform.toFormat(format as any, {
                     quality: q ? parseInt(q as string, 10) : 60
                 });
             }
