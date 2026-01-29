@@ -6,3 +6,4 @@ env.json
 
 storage/*
 !storage/example/
+src/data/database.json
