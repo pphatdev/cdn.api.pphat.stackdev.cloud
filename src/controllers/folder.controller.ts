@@ -11,7 +11,8 @@ export class FolderController {
      */
     static getFolderStructure = async (request: Request, response: Response): Promise<void> => {
         const basePath = 'storage';
-        const dynamicPath = String(request.params.path || '');
+        // Get the path from params[0] for regex routes, or params.path for named routes
+        const dynamicPath = request.params[0] || request.params.path || '';
         const currentDirectory = path.join(basePath, dynamicPath).replace(/\\/g, '/').replace(/,+/g, '/');
 
         try {

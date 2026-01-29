@@ -413,7 +413,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{url}}/source/v1/files/image/:filename?fm=webp&q=80&w=500&h=500&fit=cover",
+					"raw": "{{url}}/assets/image/:filename?fm=webp&q=80&w=500&h=500&fit=cover",
 					"host": [
 						"{{url}}"
 					],
@@ -454,7 +454,7 @@
 						}
 					]
 				},
-				"description": "## Image optimization endpoint\n\n**Endpoint:**  \n`GET /source/v1/files/image/:filename`\n\n**Description:**  \nThis endpoint allows you to retrieve and optimize an image file stored on the server by specifying the filename as a URL parameter. You can apply various optimization options through query parameters.\n\n### URL Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| filename | String | The name of the image file to retrieve and optimize |\n\n### Query Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| fm | String | (Optional) Format (e.g., jpg, png, webp) |\n| q | Number | (Optional) Quality (e.g., 80) |\n| w | Number | (Optional) Width (e.g., 300) |\n| h | Number | (Optional) Height (e.g., 300) |\n| fit | String | (Optional) Fit mode (e.g., cover, contain) |\n\n### Example Request in Postman\n\n1. Set the request method to **GET**.\n    \n2. Set the URL to: `{{url}}/source/v1/files/image/sample.png?fm=webp&q=80&w=300&h=300&fit=cover`\n    \n3. (Optional) Add any required headers.\n    \n4. Click **Send** to retrieve and optimize the image.\n    \n\n### Example cURL\n\n``` sh\ncurl -X GET \"{{url}}/source/v1/files/image/sample.png?fm=webp&q=80&w=300&h=300&fit=cover\"\n\n ```\n\n### Example Response\n\nThe response will be the optimized image file. The content type will depend on the requested format (e.g., `image/webp` for WebP format).\n\n``` http\nHTTP/1.1 200 OK\nContent-Type: image/webp\nContent-Length: 12345\n(binary image data)\n\n ```"
+				"description": "## Image optimization endpoint\n\n**Endpoint:**  \n`GET /assets/image/:filename`\n\n**Description:**  \nThis endpoint allows you to retrieve and optimize an image file stored on the server by specifying the filename as a URL parameter. You can apply various optimization options through query parameters.\n\n### URL Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| filename | String | The name of the image file to retrieve and optimize |\n\n### Query Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| fm | String | (Optional) Format (e.g., jpg, png, webp) |\n| q | Number | (Optional) Quality (e.g., 80) |\n| w | Number | (Optional) Width (e.g., 300) |\n| h | Number | (Optional) Height (e.g., 300) |\n| fit | String | (Optional) Fit mode (e.g., cover, contain) |\n\n### Example Request in Postman\n\n1. Set the request method to **GET**.\n    \n2. Set the URL to: `{{url}}/assets/image/sample.png?fm=webp&q=80&w=300&h=300&fit=cover`\n    \n3. (Optional) Add any required headers.\n    \n4. Click **Send** to retrieve and optimize the image.\n    \n\n### Example cURL\n\n``` sh\ncurl -X GET \"{{url}}/assets/image/sample.png?fm=webp&q=80&w=300&h=300&fit=cover\"\n\n ```\n\n### Example Response\n\nThe response will be the optimized image file. The content type will depend on the requested format (e.g., `image/webp` for WebP format).\n\n``` http\nHTTP/1.1 200 OK\nContent-Type: image/webp\nContent-Length: 12345\n(binary image data)\n\n ```"
 			},
 			"response": []
 		},

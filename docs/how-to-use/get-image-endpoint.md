@@ -1,6 +1,6 @@
 ## Image optimization endpoint
 **Endpoint:**
-`GET /source/v1/files/image/:filename`
+`GET /assets/image/:filename`
 
 **Description:**
 This endpoint allows you to retrieve and optimize an image file stored on the server by specifying the filename as a URL parameter. You can apply various optimization options through query parameters.
@@ -21,13 +21,13 @@ This endpoint allows you to retrieve and optimize an image file stored on the se
 
 ### Example Request in Postman
 1. Set the request method to **GET**.
-2. Set the URL to: `{{url}}/source/v1/files/image/sample.png?fm=webp&q=80&w=300&h=300&fit=cover`
+2. Set the URL to: `{{url}}/assets/image/sample.png?fm=webp&q=80&w=300&h=300&fit=cover`
 3. (Optional) Add any required headers.
 4. Click **Send** to retrieve and optimize the image.
 
 ### Example cURL
 ```sh
-curl -X GET "{{url}}/source/v1/files/image/sample.png?fm=webp&q=80&w=300&h=300&fit=cover"
+curl -X GET "{{url}}/assets/image/sample.png?fm=webp&q=80&w=300&h=300&fit=cover"
 ```
 
 ### Example Response

@@ -173,19 +173,22 @@ export class ImagesController {
 
             // reduce value of key "path" to be relative to storage directory
             for (const file of sanitizedFiles) {
+                // Preserve the original file system path before modification
+                const originalFilePath = file.path;
+
                 const sanitizedFile: any = {
                     ...file,
                     fileName: file.originalname,
-                    path: `/source/v1/files/image/${file.filename}`,
-                    pathFile: `/source/v1/files/image/${file.filename}`,
+                    path: `/assets/image/${file.filename}`,
+                    pathFile: `/assets/image/${file.filename}`,
                     type: file.mimetype,
                     name: file.filename,
                     extension: file.originalname.split('.').pop()
                 };
                 Object.assign(file, sanitizedFile);
 
-                // Sync file after upload
-                await FilesController.syncFile(file.path);
+                // Sync file after upload - use the original file system path and original filename
+                await FilesController.syncFile(originalFilePath, file.originalname);
             }
 
             sendSuccess(response, sanitizedFiles, 'Files uploaded successfully', 200);
