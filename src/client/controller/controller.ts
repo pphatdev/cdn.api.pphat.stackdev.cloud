@@ -1,4 +1,4 @@
-import { labels, modules } from "../views/layouts/modules.js";
+import { labels, modules } from "../utils/modules.js";
 
 export class Controller {
     static defaultConfig = {
