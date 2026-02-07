@@ -1,10 +1,10 @@
 import multer from 'multer';
 import { Request, Response } from 'express';
-import { configured } from '../utils/config.js';
+import { configured } from '../../utils/config.js';
 import { UploadController } from './upload.controller.js';
-import { sendBadRequest, sendNotFound, sendSuccess } from '../utils/response.js';
-import { FileUtils } from '../utils/files.js';
-import { Database } from '../utils/database.js';
+import { sendBadRequest, sendNotFound, sendSuccess } from '../../utils/response.js';
+import { FileUtils } from '../../utils/files.js';
+import { Database } from '../../utils/database.js';
 import fs from 'fs';
 
 interface FileValidateCallback {

@@ -1,8 +1,8 @@
 import multer from "multer";
 import path from 'path/win32';
-import { configured } from "../utils/config.js";
+import { configured } from "../../utils/config.js";
 import { Request } from "express";
-import { FileUtils } from "../utils/files.js";
+import { FileUtils } from "../../utils/files.js";
 export class UploadController {
 
     /**

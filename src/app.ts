@@ -2,8 +2,8 @@ import express, { Request, Response } from 'express';
 import { sendNotFound } from './utils/response.js';
 import { configured } from './utils/config.js';
 import { Database } from './utils/database.js';
-import API from './routes/api.js';
-import WEB from './routes/web.js';
+import API from './server/routes/api.js';
+import WEB from './client/routes/web.js';
 const app = express();
 
 /**

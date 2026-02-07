@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { configured } from "../utils/config.js";
-import { sendNotFound } from "../utils/response.js";
+import { configured } from "../../utils/config.js";
+import { sendNotFound } from "../../utils/response.js";
 import { FilesController } from './files.controller.js';
-import { findFileInDirectories } from "../utils/directories.js";
+import { findFileInDirectories } from "../../utils/directories.js";
 import fs from 'fs';
 import JSZip from 'jszip';
 import Tiff from 'tiff.js';

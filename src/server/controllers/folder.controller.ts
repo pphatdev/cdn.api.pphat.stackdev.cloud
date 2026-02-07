@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
-import { sendBadRequest, sendNotFound, sendSuccess } from '../utils/response.js';
+import { sendBadRequest, sendNotFound, sendSuccess } from '../../utils/response.js';
 
 export class FolderController {
     /**
