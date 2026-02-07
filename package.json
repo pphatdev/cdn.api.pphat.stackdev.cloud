@@ -6,8 +6,8 @@
   "main": "./src/app.ts",
   "module": "./src/app.ts",
   "scripts": {
-    "dev": "node --watch --no-warnings=ExperimentalWarning --loader ts-node/esm ./src/app.ts",
-    "dev:css": "npx @tailwindcss/cli -i ./src/client/styles/main.css -o ./dist/client/styles/output.css --watch",
+    "css": "npx @tailwindcss/cli -i ./src/client/styles/main.css -o ./dist/client/styles/output.css --watch",
+    "dev": "node --watch --no-warnings=ExperimentalWarning --loader ts-node/esm ./src/app.ts | npm run css",
     "build:css": "npx @tailwindcss/cli -i ./src/client/styles/main.css -o ./dist/client/styles/output.css --minify",
     "build": "npm run build:css && tsc",
     "start": "node ./dist/app.js"
