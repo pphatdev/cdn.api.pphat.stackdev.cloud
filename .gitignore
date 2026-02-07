@@ -7,3 +7,4 @@ env.json
 storage/*
 !storage/example/
 src/data/database.json
+src/server/data/database.json
