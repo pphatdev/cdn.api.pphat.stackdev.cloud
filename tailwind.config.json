@@ -1,0 +1,10 @@
+{
+  "content": ["./src/**/*.{html,js,ts,tsx,jsx,ejs}"],
+  "theme": {
+    "extend": {
+      "fontFamily": {
+        "sans": ["Inter", "system-ui", "-apple-system", "sans-serif"]
+      }
+    }
+  }
+}

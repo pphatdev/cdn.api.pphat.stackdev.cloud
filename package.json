@@ -7,14 +7,18 @@
   "module": "./src/app.ts",
   "scripts": {
     "dev": "node --watch --no-warnings=ExperimentalWarning --loader ts-node/esm ./src/app.ts",
-    "build": "tsc",
+    "dev:css": "npx @tailwindcss/cli -i ./src/client/styles/main.css -o ./dist/client/styles/output.css --watch",
+    "build:css": "npx @tailwindcss/cli -i ./src/client/styles/main.css -o ./dist/client/styles/output.css --minify",
+    "build": "npm run build:css && tsc",
     "start": "node ./dist/app.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/ejs": "^3.1.5",
     "@types/express": "^5.0.6",
     "docx-preview": "^0.3.7",
+    "ejs": "^4.0.1",
     "express": "^5.2.1",
     "fs-extra": "^11.3.2",
     "multer": "^2.0.2",
@@ -25,6 +29,9 @@
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
-    "@types/multer": "^2.0.0"
+    "@types/multer": "^2.0.0",
+    "autoprefixer": "^10.4.24",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18"
   }
 }

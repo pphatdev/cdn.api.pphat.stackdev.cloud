@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title : 'CloudBox Dashboard' %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .bg-sidebar { background-color: #F8FAFC; }
+    </style>
+</head>
+<body class="bg-white text-slate-700">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <%- include('../layouts/sidebar'); %>
+
+        <!-- Main Content Area -->
+        <%- include('../pages/' + (typeof page !== 'undefined' ? page : 'dashboard')); %>
+    </div>
+</body>
+</html>
