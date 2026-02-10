@@ -1,8 +1,8 @@
 import multer from "multer";
 import path from 'path/win32';
-import { configured } from "../../utils/config.js";
+import { configured } from "../utils/config.js";
 import { Request } from "express";
-import { FileUtils } from "../../utils/files.js";
+import { FileUtils } from "../utils/files.js";
 export class UploadController {
 
     /**
@@ -14,7 +14,7 @@ export class UploadController {
 
         const fileName = (request: Request, file: Express.Multer.File, callback: (error: Error | null, filename: string) => void) => {
             const useOriginalFilename = request.get('X-Prefix') ?? null;
-            
+
             if (useOriginalFilename) {
                 const uniqueId = crypto.randomUUID();
                 callback(null, `${useOriginalFilename}_${uniqueId}${path.extname(file.originalname)}`);

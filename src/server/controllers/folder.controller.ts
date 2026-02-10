@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
-import { sendBadRequest, sendNotFound, sendSuccess } from '../../utils/response.js';
+import { sendBadRequest, sendNotFound, sendSuccess } from '../utils/response.js';
 
 export class FolderController {
     /**
@@ -11,8 +11,7 @@ export class FolderController {
      */
     static getFolderStructure = async (request: Request, response: Response): Promise<void> => {
         const basePath = 'storage';
-        // Get the path from params[0] for regex routes, or params.path for named routes
-        const dynamicPath = request.params[0] || request.params.path || '';
+        const dynamicPath = String(request.params.path || '');
         const currentDirectory = path.join(basePath, dynamicPath).replace(/\\/g, '/').replace(/,+/g, '/');
 
         try {

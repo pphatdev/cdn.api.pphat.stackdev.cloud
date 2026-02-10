@@ -1,10 +1,9 @@
 import multer from 'multer';
 import { Request, Response } from 'express';
-import { configured } from '../../utils/config.js';
+import { configured } from '../utils/config.js';
 import { UploadController } from './upload.controller.js';
-import { sendBadRequest, sendNotFound, sendSuccess } from '../../utils/response.js';
-import { FileUtils } from '../../utils/files.js';
-import { Database } from '../../utils/database.js';
+import { sendBadRequest, sendNotFound, sendSuccess } from '../utils/response.js';
+import { FileUtils } from '../utils/files.js';
 import fs from 'fs';
 
 interface FileValidateCallback {
@@ -193,7 +192,7 @@ export class FilesController {
             limits: {
                 fileSize: configured.files.maxSize
             },
-            fileFilter: FilesController.validateFile
+            fileFilter: FilesController.validateFile as any
         }).array('files', configured.files.maxFilesUpload);
 
         /**
@@ -218,9 +217,6 @@ export class FilesController {
 
             // reduce value of key "path" to be relative to storage directory
             for (const file of sanitizedFiles) {
-                // Preserve the original file system path before modification
-                const originalFilePath = file.path;
-                
                 const sanitizedFile: any = {
                     ...file,
                     // path: file.path.replace(/\\/g, '/'),
@@ -233,8 +229,8 @@ export class FilesController {
                 };
                 Object.assign(file, sanitizedFile);
 
-                // Sync file after upload with original filename - use the original filesystem path
-                await FilesController.syncFile(originalFilePath, file.originalname);
+                // Sync file after upload
+                await FilesController.syncFile(file.path);
             }
 
             sendSuccess(response, sanitizedFiles, 'Files uploaded successfully', 200);
@@ -244,9 +240,8 @@ export class FilesController {
     /**
      * Sync a file after upload
      * @param filePath Path to the file to sync
-     * @param originalFilename Original filename from upload (optional)
      */
-    static async syncFile(filePath: string, originalFilename?: string): Promise<void> {
+    static async syncFile(filePath: string): Promise<void> {
         try {
             // Get the actual file path on disk
             const actualFilePath = filePath.startsWith(configured.baseDirectory) ? filePath : `${configured.baseDirectory}${filePath}`;
@@ -267,71 +262,21 @@ export class FilesController {
             // Ensure proper permissions are set
             await FileUtils.setProperPermissions(actualFilePath, false);
 
-            // Extract filename
-            const filename = actualFilePath.replace(/\\/g, '/').split('/').pop() || 'unknown';
-            const ext = filename.split('.').pop()?.toLowerCase();
-
-            // Check if file is an image
-            const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'];
-            const isImage = ext ? imageExtensions.includes(ext) : false;
-
-            // Create file metadata
-            const metadata = {
-                filename: filename,
-                originalFilename: originalFilename || filename,
-                path: actualFilePath.replace(/\\/g, '/'),
-                relativePath: relativePath,
-                folderPath: folderPath,
+            // Log sync information
+            console.log(`File synced successfully:`, {
+                path: actualFilePath,
+                folder: folderPath,
                 size: stats.size,
-                extension: ext || '',
-                mimeType: this.getMimeType(ext || ''),
-                previewUrl: isImage ? `/assets/image/${filename}` : `/file/preview/${filename}`,
-                createdAt: stats.birthtime.toISOString(),
-                modifiedAt: stats.mtime.toISOString(),
-                uploadedAt: new Date().toISOString()
-            };
+                syncedAt: new Date().toISOString()
+            });
 
-            // Save to database
-            await Database.addFile(metadata);
+            // Optional: Create a sync record or backup based on folder
+            // This could be extended to copy files to a backup location
+            // based on the folder structure
 
         } catch (error: any) {
             console.error(`Error syncing file ${filePath}:`, error.message);
         }
-    }
-
-
-
-    /**
-     * Get MIME type based on file extension
-     * @param ext File extension
-     */
-    static getMimeType(ext: string): string {
-        const mimeTypes: { [key: string]: string } = {
-            // Images
-            'jpg': 'image/jpeg',
-            'jpeg': 'image/jpeg',
-            'png': 'image/png',
-            'gif': 'image/gif',
-            'webp': 'image/webp',
-            'svg': 'image/svg+xml',
-            // Documents
-            'pdf': 'application/pdf',
-            'doc': 'application/msword',
-            'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'txt': 'text/plain',
-            // Spreadsheets
-            'xls': 'application/vnd.ms-excel',
-            'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'csv': 'text/csv',
-            // Presentations
-            'ppt': 'application/vnd.ms-powerpoint',
-            'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            // Archives
-            'zip': 'application/zip',
-            'rar': 'application/x-rar-compressed',
-            '7z': 'application/x-7z-compressed'
-        };
-        return mimeTypes[ext] || 'application/octet-stream';
     }
 
     /**
@@ -357,7 +302,15 @@ export class FilesController {
     static searchFileByName = async (request: Request, response: Response): Promise<void> => {
         const { q, type } = request.query;
 
-        const data = []
+        const data: Array<{
+            dir: string;
+            name: string;
+            size: number;
+            createdAt: Date;
+            modifiedAt: Date;
+            relativePath: string;
+            previewUrl: string | null;
+        }> = []
 
         // get all directories from config
         const storage = configured.directories;
@@ -392,7 +345,7 @@ export class FilesController {
                         createdAt: stats.birthtime,
                         modifiedAt: stats.mtime,
                         relativePath: filePath,
-                        previewUrl: type === 'image' ? `/assets/image/${file}` : null
+                        previewUrl: type === 'image' ? `/source/v1/files/image/${file}` : null
                     });
                 });
             }
@@ -425,52 +378,6 @@ export class FilesController {
         sendNotFound(response, 'File not found.');
     };
 
-    /**
-     * Delete a file by filename
-     * @param request Request
-     * @param response Response
-    */
-    static deleteFile = async (request: Request, response: Response): Promise<void> => {
-        const { filename } = request.params;
-
-        if (!filename) {
-            sendBadRequest(response, 'filename is required.');
-            return;
-        }
-
-        // Find the file in configured directories
-        const storage = configured.directories;
-        let foundFilePath = null;
-
-        for (const dir of storage) {
-            const filePath = `${dir}/${filename}`.replace(/\\/g, '/');
-            if (fs.existsSync(filePath)) {
-                foundFilePath = filePath;
-                break;
-            }
-        }
-
-        if (!foundFilePath) {
-            sendNotFound(response, 'File not found.');
-            return;
-        }
-
-        try {
-            // Delete the file
-            fs.unlinkSync(foundFilePath);
-
-            // Delete from database
-            await Database.deleteFile(filename);
-
-            sendSuccess(response, {
-                filename: filename,
-                deletedPath: foundFilePath
-            }, 'File deleted successfully', 200);
-        } catch (err: any) {
-            sendBadRequest(response, err.message || 'Failed to delete file.');
-        }
-    };
-
 }
 
 export const {
@@ -478,6 +385,5 @@ export const {
     searchFileByName,
     moveFileToDir,
     uploadFileBase64,
-    uploadMultipleFilesBase64,
-    deleteFile
+    uploadMultipleFilesBase64
 } = FilesController;

@@ -1,17 +1,18 @@
 import { Request, Response } from "express";
-import { configured } from "../../utils/config.js";
-import { sendNotFound } from "../../utils/response.js";
+import { configured } from "../utils/config.js";
+import { sendNotFound } from "../utils/response.js";
 import { FilesController } from './files.controller.js';
-import { findFileInDirectories } from "../../utils/directories.js";
+import { findFileInDirectories } from "../utils/directories.js";
 import fs from 'fs';
 import JSZip from 'jszip';
+// @ts-ignore
 import Tiff from 'tiff.js';
 
 export class PreviewController {
 
     static files = async (request: Request, response: Response): Promise<void> => {
         const { filename } = request.params;
-        const ext = filename.split('.').pop()?.toLowerCase();
+        const ext = (filename as string).split('.').pop()?.toLowerCase();
 
         // const previewableExtensions = [
         //     'docx',
@@ -51,7 +52,7 @@ export class PreviewController {
     static all = async (request: Request, response: Response): Promise<void> => {
         const { filename } = request.params;
         // find the file in configured directories
-        const fullPath = await findFileInDirectories(filename);
+        const fullPath = await findFileInDirectories(filename as string);
 
         if (fullPath) {
 

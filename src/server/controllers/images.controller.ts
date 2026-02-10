@@ -2,12 +2,12 @@ import sharp from 'sharp';
 import multer from 'multer';
 import { Request, Response } from 'express';
 import { createReadStream, promises as fs } from 'fs';
-import { ImageCache } from '../../utils/image-cache.js';
-import { configured } from '../../utils/config.js';
+import { ImageCache } from '../utils/image-cache.js';
+import { configured } from '../utils/config.js';
 import { UploadController } from './upload.controller.js';
-import { sendBadRequest, sendNotFound, sendSuccess } from '../../utils/response.js';
+import { sendBadRequest, sendNotFound, sendSuccess } from '../utils/response.js';
 import { FilesController } from './files.controller.js';
-import { findFileInDirectories } from '../../utils/directories.js';
+import { findFileInDirectories } from '../utils/directories.js';
 
 interface ImageQueryParams {
     fm?: string;
@@ -57,13 +57,13 @@ export class ImagesController {
             /**
              * Find the file in configured directories
             */
-            const filePath = await findFileInDirectories(filename);
+            const filePath = await findFileInDirectories(filename as string);
 
             let transform = sharp();
             let fileStream: NodeJS.ReadableStream | undefined;
             try {
-                await fs.access(filePath);
-                fileStream = createReadStream(filePath);
+                await fs.access(filePath as string);
+                fileStream = createReadStream(filePath as string);
             } catch (error) {
                 /**
                  * Generate placeholder if file not found
@@ -84,7 +84,7 @@ export class ImagesController {
 
             transform = transform.png();
             if (fm) {
-                transform = transform.toFormat(format as any, {
+                transform = transform.toFormat(fm as any, {
                     quality: q ? parseInt(q as string, 10) : 60
                 });
             }
@@ -148,7 +148,7 @@ export class ImagesController {
             limits: {
                 fileSize: configured.images.maxSize
             },
-            fileFilter: ImagesController.validateImage
+            fileFilter: ImagesController.validateImage as any
         }).array('images', configured.images.maxFilesUpload);
 
         /**
@@ -173,22 +173,19 @@ export class ImagesController {
 
             // reduce value of key "path" to be relative to storage directory
             for (const file of sanitizedFiles) {
-                // Preserve the original file system path before modification
-                const originalFilePath = file.path;
-
                 const sanitizedFile: any = {
                     ...file,
                     fileName: file.originalname,
-                    path: `/assets/image/${file.filename}`,
-                    pathFile: `/assets/image/${file.filename}`,
+                    path: `/source/v1/files/image/${file.filename}`,
+                    pathFile: `/source/v1/files/image/${file.filename}`,
                     type: file.mimetype,
                     name: file.filename,
                     extension: file.originalname.split('.').pop()
                 };
                 Object.assign(file, sanitizedFile);
 
-                // Sync file after upload - use the original file system path and original filename
-                await FilesController.syncFile(originalFilePath, file.originalname);
+                // Sync file after upload
+                await FilesController.syncFile(file.path);
             }
 
             sendSuccess(response, sanitizedFiles, 'Files uploaded successfully', 200);
@@ -201,7 +198,7 @@ export class ImagesController {
      * @param file Uploaded file
      * @param callback Callback function
     */
-    static validateImage = (req: Request, file: Express.Multer.File, callback: ImageValidateCallback) => {
+    static validateImage = (req: Request, file: Express.Multer.File, callback: ImageValidateCallback): void => {
         const allowedTypes = configured.images.allowedTypes;
         if (allowedTypes.includes(file.mimetype)) {
             callback(null, true)
