@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { DashboardController } from '../controller/dashboard.js';
+import { MyFileController } from '../controller/my-file.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,6 +20,7 @@ app.set('views', path.join(__dirname, './../views'));
 
 
 app.get('/', DashboardController.get);
+app.get('/files', MyFileController.get);
 
 
 export default app;
