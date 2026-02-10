@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
-import { sendNotFound } from './utils/response.js';
-import { configured } from './utils/config.js';
-import { Database } from './utils/database.js';
+import { sendNotFound } from './server/utils/response.js';
+import { configured } from './server/utils/config.js';
+import { Database } from './server/utils/database.js';
 import API from './server/routes/api.js';
 import WEB from './client/routes/web.js';
 const app = express();
