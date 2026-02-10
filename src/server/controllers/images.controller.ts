@@ -179,8 +179,8 @@ export class ImagesController {
                 const sanitizedFile: any = {
                     ...file,
                     fileName: file.originalname,
-                    path: `/source/v1/files/image/${file.filename}`,
-                    pathFile: `/source/v1/files/image/${file.filename}`,
+                    path: `/api/image/${file.filename}`,
+                    pathFile: `/api/image/${file.filename}`,
                     type: file.mimetype,
                     name: file.filename,
                     extension: file.originalname.split('.').pop()
