@@ -5,6 +5,7 @@ import { UploadController } from './upload.controller.js';
 import { sendBadRequest, sendNotFound, sendSuccess } from '../utils/response.js';
 import { FileUtils } from '../utils/files.js';
 import fs from 'fs';
+import path from 'path';
 import { Database } from '../utils/database.js';
 import { getMimeType } from '../utils/mine-types.js';
 
@@ -253,9 +254,14 @@ export class FilesController {
             const normalizedPath = filePath.replace(/\\/g, '/');
 
             // Get the actual file path on disk
-            const actualFilePath = normalizedPath.startsWith(configured.baseDirectory)
-                ? normalizedPath
-                : `${configured.baseDirectory}/${normalizedPath}`.replace(/\\/g, '/');
+            let actualFilePath: string;
+            if (path.isAbsolute(filePath)) {
+                // If it's already an absolute path, use it directly
+                actualFilePath = normalizedPath;
+            } else {
+                // If it's relative, prepend the base directory
+                actualFilePath = path.join(process.cwd(), configured.baseDirectory, normalizedPath).replace(/\\/g, '/');
+            }
 
             // Check if file exists
             if (!fs.existsSync(actualFilePath)) {
@@ -264,7 +270,11 @@ export class FilesController {
             }
 
             // Extract folder structure relative to storage/
-            let relativePath = actualFilePath.replace(configured.baseDirectory, '').replace(/^\/+/, '');
+            // Find where 'storage' directory starts in the path
+            const storageIndex = actualFilePath.toLowerCase().indexOf(configured.baseDirectory.toLowerCase());
+            let relativePath = storageIndex !== -1
+                ? actualFilePath.substring(storageIndex + configured.baseDirectory.length + 1)
+                : actualFilePath.split('/').pop() || '';
 
             // Extract the storage subfolder (e.g., "example" from "storage/example/file.pdf")
             const pathParts = relativePath.split('/');

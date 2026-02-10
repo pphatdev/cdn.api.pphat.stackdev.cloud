@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { appMimeTypes, audioMimeTypes, imageMimeTypes } from './mine-types.js';
+import { appMimeTypes, audioMimeTypes, imageMimeTypes, webManifestMimeTypes } from './mine-types.js';
 import { EnvConfig, getDirectories } from './directories.js';
 
 interface AppEnv {
@@ -93,7 +93,8 @@ export const configured = {
         allowedTypes: [
             ...appMimeTypes,
             ...imageMimeTypes,
-            ...audioMimeTypes
+            ...audioMimeTypes,
+            ...webManifestMimeTypes
         ]
     },
     images: {

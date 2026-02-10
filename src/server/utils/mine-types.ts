@@ -48,6 +48,14 @@ export const videoMimeTypes: string[] = [
 ];
 
 
+/**
+ * Web Manifest MIME types
+ */
+export const webManifestMimeTypes: string[] = [
+    'application/manifest+json'
+];
+
+
 export const getMimeType = (extension: string): string => {
     const mimeTypes: Record<string, string> = {
         'jpg': 'image/jpeg',
@@ -94,6 +102,9 @@ export const getMimeType = (extension: string): string => {
         // Data
         'json': 'application/json',
         'xml': 'application/xml',
+
+        // Web Manifest
+        'webmanifest': 'application/manifest+json',
 
         ...videoMimeTypes.reduce((acc, type) => {
             const extension = type.split('/')[1];
