@@ -28,10 +28,10 @@ export class FileUtils {
         // Ensure parent directory exists with proper permissions
         const dir = path.dirname(filePath);
         await this.ensureDirectoryWithPermissions(dir);
-        
+
         // Create/write file
         await fs.writeFile(filePath, content);
-        
+
         // Set file permissions
         await fs.chmod(filePath, 0o666);
     }

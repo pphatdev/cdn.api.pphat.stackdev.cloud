@@ -13,18 +13,27 @@ export class UploadController {
         const directoryPath = configured.baseDirectory + (dir.startsWith('/') ? dir : `/${dir}`);
 
         const fileName = (request: Request, file: Express.Multer.File, callback: (error: Error | null, filename: string) => void) => {
+            // Properly decode and normalize Unicode filenames
+            // Multer might incorrectly encode non-ASCII characters, so we decode and normalize
+            const originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+            const normalizedName = originalName.normalize('NFC');
+
             const useOriginalFilename = request.get('X-Prefix') ?? null;
 
             if (useOriginalFilename) {
+                // Normalize the prefix to handle Unicode characters
+                const normalizedPrefix = useOriginalFilename.normalize('NFC');
                 const uniqueId = crypto.randomUUID();
-                callback(null, `${useOriginalFilename}_${uniqueId}${path.extname(file.originalname)}`);
+                const extension = path.extname(normalizedName);
+                callback(null, `${normalizedPrefix}_${uniqueId}${extension}`);
                 return;
             }
 
             const date = new Date();
             const prefix = date.toJSON({ year: 'numeric', month: '2-digit', day: '2-digit', }).split('T')[0];
             const uniqueId = prefix + "_" + crypto.randomUUID()
-            callback(null, uniqueId + path.extname(file.originalname))
+            const extension = path.extname(normalizedName);
+            callback(null, uniqueId + extension)
         }
 
         return multer.diskStorage({
