@@ -79,7 +79,7 @@ export class PreviewController {
             if (fs.existsSync(filePath)) {
                 // Sync file when accessed and wait for completion
                 await FilesController.syncFile(filePath);
-                
+
                 // Read file with fs.promises to ensure we get the latest content
                 const fileBuffer = await fs.promises.readFile(filePath);
                 const arrayBuffer = fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength);
