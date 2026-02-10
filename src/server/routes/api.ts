@@ -1,11 +1,11 @@
 import express, { Request, Response } from 'express';
-import { getAllowOrigin } from '../../utils/config.js';
+import { getAllowOrigin } from '../utils/config.js';
 import { getImage, uploadImages } from '../controllers/images.controller.js';
 import { FilesController, uploadFiles } from '../controllers/files.controller.js';
 import { FolderController } from '../controllers/folder.controller.js';
-import { sendSuccess } from '../../utils/response.js';
+import { sendSuccess } from '../utils/response.js';
 import { PreviewController } from '../controllers/preview.controller.js';
-import { Database } from '../../utils/database.js';
+import { Database } from '../utils/database.js';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';

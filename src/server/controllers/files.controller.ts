@@ -5,6 +5,7 @@ import { UploadController } from './upload.controller.js';
 import { sendBadRequest, sendNotFound, sendSuccess } from '../utils/response.js';
 import { FileUtils } from '../utils/files.js';
 import fs from 'fs';
+import { Database } from '../utils/database.js';
 
 interface FileValidateCallback {
     (error: Error | null, acceptFile: boolean): void;
@@ -377,6 +378,53 @@ export class FilesController {
         }
         sendNotFound(response, 'File not found.');
     };
+
+    /**
+     * Delete a file by filename
+     * @param request Request
+     * @param response Response
+    */
+    static deleteFile = async (request: Request, response: Response): Promise<void> => {
+        const { filename } = request.params;
+
+        if (!filename) {
+            sendBadRequest(response, 'filename is required.');
+            return;
+        }
+
+        // Find the file in configured directories
+        const storage = configured.directories;
+        let foundFilePath = null;
+
+        for (const dir of storage) {
+            const filePath = `${dir}/${filename}`.replace(/\\/g, '/');
+            if (fs.existsSync(filePath)) {
+                foundFilePath = filePath;
+                break;
+            }
+        }
+
+        if (!foundFilePath) {
+            sendNotFound(response, 'File not found.');
+            return;
+        }
+
+        try {
+            // Delete the file
+            fs.unlinkSync(foundFilePath);
+
+            // Delete from database
+            await Database.deleteFile(filename as string);
+
+            sendSuccess(response, {
+                filename: filename,
+                deletedPath: foundFilePath
+            }, 'File deleted successfully', 200);
+        } catch (err: any) {
+            sendBadRequest(response, err.message || 'Failed to delete file.');
+        }
+    };
+
 
 }
 

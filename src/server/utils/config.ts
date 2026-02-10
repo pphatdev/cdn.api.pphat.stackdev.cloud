@@ -10,13 +10,28 @@ interface AppEnv {
 }
 
 /**
+ * Get the root directory path
+ * @returns string
+*/
+const getRootPath = (): string => {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    // From src/server/utils/ go up 3 levels to root
+    return path.resolve(__dirname, '../../../');
+}
+
+/**
  * Get Allow Origin (merge exact origins and regex patterns) from env.json
  * @returns (string|RegExp)[]
 */
 export const getAllowOrigin = (): (string | RegExp)[] => {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    const envPath = path.resolve(__dirname, '../../env.json');
+    const envPath = path.join(getRootPath(), 'env.json');
+
+    if (!fs.existsSync(envPath)) {
+        console.warn(`env.json not found at ${envPath}, using defaults`);
+        return [];
+    }
+
     const envData = JSON.parse(fs.readFileSync(envPath, 'utf-8')) as EnvConfig;
 
     const origins = (envData.allow && Array.isArray(envData.allow.origins)) ? envData.allow.origins : [];
@@ -30,9 +45,13 @@ export const getAllowOrigin = (): (string | RegExp)[] => {
 }
 
 export const getAllowPatterns = (): RegExp[] => {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    const envPath = path.resolve(__dirname, '../../env.json');
+    const envPath = path.join(getRootPath(), 'env.json');
+
+    if (!fs.existsSync(envPath)) {
+        console.warn(`env.json not found at ${envPath}, using defaults`);
+        return [];
+    }
+
     const envData = JSON.parse(fs.readFileSync(envPath, 'utf-8')) as EnvConfig;
     const patterns = (envData.allow && Array.isArray(envData.allow.patterns)) ? envData.allow.patterns : [];
     return patterns.map(p => {
@@ -45,11 +64,15 @@ export const getAllowPatterns = (): RegExp[] => {
  * @returns number
 */
 export const getPort = (): number => {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    const envPath = path.resolve(__dirname, '../../env.json');
+    const envPath = path.join(getRootPath(), 'env.json');
+
+    if (!fs.existsSync(envPath)) {
+        console.warn(`env.json not found at ${envPath}, using default port 3000`);
+        return 3000;
+    }
+
     const envData = JSON.parse(fs.readFileSync(envPath, 'utf-8')) as EnvConfig;
-    return envData.port;
+    return envData.port || 3000;
 }
 
 /**
@@ -85,9 +108,13 @@ export const configured = {
  * Get application environment info
 */
 export const appEnv: AppEnv = (() => {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    const envPath = path.resolve(__dirname, '../../env.json');
+    const envPath = path.join(getRootPath(), 'env.json');
+
+    if (!fs.existsSync(envPath)) {
+        console.warn(`env.json not found at ${envPath}, using defaults`);
+        return { name: 'app', env: 'development' };
+    }
+
     const envData = JSON.parse(fs.readFileSync(envPath, 'utf-8')) as EnvConfig & { app?: AppEnv };
     return envData.app || { name: 'app', env: 'development' };
 })();

@@ -7,7 +7,7 @@
   "module": "./src/app.ts",
   "scripts": {
     "css": "npx @tailwindcss/cli -i ./src/client/styles/main.css -o ./dist/client/styles/output.css --watch",
-    "dev": "node --watch --no-warnings=ExperimentalWarning --loader ts-node/esm ./src/app.ts | npm run css",
+    "dev": "node --watch --no-warnings=ExperimentalWarning --loader ts-node/esm ./src/app.ts",
     "build:css": "npx @tailwindcss/cli -i ./src/client/styles/main.css -o ./dist/client/styles/output.css --minify",
     "build": "tsc && npm run build:css",
     "start": "node ./dist/app.js"
