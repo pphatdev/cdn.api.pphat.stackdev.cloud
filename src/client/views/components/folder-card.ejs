@@ -1,10 +1,10 @@
 <!-- Folder Card Component -->
-<div class="p-4 bg-white border border-slate-100 rounded-xl hover:border-primary/20 hover:shadow-md transition-all cursor-pointer group">
+<div class="p-4 bg-white border border-foreground/5 rounded-xl hover:border-primary/20 transition-all cursor-pointer group">
     <div class="flex items-start justify-between mb-2">
-        <div class="p-2 <%= iconBg || 'bg-primary/5' %> text-<%= iconColor || 'primary' %> rounded-lg group-hover:bg-primary group-hover:text-white transition-all">
-            <%- icon || (`<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>` ) %>
+        <div class="p-2 <%= typeof iconBg !== 'undefined' ? iconBg : 'bg-primary/5' %> text-<%= typeof iconColor !== 'undefined' ? iconColor : 'primary' %> rounded-lg group-hover:bg-primary group-hover:text-white transition-all">
+            <%- (typeof icon !== 'undefined' ? icon : '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>') %>
         </div>
-        <button class="p-1 text-slate-300 hover:text-slate-600"><%- moreIcon || (`<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01"></path></svg>`) %></button>
+        <button class="p-1 text-slate-300 hover:text-slate-600"><%- (typeof moreIcon !== 'undefined' ? moreIcon : '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01"></path></svg>') %></button>
     </div>
     <h4 class="font-bold text-slate-900 text-sm"><%= title %></h4>
     <p class="text-[10px] text-slate-400"><%= count %></p>
