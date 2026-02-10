@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { DashboardController } from '../controller/dashboard.js';
 import { MyFileController } from '../controller/my-file.js';
 import { StarredController } from '../controller/starred.js';
+import { Controller } from '../controller/controller.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,5 +25,15 @@ app.get('/', DashboardController.get);
 app.get('/files', MyFileController.get);
 app.get('/starred', StarredController.get);
 
+// Catch-all 404 handler - render not-found page with default config
+app.use((req, res) => {
+    const pageData = {
+        ...Controller.defaultConfig,
+        page: 'not-found',
+        title: '404 Not Found',
+        currentPath: req.path
+    };
+    res.status(404).render('layouts/main', pageData);
+});
 
 export default app;
