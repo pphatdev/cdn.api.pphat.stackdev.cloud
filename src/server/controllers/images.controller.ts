@@ -173,6 +173,9 @@ export class ImagesController {
 
             // reduce value of key "path" to be relative to storage directory
             for (const file of sanitizedFiles) {
+                // Save original filesystem path before overwriting
+                const originalFilePath = file.path;
+
                 const sanitizedFile: any = {
                     ...file,
                     fileName: file.originalname,
@@ -184,8 +187,8 @@ export class ImagesController {
                 };
                 Object.assign(file, sanitizedFile);
 
-                // Sync file after upload
-                await FilesController.syncFile(file.path);
+                // Sync file after upload using the original filesystem path
+                await FilesController.syncFile(originalFilePath, file.originalname);
             }
 
             sendSuccess(response, sanitizedFiles, 'Files uploaded successfully', 200);

@@ -6,6 +6,7 @@ import { sendBadRequest, sendNotFound, sendSuccess } from '../utils/response.js'
 import { FileUtils } from '../utils/files.js';
 import fs from 'fs';
 import { Database } from '../utils/database.js';
+import { getMimeType } from '../utils/mine-types.js';
 
 interface FileValidateCallback {
     (error: Error | null, acceptFile: boolean): void;
@@ -234,7 +235,7 @@ export class FilesController {
                 Object.assign(file, sanitizedFile);
 
                 // Sync file after upload using the original filesystem path
-                await FilesController.syncFile(originalFilePath);
+                await FilesController.syncFile(originalFilePath, file.originalname);
             }
 
             sendSuccess(response, sanitizedFiles, 'Files uploaded successfully', 200);
@@ -244,8 +245,9 @@ export class FilesController {
     /**
      * Sync a file after upload
      * @param filePath Path to the file to sync
+     * @param originalFilename Optional original filename before any transformations
      */
-    static async syncFile(filePath: string): Promise<void> {
+    static async syncFile(filePath: string, originalFilename?: string): Promise<void> {
         try {
             // Normalize path separators
             const normalizedPath = filePath.replace(/\\/g, '/');
@@ -268,6 +270,7 @@ export class FilesController {
             const pathParts = relativePath.split('/');
             const storageFolder = pathParts.length > 1 ? pathParts[0] : '';
             const folderPath = pathParts.slice(0, -1).join('/'); // Full folder path without filename
+            const filename = pathParts[pathParts.length - 1];
 
             // Get file stats
             const stats = fs.statSync(actualFilePath);
@@ -275,19 +278,37 @@ export class FilesController {
             // Ensure proper permissions are set
             await FileUtils.setProperPermissions(actualFilePath, false);
 
-            // Log sync information
-            console.log(`File synced successfully:`, {
+            // Get file extension and mime type
+            const extension = filename.split('.').pop()?.toLowerCase() || '';
+            const mimeType = getMimeType(extension);
+
+            // Store file data in database
+            await Database.addFile({
+                filename: filename,
+                originalFilename: originalFilename || filename,
                 path: actualFilePath,
                 relativePath: relativePath,
-                storageFolder: storageFolder,
+                folderPath: folderPath,
+                size: stats.size,
+                extension: extension,
+                mimeType: mimeType,
+                createdAt: stats.birthtime.toISOString(),
+                modifiedAt: stats.mtime.toISOString(),
+                uploadedAt: new Date().toISOString(),
+                tags: [storageFolder],
+                metadata: {
+                    storageFolder: storageFolder
+                }
+            });
+
+            console.log(`File synced and stored in database:`, {
+                filename: filename,
+                path: actualFilePath,
+                relativePath: relativePath,
                 folderPath: folderPath,
                 size: stats.size,
                 syncedAt: new Date().toISOString()
             });
-
-            // Optional: Create a sync record or backup based on folder
-            // This could be extended to copy files to a backup location
-            // based on the folder structure
 
         } catch (error: any) {
             console.error(`Error syncing file ${filePath}:`, error.message);
