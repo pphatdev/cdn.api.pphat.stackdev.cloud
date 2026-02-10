@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { DashboardController } from '../controller/dashboard.js';
 import { MyFileController } from '../controller/my-file.js';
+import { StarredController } from '../controller/starred.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,6 +22,7 @@ app.set('views', path.join(__dirname, './../views'));
 
 app.get('/', DashboardController.get);
 app.get('/files', MyFileController.get);
+app.get('/starred', StarredController.get);
 
 
 export default app;

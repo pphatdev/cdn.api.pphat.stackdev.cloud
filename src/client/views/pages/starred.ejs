@@ -1,0 +1,18 @@
+<main class="flex-1 overflow-y-auto bg-background relative">
+    <%- include('../components/header') %>
+
+    <div class="p-8">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">Starred</h1>
+                <p class="text-sm text-slate-400">Files and folders you've starred for quick access</p>
+            </div>
+        </div>
+
+        <div class="border border-slate-100 rounded-lg p-12 text-center text-slate-400">
+            <svg class="w-12 h-12 mx-auto text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.962a1 1 0 00.95.69h4.173c.969 0 1.371 1.24.588 1.81l-3.378 2.455a1 1 0 00-.364 1.118l1.287 3.962c.3.922-.755 1.688-1.54 1.118l-3.378-2.455a1 1 0 00-1.175 0L7.31 20.94c-.785.57-1.84-.196-1.54-1.118l1.287-3.962a1 1 0 00-.364-1.118L3.314 12.29c-.783-.57-.38-1.81.588-1.81h4.173a1 1 0 00.95-.69l1.286-3.962z"></path></svg>
+            <h3 class="mt-6 font-semibold text-slate-800">No starred items</h3>
+            <p class="text-sm mt-2">Star files or folders to quickly find them here.</p>
+        </div>
+    </div>
+</main>
