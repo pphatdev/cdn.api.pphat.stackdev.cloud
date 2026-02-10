@@ -1,0 +1,16 @@
+<!-- Quick Access Item Component -->
+<div class="p-4 rounded-2xl hover:border-blue-200 transition-all cursor-pointer bg-white group">
+    <div class="flex items-center gap-4 mb-4">
+        <div class="p-2.5 bg-<%= iconBg %> rounded-lg text-<%= iconColor %> group-hover:bg-blue-600 group-hover:text-white transition-all">
+            <%- icon %>
+        </div>
+        <div class="flex-1 overflow-hidden">
+            <h4 class="font-bold text-slate-900 text-sm truncate"><%= title %></h4>
+            <p class="text-[10px] text-slate-400"><%= label %> • <%= size %></p>
+        </div>
+    </div>
+    <div class="flex justify-between text-[10px] text-slate-400">
+        <span><%= fileCount %></span>
+        <span><%= updated %></span>
+    </div>
+</div>
