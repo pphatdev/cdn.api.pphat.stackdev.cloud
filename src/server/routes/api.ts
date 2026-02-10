@@ -62,9 +62,14 @@ app.get('/version', (request: Request, response: Response) => {
         const packageJson = JSON.parse(
             readFileSync(join(__dirname, '../../package.json'), 'utf-8')
         );
-        sendSuccess(response, { version: packageJson.version, name: packageJson.name }, 'Version retrieved successfully', 200);
+        sendSuccess(response, {
+            version: packageJson.version,
+            name: packageJson.name
+        }, 'Version retrieved successfully', 200);
     } catch (error) {
-        sendSuccess(response, { version: '1.0.0' }, 'Version retrieved successfully', 200);
+        sendSuccess(response, {
+            version: '1.0.0'
+        }, 'Version retrieved successfully', 200);
     }
 });
 
