@@ -1,5 +1,5 @@
 {
-  "name": "assets-service",
+  "name": "cdn.api.pphat.stackdev.cloud",
   "version": "1.0.0",
   "description": "Image optimization and asset management service",
   "type": "module",
