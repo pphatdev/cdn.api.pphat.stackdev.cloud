@@ -1,0 +1,17 @@
+<!-- Table Component -->
+<div class="bg-white rounded-2xl overflow-hidden border border-black/5">
+    <table class="w-full text-left text-sm">
+        <thead class="bg-slate-50 text-slate-400 font-bold text-[11px] uppercase tracking-wider">
+            <tr>
+                <% headers.forEach(header => { %>
+                    <th class="px-6 py-4"><%= header %></th>
+                <% }); %>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+            <% rows.forEach(row => { %>
+                <%- include('./table-row', { icon: row.icon, iconBg: row.iconBg, iconColor: row.iconColor, name: row.name, totalFiles: row.totalFiles, storageUsed: row.storageUsed, averageSize: row.averageSize, shareOfTotal: row.shareOfTotal }) %>
+            <% }); %>
+        </tbody>
+    </table>
+</div>
