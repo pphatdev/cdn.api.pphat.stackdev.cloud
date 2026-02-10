@@ -16,14 +16,15 @@ Database.initialize().then(() => {
 });
 
 /**
+ * API Routes
+*/
+app.use('/api', API);
+
+/**
  * Web UI Routes
 */
 app.use('/', WEB);
 
-/**
- * API Routes
-*/
-app.use('/api', API);
 
 /**
  * Catch-all route for undefined endpoints

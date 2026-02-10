@@ -45,7 +45,7 @@ app.use((req, res, next) => {
 
 /**
  * Default End point
- * @method GET /
+ * @method GET /api
 */
 app.get('/', (request: Request, response: Response) => {
     sendSuccess(response, request.query, 'Welcome to Assets Service', 200);
@@ -53,7 +53,7 @@ app.get('/', (request: Request, response: Response) => {
 
 /**
  * Get application version from package.json
- * @method GET /version
+ * @method GET /api/version
 */
 app.get('/version', (request: Request, response: Response) => {
     try {
@@ -68,7 +68,7 @@ app.get('/version', (request: Request, response: Response) => {
 
 /**
  * Image optimization endpoint
- * @method GET /assets/image/:filename
+ * @method GET /api/assets/image/:filename
  *
  * Query Parameters:
  * - fm: Format (e.g., jpg, png, webp)
@@ -82,7 +82,7 @@ app.get('/assets/image/:filename', getImage);
 /**
  * Image upload endpoint
  *
- * @method POST /image/upload
+ * @method POST /api/image/upload
  * Form Data:
  * - images: Images file to upload
 */
@@ -91,7 +91,7 @@ app.post('/image/upload', uploadImages);
 /**
  * @title File upload endpoint
  *
- * @method POST /file/upload
+ * @method POST /api/file/upload
  * --------------------------------------------------
  * @description Multipart Form Data Upload
  * --------------------------------------------------
@@ -152,7 +152,7 @@ app.post('/file/upload', (req, res) => {
 
 /**
  * File search endpoint
- * @method GET /file/search?q=&type
+ * @method GET /api/file/search?q=&type
  *
  * Query Parameters:
  * - q: Name of the file to search
@@ -163,7 +163,7 @@ app.get('/file/search', FilesController.searchFileByName);
 /**
  * Move file to directory endpoint
  *
- * @method PUT /file/move/:filename
+ * @method PUT /api/file/move/:filename
  */
 app.put('/file/move/:filename', FilesController.moveFileToDir);
 
@@ -171,31 +171,31 @@ app.put('/file/move/:filename', FilesController.moveFileToDir);
 /**
  * File delete endpoint
  *
- * @method DELETE /file/delete/:filename
+ * @method DELETE /api/file/delete/:filename
 */
 app.delete('/file/delete/:filename', FilesController.deleteFile);
 
 /**
  * File download endpoint
  *
- * @method GET /file/download/:filename
+ * @method GET /api/file/download/:filename
 */
 app.get('/file/download/:filename', FilesController.downloadFile);
 
 /**
  * File preview endpoint
  *
- * @method GET /file/preview/:filename
+ * @method GET /api/file/preview/:filename
 */
 app.get('/file/preview/:filename', PreviewController.all);
 
 
 /**
  * Get folder structure dynamically based on the route
- * @method GET /folder
+ * @method GET /api/folder
  * Dynamic Path:
- * - /folder -> Shows top-level folders and files in `storage`
- * - /folder/subfolder -> Shows contents of `subfolder`
+ * - /api/folder -> Shows top-level folders and files in `storage`
+ * - /api/folder/subfolder -> Shows contents of `subfolder`
  */
 app.get('/folder', FolderController.getFolderStructure);
 app.get(/^\/folder\/(.+)$/, FolderController.getFolderStructure);
@@ -206,7 +206,7 @@ app.get(/^\/folder\/(.+)$/, FolderController.getFolderStructure);
 
 /**
  * Get all files from database
- * @method GET /database/files
+ * @method GET /api/database/files
  */
 app.get('/database/files', async (req: Request, res: Response) => {
     try {
@@ -219,7 +219,7 @@ app.get('/database/files', async (req: Request, res: Response) => {
 
 /**
  * Get database statistics
- * @method GET /database/stats
+ * @method GET /api/database/stats
  */
 app.get('/database/stats', async (req: Request, res: Response) => {
     try {
@@ -232,7 +232,7 @@ app.get('/database/stats', async (req: Request, res: Response) => {
 
 /**
  * Search files in database
- * @method GET /database/search?q=query&type=type
+ * @method GET /api/database/search?q=query&type=type
  */
 app.get('/database/search', async (req: Request, res: Response) => {
     try {
@@ -250,7 +250,7 @@ app.get('/database/search', async (req: Request, res: Response) => {
 
 /**
  * Backup database
- * @method POST /database/backup
+ * @method POST /api/database/backup
  */
 app.post('/database/backup', async (req: Request, res: Response) => {
     try {
