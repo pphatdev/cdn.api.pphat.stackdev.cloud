@@ -31,7 +31,7 @@ export class FilesController {
         const storages = configured.directories;
         let sourcePath = null;
         for (const dir of storages) {
-            const filePath = `${dir}/${filename}`.replace(/\\/g, '/');
+            const filePath = `${configured.baseDirectory}/${dir}/${filename}`.replace(/\\/g, '/');
             if (fs.existsSync(filePath)) {
                 sourcePath = filePath;
                 break;
@@ -218,6 +218,9 @@ export class FilesController {
 
             // reduce value of key "path" to be relative to storage directory
             for (const file of sanitizedFiles) {
+                // Save original filesystem path before overwriting
+                const originalFilePath = file.path;
+
                 const sanitizedFile: any = {
                     ...file,
                     // path: file.path.replace(/\\/g, '/'),
@@ -230,8 +233,8 @@ export class FilesController {
                 };
                 Object.assign(file, sanitizedFile);
 
-                // Sync file after upload
-                await FilesController.syncFile(file.path);
+                // Sync file after upload using the original filesystem path
+                await FilesController.syncFile(originalFilePath);
             }
 
             sendSuccess(response, sanitizedFiles, 'Files uploaded successfully', 200);
@@ -244,18 +247,27 @@ export class FilesController {
      */
     static async syncFile(filePath: string): Promise<void> {
         try {
-            // Get the actual file path on disk
-            const actualFilePath = filePath.startsWith(configured.baseDirectory) ? filePath : `${configured.baseDirectory}${filePath}`;
+            // Normalize path separators
+            const normalizedPath = filePath.replace(/\\/g, '/');
 
-            // Extract folder structure from the file path
-            const relativePath = actualFilePath.replace(configured.baseDirectory, '').replace(/\\/g, '/');
-            const folderPath = relativePath.substring(0, relativePath.lastIndexOf('/'));
+            // Get the actual file path on disk
+            const actualFilePath = normalizedPath.startsWith(configured.baseDirectory)
+                ? normalizedPath
+                : `${configured.baseDirectory}/${normalizedPath}`.replace(/\\/g, '/');
 
             // Check if file exists
             if (!fs.existsSync(actualFilePath)) {
                 console.error(`File not found for sync: ${actualFilePath}`);
                 return;
             }
+
+            // Extract folder structure relative to storage/
+            let relativePath = actualFilePath.replace(configured.baseDirectory, '').replace(/^\/+/, '');
+
+            // Extract the storage subfolder (e.g., "example" from "storage/example/file.pdf")
+            const pathParts = relativePath.split('/');
+            const storageFolder = pathParts.length > 1 ? pathParts[0] : '';
+            const folderPath = pathParts.slice(0, -1).join('/'); // Full folder path without filename
 
             // Get file stats
             const stats = fs.statSync(actualFilePath);
@@ -266,7 +278,9 @@ export class FilesController {
             // Log sync information
             console.log(`File synced successfully:`, {
                 path: actualFilePath,
-                folder: folderPath,
+                relativePath: relativePath,
+                storageFolder: storageFolder,
+                folderPath: folderPath,
                 size: stats.size,
                 syncedAt: new Date().toISOString()
             });
@@ -315,10 +329,14 @@ export class FilesController {
 
         // get all directories from config
         const storage = configured.directories;
+
         // search for the file in each directory
         for (const dir of storage) {
-            if (fs.existsSync(dir)) {
-                const files = fs.readdirSync(dir);
+            const fullDirPath = `${configured.baseDirectory}/${dir}`.replace(/\\/g, '/');
+
+            if (fs.existsSync(fullDirPath)) {
+                const files = fs.readdirSync(fullDirPath);
+
                 const matches = files.filter(file => {
                     const matchesQuery = file.toLowerCase().includes((q as string).toLowerCase());
                     if (type) {
@@ -337,7 +355,7 @@ export class FilesController {
                 });
 
                 matches.forEach(file => {
-                    const filePath = `${dir}/${file}`.replace(/\\/g, '/');
+                    const filePath = `${fullDirPath}/${file}`.replace(/\\/g, '/');
                     const stats = fs.statSync(filePath);
                     data.push({
                         dir: dir,
@@ -346,7 +364,7 @@ export class FilesController {
                         createdAt: stats.birthtime,
                         modifiedAt: stats.mtime,
                         relativePath: filePath,
-                        previewUrl: type === 'image' ? `/source/v1/files/image/${file}` : null
+                        previewUrl: `/api/file/preview/${file}`
                     });
                 });
             }
@@ -370,7 +388,7 @@ export class FilesController {
         const storage = configured.directories;
 
         for (const dir of storage) {
-            const filePath = `${dir}/${filename}`.replace(/\\/g, '/');
+            const filePath = `${configured.baseDirectory}/${dir}/${filename}`.replace(/\\/g, '/');
             if (fs.existsSync(filePath)) {
                 response.download(filePath);
                 return;
@@ -397,7 +415,7 @@ export class FilesController {
         let foundFilePath = null;
 
         for (const dir of storage) {
-            const filePath = `${dir}/${filename}`.replace(/\\/g, '/');
+            const filePath = `${configured.baseDirectory}/${dir}/${filename}`.replace(/\\/g, '/');
             if (fs.existsSync(filePath)) {
                 foundFilePath = filePath;
                 break;
