@@ -1,5 +1,5 @@
 const defaultClass = "flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
-const activeClass = "flex items-center gap-3 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg font-medium"
+const activeClass = "flex items-center gap-3 px-3 py-2 bg-primary/5 text-primary rounded-lg font-medium"
 
 export const modules = [
     {
