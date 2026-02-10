@@ -26,7 +26,12 @@ app.get('/files', MyFileController.get);
 app.get('/starred', StarredController.get);
 
 // Catch-all 404 handler - render not-found page with default config
-app.use((req, res) => {
+app.use((req, res, next) => {
+    // Skip API routes - let them be handled by API router
+    if (req.path.startsWith('/api')) {
+        return next();
+    }
+
     const pageData = {
         ...Controller.defaultConfig,
         page: 'not-found',
