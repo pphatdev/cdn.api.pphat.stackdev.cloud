@@ -8,6 +8,7 @@ export class DashboardController extends Controller {
 
         const dashboardData = {
             ...Controller.defaultConfig,
+            title: `Dashboard - ${Controller.defaultConfig.title}`,
             currentPath
         };
 

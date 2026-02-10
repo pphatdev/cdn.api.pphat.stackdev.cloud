@@ -9,7 +9,7 @@ export class StarredController extends Controller {
         const pageData = {
             ...Controller.defaultConfig,
             page: 'starred',
-            title: 'Starred - CloudBox',
+            title: `My Favorites - ${Controller.defaultConfig.title}`,
             currentPath
         };
 

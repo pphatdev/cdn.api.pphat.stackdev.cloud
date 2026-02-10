@@ -9,7 +9,7 @@ export class MyFileController extends Controller {
         const pageData = {
             ...Controller.defaultConfig,
             page: 'my-file',
-            title: 'My Files - CloudBox',
+            title: `My Files - ${Controller.defaultConfig.title}`,
             currentPath
         };
 

@@ -2,7 +2,7 @@ import { labels, modules } from "../utils/modules.js";
 
 export class Controller {
     static defaultConfig = {
-        title: 'CloudBox - Storage Dashboard',
+        title: 'StackDev',
         page: 'dashboard',
         modules,
         labels,
