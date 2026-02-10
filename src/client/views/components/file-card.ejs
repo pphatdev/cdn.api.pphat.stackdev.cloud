@@ -1,0 +1,18 @@
+<!-- File Card Component -->
+<div class="bg-white border border-foreground/10 rounded-xl overflow-hidden hover:border-primary transition-all cursor-pointer">
+    <div class="h-32 bg-slate-50 relative flex items-center justify-center overflow-hidden">
+        <%- thumbnail %>
+    </div>
+    <div class="p-3">
+        <div class="flex items-center justify-between mb-1">
+            <div class="flex items-center gap-2">
+                <div class="p-1 rounded <%= className %>">
+                    <%- icon %>
+                </div>
+                <span class="text-xs font-bold text-slate-900 truncate"><%= title %></span>
+            </div>
+            <button class="text-slate-300"><%- moreIcon %></button>
+        </div>
+        <p class="text-[9px] text-slate-400"><%= subtitle %></p>
+    </div>
+</div>
