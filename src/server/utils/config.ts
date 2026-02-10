@@ -82,7 +82,6 @@ export const configured = {
     directories: [
         // can be dynamic directories via env.json
         ...getDirectories(),
-        "./storage/**/**"
     ],
     port: getPort(),
     baseDirectory: 'storage',
