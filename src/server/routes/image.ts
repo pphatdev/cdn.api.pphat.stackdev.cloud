@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import { getImage, uploadImages } from '../controllers/images.controller.js';
+import { imageUploadRateLimiter } from '../middlewares/rate-limit.js';
 
 const router = express.Router();
 
@@ -31,6 +32,6 @@ router.get('/assets/:filename', getImage);
  * Form Data:
  * - images: Images file to upload
 */
-router.post('/upload', uploadImages);
+router.post('/upload', imageUploadRateLimiter, uploadImages);
 
 export default router;
