@@ -105,6 +105,12 @@ export const configured = {
 };
 
 /**
+ * Limited time window in milliseconds for rate limiting
+*/
+export const limitedMins = 15 * 60 * 1000;
+
+
+/**
  * Get application environment info
 */
 export const appEnv: AppEnv = (() => {
