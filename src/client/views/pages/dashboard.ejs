@@ -155,7 +155,7 @@
                     ];
                 %>
                 <% quickAccessItems.forEach(item => { %>
-                    <%- include('../components/quick-access-item', { icon: item.icon, title: item.title, label: item.label, size: item.size, fileCount: item.fileCount, updated: item.updated, className: item.className, iconColor: item.iconColor }) %>
+                    <%- include('../components/quick-access-item', item) %>
                 <% }); %>
             </div>
         </section>

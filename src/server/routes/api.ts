@@ -8,6 +8,7 @@ import imageRoutes from './image.js';
 import fileRoutes from './file.js';
 import databaseRoutes from './database.js';
 import folderRoutes from './folder.js';
+import storageRoutes from './storage.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -44,6 +45,11 @@ app.use('/database', databaseRoutes);
  * Folder routes
  */
 app.use('/folder', folderRoutes);
+
+/**
+ * Storage routes
+ */
+app.use('/storage', storageRoutes);
 
 /**
  * Default End point
