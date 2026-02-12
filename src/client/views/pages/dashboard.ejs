@@ -142,12 +142,13 @@
 
                     const quickAccessItems = topFolders.map(folder => ({
                         icon: folderIcon,
-                        title: folder.name,
+                        title: folder.name === "." ? "My Files" : folder.name,
                         label: 'Folder',
                         size: folder.formattedSize,
                         fileCount: `${folder.fileCount} files`,
                         updated: 'Recent',
-                        className: 'bg-primary/10 text-primary'
+                        className: 'bg-primary/10 text-primary',
+                        route: folder.name === "." ? "/files" : `/files/${folder.name}`
                     }));
                 %>
                 <% quickAccessItems.forEach((item) => { %>
@@ -194,16 +195,21 @@
 <script>
     const usedPercentage = document.querySelector('[data-used-percentage]');
     usedPercentage.style.width = "<%= usedPercentage.toFixed(1) %>%";
+    usedPercentage.style.minWidth = "2px";
 
     const imagesPercentage = document.querySelector('[data-images-percentage]');
     imagesPercentage.style.width = "<%= imagesPercentage.toFixed(1) %>%";
+    imagesPercentage.style.minWidth = "2px";
 
     const documentsPercentage = document.querySelector('[data-documents-percentage]');
     documentsPercentage.style.width = "<%= documentsPercentage.toFixed(1) %>%";
+    documentsPercentage.style.minWidth = "2px";
 
     const videosPercentage = document.querySelector('[data-videos-percentage]');
     videosPercentage.style.width = "<%= videosPercentage.toFixed(1) %>%";
+    videosPercentage.style.minWidth = "2px";
 
     const othersPercentage = document.querySelector('[data-others-percentage]');
     othersPercentage.style.width = "<%= othersPercentage.toFixed(1) %>%";
+    othersPercentage.style.minWidth = "2px";
 </script>
