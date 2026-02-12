@@ -154,7 +154,7 @@
                         imageSrc: fileInfo.isImage ? '/api/image/' + file.name + '?fm=webp&w=200&h=200&q=80' : undefined,
                         icon: fileInfo.icon,
                         previewUrl: detailUrl,
-                        downloadUrl: '/api/files/' + encodeURIComponent(file.name),
+                        downloadUrl: '/api/file/' + encodeURIComponent(file.name),
                         link: detailUrl,
                         iconClassName: fileInfo.className
                     }) %>
