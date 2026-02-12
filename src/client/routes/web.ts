@@ -23,6 +23,7 @@ app.set('views', path.join(__dirname, './../views'));
 
 app.get('/', DashboardController.get);
 app.get('/files', MyFileController.get);
+app.get(/^\/files\/(.*)/, MyFileController.get);
 app.get('/starred', StarredController.get);
 
 // Catch-all 404 handler - render not-found page with default config

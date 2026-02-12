@@ -1,15 +1,73 @@
+<%
+    // Helper function to format bytes
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Format date
+    function formatDate(date) {
+        const now = new Date();
+        const fileDate = new Date(date);
+        const diff = now - fileDate;
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+        if (hours < 1) return 'Just now';
+        if (hours < 24) return hours + 'h ago';
+        if (days < 7) return days + 'd ago';
+        return fileDate.toLocaleDateString();
+    }
+
+    // Get file icon based on extension
+    function getFileIcon(filename) {
+        const ext = filename.split('.').pop()?.toLowerCase();
+        const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+        const videoExts = ['mp4', 'mov', 'avi', 'mkv', 'webm'];
+        const docExts = ['pdf', 'doc', 'docx', 'txt'];
+        const codeExts = ['js', 'ts', 'html', 'css', 'json', 'py', 'java'];
+
+        if (imageExts.includes(ext)) {
+            return { icon: '<svg viewBox="0 0 24 24" fill="currentColor" class="size-7"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8.813 11.612c.457 -.38 .918 -.38 1.386 .011l.108 .098l4.986 4.986l.094 .083a1 1 0 0 0 1.403 -1.403l-.083 -.094l-1.292 -1.293l.292 -.293l.106 -.095c.457 -.38 .918 -.38 1.386 .011l.108 .098l4.674 4.675a4 4 0 0 1 -3.775 3.599l-.206 .005h-12a4 4 0 0 1 -3.98 -3.603l6.687 -6.69l.106 -.095zm9.187 -9.612a4 4 0 0 1 3.995 3.8l.005 .2v9.585l-3.293 -3.292l-.15 -.137c-1.256 -1.095 -2.85 -1.097 -4.096 -.017l-.154 .14l-.307 .306l-2.293 -2.292l-.15 -.137c-1.256 -1.095 -2.85 -1.097 -4.096 -.017l-.154 .14l-5.307 5.306v-9.585a4 4 0 0 1 3.8 -3.995l.2 -.005h12zm-2.99 5l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007z" /></svg>', className: 'bg-blue-50 text-blue-600', isImage: true };
+        }
+        if (videoExts.includes(ext)) {
+            return { icon: '<svg viewBox="0 0 24 24" fill="currentColor" class="size-7"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20.117 7.625a1 1 0 0 0 -.564 .1l-4.553 2.275v4l4.553 2.275a1 1 0 0 0 1.447 -.892v-6.766a1 1 0 0 0 -.883 -.992z" /><path d="M5 5c-1.645 0 -3 1.355 -3 3v8c0 1.645 1.355 3 3 3h8c1.645 0 3 -1.355 3 -3v-8c0 -1.645 -1.355 -3 -3 -3z" /></svg>', isImage: false };
+        }
+        if (docExts.includes(ext)) {
+            return { icon: '<svg viewBox="0 0 24 24" fill="currentColor" class="size-7"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 2l.117 .007a1 1 0 0 1 .876 .876l.007 .117v4l.005 .15a2 2 0 0 0 1.838 1.844l.157 .006h4l.117 .007a1 1 0 0 1 .876 .876l.007 .117v9a3 3 0 0 1 -2.824 2.995l-.176 .005h-10a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-14a3 3 0 0 1 2.824 -2.995l.176 -.005h5z" /><path d="M19 7h-4l-.001 -4.001z" /></svg>', className: 'bg-orange-50 text-orange-600', isImage: false };
+        }
+        if (codeExts.includes(ext)) {
+            return { icon: '<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>', className: 'bg-green-50 text-green-600', isImage: false };
+        }
+        return { icon: '<svg viewBox="0 0 24 24" fill="currentColor" class="size-7"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 2l.117 .007a1 1 0 0 1 .876 .876l.007 .117v4l.005 .15a2 2 0 0 0 1.838 1.844l.157 .006h4l.117 .007a1 1 0 0 1 .876 .876l.007 .117v9a3 3 0 0 1 -2.824 2.995l-.176 .005h-10a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-14a3 3 0 0 1 2.824 -2.995l.176 -.005zm3 14h-6a1 1 0 0 0 0 2h6a1 1 0 0 0 0 -2m0 -4h-6a1 1 0 0 0 0 2h6a1 1 0 0 0 0 -2m-5 -4h-1a1 1 0 1 0 0 2h1a1 1 0 0 0 0 -2" /><path d="M19 7h-4l-.001 -4.001z" /></svg>', className: 'bg-slate-50 text-slate-600', isImage: false };
+    }
+%>
+
 <main class="flex-1 overflow-y-auto bg-background relative">
     <%- include('../components/header') %>
 
     <!-- MY FILES VIEW -->
-    <div id="view-my-files" class="p-8">
+    <div id="view-my-files" class="container mx-auto p-8">
         <!-- Breadcrumbs & Title Bar -->
-        <div class="flex items-center gap-4 text-xs text-slate-400 mb-6">
-            <div class="flex items-center cursor-pointer hover:text-slate-600">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-            </div>
-            <span class="breadcrumb-item cursor-pointer hover:text-slate-600">My Files</span>
-            <span class="breadcrumb-item font-semibold text-slate-900">Design System</span>
+        <div class="flex items-center gap-4 text-xs text-foreground/60 mb-6" id="breadcrumbs">
+            <a href="/files" class="flex items-center cursor-pointer hover:text-slate-600">
+                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+            </a>
+            <a href="/files" class="breadcrumb-item cursor-pointer hover:text-slate-600">My Files</a>
+            <% if (breadcrumbs && breadcrumbs.length > 0) { %>
+                <% breadcrumbs.forEach((crumb, index) => { %>
+                    <% if (index < breadcrumbs.length - 1) { %>
+                        <span>/</span>
+                        <a href="<%= crumb.path %>" class="cursor-pointer hover:text-slate-600"><%= crumb.name %></a>
+                    <% } else { %>
+                        <span>/</span>
+                        <span class="font-semibold text-slate-900"><%= crumb.name %></span>
+                    <% } %>
+                <% }); %>
+            <% } %>
         </div>
 
         <div class="flex items-center justify-between mb-8">
@@ -18,84 +76,91 @@
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-900">Design System</h1>
-                    <p class="text-sm text-slate-400">21 Files, 5 Folders • 4.2 GB • Last modified 2h ago</p>
+                    <h1 class="text-2xl font-bold text-slate-900"><%= folderName || 'My Files' %></h1>
+                    <p class="text-sm text-foreground/60"><%= stats.totalFiles %> Files, <%= stats.totalFolders %> Folders</p>
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <div class="flex -space-x-2 mr-4">
-                    <img class="w-8 h-8 rounded-full border-2 border-white" src="https://ui-avatars.com/api/?name=JD&background=ef4444&color=fff" alt="">
-                    <img class="w-8 h-8 rounded-full border-2 border-white" src="https://ui-avatars.com/api/?name=AM&background=f59e0b&color=fff" alt="">
-                    <img class="w-8 h-8 rounded-full border-2 border-white" src="https://ui-avatars.com/api/?name=SL&background=10b981&color=fff" alt="">
-                    <div class="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500">+4</div>
-                </div>
-                <button class="px-4 py-2 border border-slate-200 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-slate-50">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                <button class="px-4 py-2 border border-slate-200 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-slate-50 transition-all duration-300">
+                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
                     Share
                 </button>
-                <button class="px-4 py-2 border border-slate-200 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-slate-50">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    Download
-                </button>
-                <button class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-primary/70 shadow-sm shadow-primary-100">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    New Item
+                <button class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-primary/70 shadow-sm shadow-primary-100 transition-all duration-300">
+                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Upload File
                 </button>
             </div>
         </div>
 
         <!-- Filters & Controls -->
-        <div class="flex items-center justify-between mb-8 border-b border-slate-100 pb-4">
+        <!-- <div class="flex items-center justify-between mb-8 border-b border-foreground/5 pb-4">
             <div class="flex items-center gap-4">
-                <button class="flex items-center gap-2 text-sm font-medium px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
-                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                <button class="flex items-center gap-2 text-sm font-medium px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg transition-all duration-300 hover:bg-slate-100">
+                    <svg class="size-4 text-foreground/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
                     Type: All
                 </button>
-                <button class="flex items-center gap-2 text-sm font-medium px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
-                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <button class="flex items-center gap-2 text-sm font-medium px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg transition-all duration-300 hover:bg-slate-100">
+                    <svg class="size-4 text-foreground/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     Date Modified
                 </button>
             </div>
             <div class="flex items-center bg-slate-50 p-1 rounded-lg border border-slate-200">
                 <button class="p-1.5 bg-white shadow-sm rounded-md text-primary">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                 </button>
-                <button class="p-1.5 text-slate-400 hover:text-slate-600">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                <button class="p-1.5 text-foreground/60 hover:text-slate-600 transition-all duration-300">
+                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
             </div>
-        </div>
+        </div> -->
 
         <!-- Folders Section -->
+        <% if (folders && folders.length > 0) { %>
         <div class="mb-12">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Folders</h3>
+            <h3 class="text-xs font-bold text-foreground/60 uppercase tracking-widest mb-6">Folders</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <%- include('../components/folder-card', { title: '01. Assets', count: '128 files', icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>', className: 'bg-primary/5' }) %>
-                <%- include('../components/folder-card', { title: '02. Components', count: '45 files', icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>', className: 'bg-primary/5' }) %>
-                <%- include('../components/folder-card', { title: '03. Templates', count: '12 files', icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>', className: 'bg-primary/5' }) %>
-                <%- include('../components/folder-card', { title: 'Documentation', count: '8 files', icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>', className: 'bg-primary/5' }) %>
+                <% folders.forEach(folder => { %>
+                    <a href="/files/<%= folder.path %>" class="block transition-all duration-300">
+                        <%- include('../components/folder-card', {
+                            title: folder.name,
+                            count: folder.itemCount + ' items'
+                        }) %>
+                    </a>
+                <% }); %>
             </div>
         </div>
+        <% } %>
 
         <!-- Files Section -->
+        <% if (files && files.length > 0) { %>
         <div>
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Files</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-                <%
-                    const fileCards = [
-                        {
-                            thumbnail: '<img src="/api/image/example.png?w=200&h=200" alt="File Thumbnail" class="w-full h-full object-cover">',
-                            icon: '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>',
-                            className: 'bg-orange-50',
-                            title: 'Color_Tokens_V2.fig',
-                            subtitle: 'Edited 2h ago'
-                        }
-                    ];
+            <h3 class="text-xs font-bold text-foreground/60 uppercase tracking-widest mb-6">Files</h3>
+            <div class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-6">
+                <% files.forEach(file => {
+                    const fileInfo = getFileIcon(file.name);
                 %>
-                <% fileCards.forEach(card => { %>
-                    <%- include('../components/file-card', { thumbnail: card.thumbnail, icon: card.icon, className: card.className, title: card.title, subtitle: card.subtitle, moreIcon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01"></path></svg>' }) %>
-                <% });%>
+                    <%- include('../components/file-card', {
+                        title: file.name,
+                        subtitle: formatDate(file.modifiedAt) + ' • ' + formatBytes(file.size),
+                        isImage: fileInfo.isImage,
+                        imageSrc: fileInfo.isImage ? '/api/image/' + file.name + '?w=200&h=200' : undefined,
+                        icon: fileInfo.icon,
+                        iconClassName: fileInfo.className
+                    }) %>
+                <% }); %>
             </div>
         </div>
+        <% } %>
+
+        <!-- Empty State -->
+        <% if ((!folders || folders.length === 0) && (!files || files.length === 0)) { %>
+        <div class="text-center py-16">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-slate-100 rounded-full mb-4">
+                <svg class="w-10 h-10 text-foreground/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">This folder is empty</h3>
+            <p class="text-sm text-foreground/60">Upload files to get started</p>
+        </div>
+        <% } %>
     </div>
 </main>
