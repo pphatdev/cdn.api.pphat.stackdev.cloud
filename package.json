@@ -7,7 +7,7 @@
   "module": "./src/app.ts",
   "scripts": {
     "css": "npx @tailwindcss/cli -i ./src/client/styles/main.css -o ./dist/client/styles/output.css --watch",
-    "dev": "node --watch --no-warnings=ExperimentalWarning --loader ts-node/esm ./src/app.ts",
+    "dev": "node --watch --no-warnings=ExperimentalWarning --loader ts-node/esm ./src/app.ts | npm run css",
     "build:css": "npx @tailwindcss/cli -i ./src/client/styles/main.css -o ./dist/client/styles/output.css --minify",
     "copy:views": "node -e \"require('fs-extra').copySync('src/client/views', 'dist/client/views')\"",
     "build": "tsc && npm run build:css && npm run copy:views",
