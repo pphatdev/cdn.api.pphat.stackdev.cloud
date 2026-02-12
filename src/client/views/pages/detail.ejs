@@ -545,7 +545,7 @@
     // Update URLs
     const updateUrls = (filename, isImage = false) => {
         const baseUrl = window.location.origin;
-        const fileUrl = `${baseUrl}/api/files/${encodeURIComponent(filename)}`;
+        const fileUrl = `${baseUrl}/api/file/preview/${encodeURIComponent(filename)}`;
         const imageUrl = `${baseUrl}/api/image/${encodeURIComponent(filename)}`;
 
         document.getElementById('direct-url').value = fileUrl;
@@ -754,16 +754,27 @@
 
     // Share action
     document.getElementById('action-share')?.addEventListener('click', async () => {
-        if (navigator.share && currentFile) {
+        if (!currentFile || !currentUrl) return;
+
+        const shareUrl = window.location.origin + currentUrl;
+
+        // Try native share API first (mobile/supported browsers)
+        if (navigator.share) {
             try {
                 await navigator.share({
                     title: currentFile,
-                    url: window.location.origin + currentUrl
+                    text: `Check out this file: ${currentFile}`,
+                    url: shareUrl
                 });
-            } catch (e) {}
-        } else {
-            document.getElementById('action-copy-url')?.click();
+                return;
+            } catch (e) {
+                // User cancelled or share failed, fallback to share page
+            }
         }
+
+        // Navigate to share page with file info
+        const sharePageUrl = `/share?file=${encodeURIComponent(currentFile)}&url=${encodeURIComponent(shareUrl)}`;
+        window.location.href = sharePageUrl;
     });
 
     // Quality slider
