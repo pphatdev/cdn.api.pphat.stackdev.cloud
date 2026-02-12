@@ -145,6 +145,7 @@
             <div class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-6">
                 <% files.forEach(file => {
                     const fileInfo = getFileIcon(file.name);
+                    const detailUrl = '/detail?file=' + encodeURIComponent(file.name);
                 %>
                     <%- include('../components/file-card', {
                         title: file.name,
@@ -152,6 +153,9 @@
                         isImage: fileInfo.isImage,
                         imageSrc: fileInfo.isImage ? '/api/image/' + file.name + '?fm=webp&w=200&h=200&q=80' : undefined,
                         icon: fileInfo.icon,
+                        previewUrl: detailUrl,
+                        downloadUrl: '/api/files/' + encodeURIComponent(file.name),
+                        link: detailUrl,
                         iconClassName: fileInfo.className
                     }) %>
                 <% }); %>
