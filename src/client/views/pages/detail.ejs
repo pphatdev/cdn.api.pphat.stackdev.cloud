@@ -80,18 +80,18 @@
                                 </a>
                             </div>
                         </div>
-                        
+
                         <!-- Image Preview -->
                         <div id="image-preview-container" class="hidden relative bg-slate-900">
-                            <div class="flex items-center justify-center min-h-[400px] max-h-[500px] p-4">
-                                <img id="preview-image" src="" alt="" class="max-w-full max-h-[480px] object-contain rounded-lg shadow-2xl" />
+                            <div class="flex items-center justify-center min-h-100 max-h-125 overflow-hidden p-4">
+                                <img id="preview-image" src="" alt="" class="max-w-full max-h-120 object-contain rounded-lg shadow-2xl" />
                             </div>
                             <!-- Image Controls -->
                             <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-full px-4 py-2">
                                 <button type="button" id="zoom-out-btn" class="p-2 text-white hover:bg-white/20 rounded-full transition-colors" title="Zoom Out">
                                     <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"></path></svg>
                                 </button>
-                                <span id="zoom-level" class="text-white text-sm font-medium min-w-[50px] text-center">100%</span>
+                                <span id="zoom-level" class="text-white text-sm font-medium min-w-12.5 text-center">100%</span>
                                 <button type="button" id="zoom-in-btn" class="p-2 text-white hover:bg-white/20 rounded-full transition-colors" title="Zoom In">
                                     <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"></path></svg>
                                 </button>
@@ -107,11 +107,11 @@
 
                         <!-- Video Preview -->
                         <div id="video-preview-container" class="hidden bg-black">
-                            <video id="preview-video" controls class="w-full max-h-[500px]"></video>
+                            <video id="preview-video" controls class="w-full max-h-125"></video>
                         </div>
 
                         <!-- Audio Preview -->
-                        <div id="audio-preview-container" class="hidden p-8 bg-gradient-to-br from-slate-50 to-slate-100">
+                        <div id="audio-preview-container" class="hidden p-8 bg-linear-to-br from-slate-50 to-slate-100">
                             <div class="max-w-xl mx-auto">
                                 <div class="flex items-center gap-4 mb-6">
                                     <div class="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center shrink-0">
@@ -128,12 +128,12 @@
 
                         <!-- PDF Preview -->
                         <div id="pdf-preview-container" class="hidden">
-                            <iframe id="preview-pdf" class="w-full h-[500px] border-0"></iframe>
+                            <iframe id="preview-pdf" class="w-full h-125 border-0"></iframe>
                         </div>
 
                         <!-- Document/Code/Text Preview -->
                         <div id="text-preview-container" class="hidden">
-                            <pre id="preview-text" class="p-6 bg-slate-900 text-slate-100 overflow-auto max-h-[500px] text-sm font-mono leading-relaxed"></pre>
+                            <pre id="preview-text" class="p-6 bg-slate-900 text-slate-100 overflow-auto max-h-125 text-sm font-mono leading-relaxed"></pre>
                         </div>
 
                         <!-- Generic File Preview -->
