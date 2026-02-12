@@ -167,3 +167,7 @@
         @apply cursor-pointer;
     }
 }
+
+@layer components {
+    @import url("./dropdown.css");
+}

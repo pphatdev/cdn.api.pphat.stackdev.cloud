@@ -16,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
     "@types/ejs": "^3.1.5",
     "@types/express": "^5.0.6",
     "@types/glob": "^8.1.0",

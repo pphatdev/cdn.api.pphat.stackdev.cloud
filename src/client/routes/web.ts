@@ -16,7 +16,7 @@ const app = express();
 // Serve static files from the dist directory
 app.use('/styles', express.static(path.join(__dirname, '../../../dist/client/styles')));
 app.use(express.static(path.join(__dirname, '../../../dist/client')));
-app.use('/utils', express.static(path.join(__dirname, '../utils')));
+app.use('/utils', express.static(path.join(__dirname, '../../../dist/client/utils')));
 
 
 // Set EJS as template engine

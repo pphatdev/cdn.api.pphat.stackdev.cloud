@@ -1,6 +1,6 @@
 <!-- File Card Component -->
 <div class="rounded-2xl bg-white hover:shadow-lg shadow-primary/10 transition-all duration-300 overflow-hidden group border border-foreground/10">
-    <div class="relative aspect-video bg-slate-50 flex items-center justify-center overflow-hidden">
+    <div class="relative aspect-video bg-slate-50 flex items-center justify-center">
         <% if (typeof isImage !== 'undefined' && isImage && typeof imageSrc !== 'undefined') { %>
             <img src="<%= imageSrc %>" alt="<%= title %>" loading="lazy" class="w-full bg-primary/5 h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             <div class="hidden items-center justify-center w-full h-full <%= typeof iconClassName !== 'undefined' ? iconClassName : 'bg-slate-50 text-slate-600' %>">
@@ -11,9 +11,71 @@
                 <%- (typeof icon !== 'undefined' ? icon : '<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>') %>
             </div>
         <% } %>
-        <button class="absolute top-3 right-3 p-2 bg-white rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-sm" onclick="event.stopPropagation();">
-            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01"></path></svg>
-        </button>
+        <%
+            const previewLink = typeof previewUrl !== 'undefined' ? previewUrl : null;
+            const downloadLink = typeof downloadUrl !== 'undefined' ? downloadUrl : null;
+            const renameActionValue = typeof renameAction !== 'undefined' ? renameAction : null;
+            const moveActionValue = typeof moveAction !== 'undefined' ? moveAction : null;
+            const deleteActionValue = typeof deleteAction !== 'undefined' ? deleteAction : null;
+
+            const defaultMenuOptions = [
+                {
+                    label: 'Preview',
+                    href: previewLink,
+                    action: previewLink ? null : 'preview',
+                    icon: '<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>'
+                },
+                {
+                    label: 'Download',
+                    href: downloadLink,
+                    action: downloadLink ? null : 'download',
+                    icon: '<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4 4m0 0l-4-4m4 4V4"></path></svg>'
+                },
+                {
+                    label: 'Move',
+                    action: 'move',
+                    handler: moveActionValue,
+                    icon: '<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M10 12h10M10 18h10"></path></svg>'
+                },
+                {
+                    label: 'Delete',
+                    action: 'delete',
+                    handler: deleteActionValue,
+                    tone: 'danger',
+                    icon: '<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>'
+                }
+            ];
+
+            const dynamicMenuOptions = typeof menuOptions !== 'undefined' && Array.isArray(menuOptions)
+                ? menuOptions
+                : defaultMenuOptions;
+
+            const dropdownIdValue = typeof dropdownId !== 'undefined'
+                ? dropdownId
+                : `file-card-dropdown-${String(title || 'item').replace(/[^a-zA-Z0-9_-]/g, '')}-${Math.random().toString(36).slice(2, 8)}`;
+        %>
+        <div class="absolute z-20 top-3 right-3">
+            <button type="button" data-dropdown-toggle="<%= dropdownIdValue %>" data-dropdown-placement="bottom-end" aria-expanded="false" class="p-2 bg-white rounded-lg opacity-0 focus-within:opacity-100 group-hover:opacity-100 transition-all duration-300 shadow-sm cursor-pointer">
+                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01"></path></svg>
+            </button>
+            <div id="<%= dropdownIdValue %>" class="hidden absolute right-0 mt-2 w-44 rounded-xl border border-slate-100 bg-white shadow-lg p-2 z-50 text-sm">
+                <% dynamicMenuOptions.forEach((option) => { %>
+                    <% if (option && option.divider) { %>
+                        <div class="h-px bg-slate-100 my-1"></div>
+                    <% } else if (option && option.href) { %>
+                        <a href="<%= option.href %>" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 <%= option.tone === 'danger' ? 'text-red-600 hover:bg-red-50' : '' %>">
+                            <%- option.icon || '' %>
+                            <%= option.label %>
+                        </a>
+                    <% } else if (option) { %>
+                        <button type="button" class="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 <%= option.tone === 'danger' ? 'text-red-600 hover:bg-red-50' : '' %>" data-action="<%= option.action || '' %>" data-handler="<%= option.handler || '' %>">
+                            <%- option.icon || '' %>
+                            <%= option.label %>
+                        </button>
+                    <% } %>
+                <% }); %>
+            </div>
+        </div>
     </div>
     <div class="p-4">
         <h4 class="text-sm font-bold text-slate-900 mb-1 truncate" title="<%= title %>"><%= title %></h4>

@@ -1,0 +1,20 @@
+[role="menu"] {
+    @apply z-50 bg-background border border-foreground/10 rounded-xl text-xs font-sans w-52 drop-shadow-md relative;
+}
+
+[role="menu"] .menu-title {
+    @apply py-2.5 px-5 text-sm leading-5 font-medium border-b border-foreground/5;
+}
+
+[role="menu"] .menu-items {
+    @apply flex flex-col gap-0 p-2 text-sm;
+}
+
+[role="menu"] .menu-item {
+    @apply w-full flex items-center relative overflow-hidden justify-start gap-2 p-2 text-sm rounded-lg hover:bg-foreground/5;
+}
+
+[role="menu"] .menu-item > i,
+[role="menu"] .menu-item > svg {
+    @apply text-base leading-tight text-center min-w-5;
+}
