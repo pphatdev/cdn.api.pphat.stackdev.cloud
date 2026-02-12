@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { runMigrations, rollbackLastMigration, getMigrationStatus, createMigration } from '../src/server/utils/migration-runner.js';
+import { runMigrations, rollbackLastMigration, getMigrationStatus, createMigration, runSeeds, createSeed } from '../src/server/utils/migration-runner.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -8,27 +8,34 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const MIGRATIONS_DIR = path.join(__dirname, '..', 'src', 'server', 'migrations');
+const SEEDS_DIR = path.join(__dirname, '..', 'src', 'server', 'seeds');
 
 /**
  * Display help message
  */
 const showHelp = () => {
     console.log(`
-📦 Database Migration Tool
+📦 Database Migration & Seed Tool
 
 Usage: npm run migrate [command] [options]
 
-Commands:
+Migration Commands:
     up              Run all pending migrations
     down            Rollback the last migration
     status          Show migration status
     create <name>   Create a new migration file
+
+Seed Commands:
+    seed            Run all seed files
+    seed:create <name>   Create a new seed file
 
 Examples:
     npm run migrate up
     npm run migrate down
     npm run migrate status
     npm run migrate create add_users_table
+    npm run migrate seed
+    npm run migrate seed:create demo_data
 
 Options:
     --help, -h      Show this help message
@@ -68,6 +75,20 @@ const main = async () => {
                     process.exit(1);
                 }
                 createMigration(MIGRATIONS_DIR, migrationName);
+                break;
+
+            case 'seed':
+                await runSeeds(SEEDS_DIR);
+                break;
+
+            case 'seed:create':
+                const seedName = args.slice(1).join(' ');
+                if (!seedName) {
+                    console.error('❌ Error: Seed name is required');
+                    console.log('Usage: npm run migrate seed:create <name>');
+                    process.exit(1);
+                }
+                createSeed(SEEDS_DIR, seedName);
                 break;
 
             case '--help':
