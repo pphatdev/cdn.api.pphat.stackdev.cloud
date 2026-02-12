@@ -8,6 +8,7 @@ import { Controller } from '../controller/controller.js';
 import { UploadController } from '../controller/upload.js';
 import { UploadHistoryController } from '../controller/upload-history.js';
 import { RecentController } from '../controller/recent.js';
+import { DetailController } from '../controller/detail.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +31,7 @@ app.get('/files', MyFileController.get);
 app.get(/^\/files\/(.*)/, MyFileController.get);
 app.get('/starred', StarredController.get);
 app.get('/recent', RecentController.get);
+app.get('/detail', DetailController.get);
 app.get('/upload', UploadController.get);
 app.get('/upload/history', UploadHistoryController.get);
 

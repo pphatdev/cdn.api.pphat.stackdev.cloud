@@ -1,0 +1,739 @@
+<main class="flex-1 overflow-y-auto bg-background relative">
+    <%- include('../components/header') %>
+
+    <div class="container mx-auto p-8">
+        <!-- Breadcrumbs -->
+        <div class="mb-6">
+            <%- include('../components/breadcrumbs', {
+                items: [
+                    {
+                        label: 'Dashboard',
+                        href: '/',
+                        icon: '<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>'
+                    },
+                    { label: 'My Files', href: '/files' },
+                    { label: 'File Details' }
+                ]
+            }) %>
+        </div>
+
+        <!-- Input Section -->
+        <!-- <div class="bg-white rounded-2xl border border-slate-100 p-6 mb-6">
+            <div class="flex flex-col sm:flex-row gap-4">
+                <div class="flex-1">
+                    <label for="file-url" class="block text-sm font-medium text-slate-700 mb-2">File URL or Filename</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="file-url" placeholder="Enter file URL or filename..." value="<%= typeof file !== 'undefined' ? file : '' %>" class="flex-1 px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+                        <button type="button" id="load-btn" class="px-6 py-2.5 text-sm font-semibold text-white bg-primary rounded-xl hover:bg-primary/80 transition-colors flex items-center gap-2">
+                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            Load
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
+        <!-- Loading State -->
+        <div id="loading-state" class="hidden">
+            <div class="bg-white rounded-2xl border border-slate-100 p-12 text-center">
+                <div class="mx-auto w-16 h-16 flex items-center justify-center mb-4">
+                    <svg class="size-10 text-primary animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                </div>
+                <h3 class="text-lg font-semibold text-slate-900 mb-2">Loading file details...</h3>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="bg-white rounded-2xl border border-slate-100 p-12 text-center">
+            <div class="mx-auto w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                <svg class="size-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-900 mb-2">No file selected</h3>
+            <p class="text-sm text-slate-500 max-w-md mx-auto">Enter a filename or URL above to view detailed information about images and files.</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-state" class="hidden bg-white rounded-2xl border border-slate-100 p-12 text-center">
+            <div class="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <svg class="size-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-900 mb-2">Unable to load file</h3>
+            <p id="error-message" class="text-sm text-slate-500">The file could not be found or loaded.</p>
+        </div>
+
+        <!-- Main Content -->
+        <div id="detail-content" class="hidden">
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <!-- Preview Area -->
+                <div class="xl:col-span-2 space-y-6">
+                    <!-- Preview Card -->
+                    <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+                        <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                            <h2 class="font-semibold text-slate-900 flex items-center gap-2">
+                                <span id="file-type-icon" class="size-5"></span>
+                                <span id="preview-title">File Preview</span>
+                            </h2>
+                            <div class="flex items-center gap-2">
+                                <a id="open-preview-btn" href="#" class="px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 flex items-center gap-2">
+                                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                    Open Full Preview
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Image Preview -->
+                        <div id="image-preview-container" class="hidden relative bg-slate-900">
+                            <div class="flex items-center justify-center min-h-[400px] max-h-[500px] p-4">
+                                <img id="preview-image" src="" alt="" class="max-w-full max-h-[480px] object-contain rounded-lg shadow-2xl" />
+                            </div>
+                            <!-- Image Controls -->
+                            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-full px-4 py-2">
+                                <button type="button" id="zoom-out-btn" class="p-2 text-white hover:bg-white/20 rounded-full transition-colors" title="Zoom Out">
+                                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"></path></svg>
+                                </button>
+                                <span id="zoom-level" class="text-white text-sm font-medium min-w-[50px] text-center">100%</span>
+                                <button type="button" id="zoom-in-btn" class="p-2 text-white hover:bg-white/20 rounded-full transition-colors" title="Zoom In">
+                                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"></path></svg>
+                                </button>
+                                <div class="w-px h-6 bg-white/30 mx-1"></div>
+                                <button type="button" id="rotate-btn" class="p-2 text-white hover:bg-white/20 rounded-full transition-colors" title="Rotate">
+                                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                </button>
+                                <button type="button" id="reset-btn" class="p-2 text-white hover:bg-white/20 rounded-full transition-colors" title="Reset">
+                                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Video Preview -->
+                        <div id="video-preview-container" class="hidden bg-black">
+                            <video id="preview-video" controls class="w-full max-h-[500px]"></video>
+                        </div>
+
+                        <!-- Audio Preview -->
+                        <div id="audio-preview-container" class="hidden p-8 bg-gradient-to-br from-slate-50 to-slate-100">
+                            <div class="max-w-xl mx-auto">
+                                <div class="flex items-center gap-4 mb-6">
+                                    <div class="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                                        <svg class="size-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 id="audio-title" class="font-semibold text-slate-900 truncate">Audio File</h4>
+                                        <p id="audio-info" class="text-sm text-slate-500">—</p>
+                                    </div>
+                                </div>
+                                <audio id="preview-audio" controls class="w-full"></audio>
+                            </div>
+                        </div>
+
+                        <!-- PDF Preview -->
+                        <div id="pdf-preview-container" class="hidden">
+                            <iframe id="preview-pdf" class="w-full h-[500px] border-0"></iframe>
+                        </div>
+
+                        <!-- Document/Code/Text Preview -->
+                        <div id="text-preview-container" class="hidden">
+                            <pre id="preview-text" class="p-6 bg-slate-900 text-slate-100 overflow-auto max-h-[500px] text-sm font-mono leading-relaxed"></pre>
+                        </div>
+
+                        <!-- Generic File Preview -->
+                        <div id="generic-preview-container" class="hidden p-12 text-center bg-slate-50">
+                            <div id="generic-icon" class="mx-auto w-24 h-24 bg-white rounded-2xl shadow-lg flex items-center justify-center mb-4"></div>
+                            <h3 id="generic-filename" class="text-lg font-semibold text-slate-900 mb-2">filename.ext</h3>
+                            <p class="text-sm text-slate-500 mb-4">This file type cannot be previewed directly</p>
+                            <a id="generic-download" href="#" download class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-primary rounded-xl hover:bg-primary/80 transition-colors">
+                                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download File
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Usage & Embed Section -->
+                    <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+                        <div class="p-4 border-b border-slate-100">
+                            <h2 class="font-semibold text-slate-900 flex items-center gap-2">
+                                <svg class="size-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                                Usage & Embed Codes
+                            </h2>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <!-- Direct URL -->
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Direct URL</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="direct-url" readonly class="flex-1 px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none font-mono" />
+                                        <button type="button" data-copy="direct-url" class="copy-btn px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 flex items-center gap-2">
+                                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                            Copy
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- HTML Embed (for images) -->
+                                <div id="html-embed-row">
+                                    <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">HTML Embed</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="html-embed" readonly class="flex-1 px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none font-mono" />
+                                        <button type="button" data-copy="html-embed" class="copy-btn px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 flex items-center gap-2">
+                                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                            Copy
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Markdown (for images) -->
+                                <div id="markdown-embed-row">
+                                    <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Markdown</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="markdown-embed" readonly class="flex-1 px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none font-mono" />
+                                        <button type="button" data-copy="markdown-embed" class="copy-btn px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 flex items-center gap-2">
+                                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                            Copy
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- CDN URL with optimization (for images) -->
+                                <div id="cdn-url-row">
+                                    <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">CDN URL (Optimized)</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="cdn-url" readonly class="flex-1 px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none font-mono" />
+                                        <button type="button" data-copy="cdn-url" class="copy-btn px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 flex items-center gap-2">
+                                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                            Copy
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="space-y-6">
+                    <!-- File Information -->
+                    <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+                        <div class="p-4 border-b border-slate-100">
+                            <h2 class="font-semibold text-slate-900 flex items-center gap-2">
+                                <svg class="size-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                File Information
+                            </h2>
+                        </div>
+                        <div class="p-6">
+                            <dl class="space-y-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <svg class="size-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <dt class="text-xs text-slate-400 uppercase tracking-wide">Filename</dt>
+                                        <dd id="info-filename" class="text-sm font-medium text-slate-900 mt-1 break-all">—</dd>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <svg class="size-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <dt class="text-xs text-slate-400 uppercase tracking-wide">File Type</dt>
+                                        <dd id="info-type" class="text-sm font-medium text-slate-900 mt-1">—</dd>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <svg class="size-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path></svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <dt class="text-xs text-slate-400 uppercase tracking-wide">File Size</dt>
+                                        <dd id="info-size" class="text-sm font-medium text-slate-900 mt-1">—</dd>
+                                    </div>
+                                </div>
+                                <div id="info-dimensions-row" class="hidden flex items-start gap-3">
+                                    <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <svg class="size-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <dt class="text-xs text-slate-400 uppercase tracking-wide">Dimensions</dt>
+                                        <dd id="info-dimensions" class="text-sm font-medium text-slate-900 mt-1">—</dd>
+                                    </div>
+                                </div>
+                                <div id="info-duration-row" class="hidden flex items-start gap-3">
+                                    <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <svg class="size-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <dt class="text-xs text-slate-400 uppercase tracking-wide">Duration</dt>
+                                        <dd id="info-duration" class="text-sm font-medium text-slate-900 mt-1">—</dd>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <svg class="size-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <dt class="text-xs text-slate-400 uppercase tracking-wide">Modified</dt>
+                                        <dd id="info-modified" class="text-sm font-medium text-slate-900 mt-1">—</dd>
+                                    </div>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+                        <div class="p-4 border-b border-slate-100">
+                            <h2 class="font-semibold text-slate-900 flex items-center gap-2">
+                                <svg class="size-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                Quick Actions
+                            </h2>
+                        </div>
+                        <div class="p-4 space-y-2">
+                            <a id="action-download" href="#" download class="w-full px-4 py-3 text-sm font-semibold text-white bg-primary rounded-xl hover:bg-primary/80 transition-colors flex items-center justify-center gap-2">
+                                <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </a>
+                            <a id="action-open" href="#" target="_blank" class="w-full px-4 py-3 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                                <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                Open in New Tab
+                            </a>
+                            <button type="button" id="action-copy-url" class="w-full px-4 py-3 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                                <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                                Copy Link
+                            </button>
+                            <button type="button" id="action-share" class="w-full px-4 py-3 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                                <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                                Share
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Image Optimization (for images only) -->
+                    <div id="optimization-panel" class="hidden bg-white rounded-2xl border border-slate-100 overflow-hidden">
+                        <div class="p-4 border-b border-slate-100">
+                            <h2 class="font-semibold text-slate-900 flex items-center gap-2">
+                                <svg class="size-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                                Image Optimization
+                            </h2>
+                        </div>
+                        <div class="p-4 space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Format</label>
+                                <select id="opt-format" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                    <option value="">Original</option>
+                                    <option value="webp">WebP</option>
+                                    <option value="avif">AVIF</option>
+                                    <option value="png">PNG</option>
+                                    <option value="jpg">JPEG</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Quality: <span id="opt-quality-value">80</span>%</label>
+                                <input type="range" id="opt-quality" min="1" max="100" value="80" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Width</label>
+                                    <input type="number" id="opt-width" placeholder="Auto" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Height</label>
+                                    <input type="number" id="opt-height" placeholder="Auto" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                                </div>
+                            </div>
+                            <button type="button" id="apply-optimization" class="w-full px-4 py-2.5 text-sm font-semibold text-white bg-primary rounded-xl hover:bg-primary/80 transition-colors">
+                                Apply & Update URLs
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    const loadBtn = document.getElementById('load-btn');
+    const loadingState = document.getElementById('loading-state');
+    const emptyState = document.getElementById('empty-state');
+    const errorState = document.getElementById('error-state');
+    const errorMessage = document.getElementById('error-message');
+    const detailContent = document.getElementById('detail-content');
+
+    // Preview containers
+    const imagePreviewContainer = document.getElementById('image-preview-container');
+    const videoPreviewContainer = document.getElementById('video-preview-container');
+    const audioPreviewContainer = document.getElementById('audio-preview-container');
+    const pdfPreviewContainer = document.getElementById('pdf-preview-container');
+    const textPreviewContainer = document.getElementById('text-preview-container');
+    const genericPreviewContainer = document.getElementById('generic-preview-container');
+
+    // State
+    let currentFile = null;
+    let currentUrl = null;
+    let fileType = null;
+    let zoomLevel = 100;
+    let rotation = 0;
+
+    // File type mappings
+    const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico', 'tiff', 'tif', 'avif'];
+    const videoExts = ['mp4', 'webm', 'ogg', 'ogv', 'mov', 'avi', 'mkv'];
+    const audioExts = ['mp3', 'wav', 'ogg', 'oga', 'flac', 'aac', 'm4a'];
+    const codeExts = ['js', 'ts', 'jsx', 'tsx', 'css', 'scss', 'less', 'html', 'htm', 'xml', 'json', 'yaml', 'yml', 'md', 'py', 'rb', 'php', 'java', 'c', 'cpp', 'h', 'cs', 'go', 'rs', 'swift', 'kt', 'sql', 'sh', 'bash', 'ps1'];
+    const textExts = ['txt', 'log', 'csv', 'ini', 'cfg', 'conf', 'env'];
+
+    // Utilities
+    const formatBytes = (bytes) => {
+        if (!bytes) return '—';
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), sizes.length - 1);
+        return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+    };
+
+    const formatDuration = (seconds) => {
+        if (!seconds || isNaN(seconds)) return '—';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const getExtension = (filename) => {
+        return filename.split('.').pop()?.toLowerCase() || '';
+    };
+
+    const getFilename = (path) => {
+        return decodeURIComponent(path.split('/').pop() || path);
+    };
+
+    const getMimeType = (ext) => {
+        const mimeTypes = {
+            jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif',
+            webp: 'image/webp', svg: 'image/svg+xml', avif: 'image/avif', bmp: 'image/bmp',
+            mp4: 'video/mp4', webm: 'video/webm', ogg: 'video/ogg', mov: 'video/quicktime',
+            mp3: 'audio/mpeg', wav: 'audio/wav', flac: 'audio/flac', aac: 'audio/aac',
+            pdf: 'application/pdf', json: 'application/json', xml: 'application/xml',
+            js: 'text/javascript', ts: 'text/typescript', css: 'text/css', html: 'text/html',
+            txt: 'text/plain', md: 'text/markdown'
+        };
+        return mimeTypes[ext] || 'application/octet-stream';
+    };
+
+    const getFileTypeIcon = (ext) => {
+        if (imageExts.includes(ext)) {
+            return { icon: '<svg class="size-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>', label: 'Image', color: 'blue' };
+        }
+        if (videoExts.includes(ext)) {
+            return { icon: '<svg class="size-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>', label: 'Video', color: 'purple' };
+        }
+        if (audioExts.includes(ext)) {
+            return { icon: '<svg class="size-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>', label: 'Audio', color: 'green' };
+        }
+        if (ext === 'pdf') {
+            return { icon: '<svg class="size-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>', label: 'PDF', color: 'red' };
+        }
+        if (codeExts.includes(ext) || textExts.includes(ext)) {
+            return { icon: '<svg class="size-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>', label: 'Code/Text', color: 'green' };
+        }
+        return { icon: '<svg class="size-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>', label: 'File', color: 'slate' };
+    };
+
+    // Hide all states
+    const hideAllStates = () => {
+        [loadingState, emptyState, errorState, detailContent].forEach(el => el.classList.add('hidden'));
+    };
+
+    // Hide all previews
+    const hideAllPreviews = () => {
+        [imagePreviewContainer, videoPreviewContainer, audioPreviewContainer, pdfPreviewContainer, textPreviewContainer, genericPreviewContainer].forEach(el => el.classList.add('hidden'));
+    };
+
+    // Show state
+    const showState = (state) => {
+        hideAllStates();
+        state.classList.remove('hidden');
+    };
+
+    // Update file info
+    const updateInfo = (data) => {
+        document.getElementById('info-filename').textContent = data.filename || '—';
+        document.getElementById('info-type').textContent = data.mimeType || '—';
+        document.getElementById('info-size').textContent = formatBytes(data.size);
+        document.getElementById('info-modified').textContent = data.modified || '—';
+
+        const dimRow = document.getElementById('info-dimensions-row');
+        const durRow = document.getElementById('info-duration-row');
+
+        if (data.dimensions) {
+            document.getElementById('info-dimensions').textContent = data.dimensions;
+            dimRow.classList.remove('hidden');
+        } else {
+            dimRow.classList.add('hidden');
+        }
+
+        if (data.duration) {
+            document.getElementById('info-duration').textContent = data.duration;
+            durRow.classList.remove('hidden');
+        } else {
+            durRow.classList.add('hidden');
+        }
+    };
+
+    // Update URLs
+    const updateUrls = (filename, isImage = false) => {
+        const baseUrl = window.location.origin;
+        const fileUrl = `${baseUrl}/api/files/${encodeURIComponent(filename)}`;
+        const imageUrl = `${baseUrl}/api/image/${encodeURIComponent(filename)}`;
+
+        document.getElementById('direct-url').value = fileUrl;
+
+        // HTML and Markdown embeds
+        const htmlRow = document.getElementById('html-embed-row');
+        const mdRow = document.getElementById('markdown-embed-row');
+        const cdnRow = document.getElementById('cdn-url-row');
+        const optPanel = document.getElementById('optimization-panel');
+
+        if (isImage) {
+            document.getElementById('html-embed').value = `<img src="${imageUrl}" alt="${filename}" />`;
+            document.getElementById('markdown-embed').value = `![${filename}](${imageUrl})`;
+            document.getElementById('cdn-url').value = `${imageUrl}?fm=webp&q=80`;
+            htmlRow.classList.remove('hidden');
+            mdRow.classList.remove('hidden');
+            cdnRow.classList.remove('hidden');
+            optPanel.classList.remove('hidden');
+        } else {
+            htmlRow.classList.add('hidden');
+            mdRow.classList.add('hidden');
+            cdnRow.classList.add('hidden');
+            optPanel.classList.add('hidden');
+        }
+
+        // Update action links
+        document.getElementById('action-download').href = fileUrl;
+        document.getElementById('action-download').download = filename;
+        document.getElementById('action-open').href = fileUrl;
+        currentUrl = fileUrl;
+
+        // Open preview link
+        const previewLink = isImage ? `/preview-image?file=${encodeURIComponent(filename)}` : `/preview?file=${encodeURIComponent(filename)}`;
+        document.getElementById('open-preview-btn').href = previewLink;
+    };
+
+    // Load file details
+    const loadFile = async (filename) => {
+        if (!filename) return;
+
+        showState(loadingState);
+        currentFile = filename;
+
+        try {
+            const ext = getExtension(filename);
+            const typeInfo = getFileTypeIcon(ext);
+            const isImage = imageExts.includes(ext);
+            const isVideo = videoExts.includes(ext);
+            const isAudio = audioExts.includes(ext);
+            const isPdf = ext === 'pdf';
+            const isCode = codeExts.includes(ext);
+            const isText = textExts.includes(ext);
+
+            fileType = isImage ? 'image' : isVideo ? 'video' : isAudio ? 'audio' : isPdf ? 'pdf' : (isCode || isText) ? 'text' : 'generic';
+
+            // Update header
+            document.getElementById('file-type-icon').innerHTML = typeInfo.icon;
+            document.getElementById('preview-title').textContent = `${typeInfo.label} Preview`;
+
+            // Build URLs
+            const fileUrl = `/api/file/preview/${encodeURIComponent(filename)}`;
+            const imageUrl = `/api/image/${encodeURIComponent("<%= typeof file !== 'undefined' ? file : '' %>")}`;
+
+            // Fetch file info via HEAD request
+            let fileSize = null;
+            let lastModified = null;
+            try {
+                const headRes = await fetch(fileUrl, { method: 'HEAD' });
+                if (headRes.ok) {
+                    fileSize = parseInt(headRes.headers.get('content-length') || '0');
+                    lastModified = headRes.headers.get('last-modified');
+                }
+            } catch (e) {}
+
+            hideAllPreviews();
+
+            const infoData = {
+                filename: filename,
+                mimeType: getMimeType(ext),
+                size: fileSize,
+                modified: lastModified ? new Date(lastModified).toLocaleString() : '—'
+            };
+
+            // Load preview based on type
+            if (isImage) {
+                const img = document.getElementById('preview-image');
+                img.src = imageUrl;
+                img.alt = filename;
+                img.onload = () => {
+                    infoData.dimensions = `${img.naturalWidth} × ${img.naturalHeight} px`;
+                    updateInfo(infoData);
+                    zoomLevel = 100;
+                    rotation = 0;
+                    updateImageTransform();
+                };
+                img.onerror = () => {
+                    throw new Error('Failed to load image');
+                };
+                imagePreviewContainer.classList.remove('hidden');
+            } else if (isVideo) {
+                const video = document.getElementById('preview-video');
+                video.src = fileUrl;
+                video.onloadedmetadata = () => {
+                    infoData.dimensions = `${video.videoWidth} × ${video.videoHeight} px`;
+                    infoData.duration = formatDuration(video.duration);
+                    updateInfo(infoData);
+                };
+                videoPreviewContainer.classList.remove('hidden');
+            } else if (isAudio) {
+                const audio = document.getElementById('preview-audio');
+                audio.src = fileUrl;
+                document.getElementById('audio-title').textContent = filename;
+                audio.onloadedmetadata = () => {
+                    document.getElementById('audio-info').textContent = formatDuration(audio.duration);
+                    infoData.duration = formatDuration(audio.duration);
+                    updateInfo(infoData);
+                };
+                audioPreviewContainer.classList.remove('hidden');
+            } else if (isPdf) {
+                document.getElementById('preview-pdf').src = fileUrl;
+                pdfPreviewContainer.classList.remove('hidden');
+            } else if (isCode || isText) {
+                const res = await fetch(fileUrl);
+                if (!res.ok) throw new Error('Failed to load file');
+                const text = await res.text();
+                document.getElementById('preview-text').textContent = text;
+                infoData.size = text.length;
+                textPreviewContainer.classList.remove('hidden');
+            } else {
+                document.getElementById('generic-icon').innerHTML = `<div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">${typeInfo.icon.replace('size-5', 'size-8')}</div>`;
+                document.getElementById('generic-filename').textContent = filename;
+                document.getElementById('generic-download').href = fileUrl;
+                genericPreviewContainer.classList.remove('hidden');
+            }
+
+            updateInfo(infoData);
+            updateUrls(filename, isImage);
+            showState(detailContent);
+
+            // Update URL
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.set('file', filename);
+            history.replaceState(null, '', newUrl);
+
+        } catch (err) {
+            console.error('Load error:', err);
+            errorMessage.textContent = err.message || 'The file could not be found or loaded.';
+            showState(errorState);
+        }
+    };
+
+    // Image controls
+    const updateImageTransform = () => {
+        const img = document.getElementById('preview-image');
+        img.style.transform = `scale(${zoomLevel / 100}) rotate(${rotation}deg)`;
+        document.getElementById('zoom-level').textContent = `${zoomLevel}%`;
+    };
+
+    document.getElementById('zoom-in-btn')?.addEventListener('click', () => {
+        zoomLevel = Math.min(zoomLevel + 25, 300);
+        updateImageTransform();
+    });
+
+    document.getElementById('zoom-out-btn')?.addEventListener('click', () => {
+        zoomLevel = Math.max(zoomLevel - 25, 25);
+        updateImageTransform();
+    });
+
+    document.getElementById('rotate-btn')?.addEventListener('click', () => {
+        rotation = (rotation + 90) % 360;
+        updateImageTransform();
+    });
+
+    document.getElementById('reset-btn')?.addEventListener('click', () => {
+        zoomLevel = 100;
+        rotation = 0;
+        updateImageTransform();
+    });
+
+    // Copy buttons
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const targetId = btn.dataset.copy;
+            const input = document.getElementById(targetId);
+            if (input) {
+                await navigator.clipboard.writeText(input.value);
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<svg class="size-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Copied!';
+                setTimeout(() => { btn.innerHTML = originalHtml; }, 1500);
+            }
+        });
+    });
+
+    // Copy URL action
+    document.getElementById('action-copy-url')?.addEventListener('click', async () => {
+        if (currentUrl) {
+            const fullUrl = window.location.origin + currentUrl;
+            await navigator.clipboard.writeText(fullUrl);
+            const btn = document.getElementById('action-copy-url');
+            btn.innerHTML = '<svg class="size-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Copied!';
+            setTimeout(() => {
+                btn.innerHTML = '<svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg> Copy Link';
+            }, 1500);
+        }
+    });
+
+    // Share action
+    document.getElementById('action-share')?.addEventListener('click', async () => {
+        if (navigator.share && currentFile) {
+            try {
+                await navigator.share({
+                    title: currentFile,
+                    url: window.location.origin + currentUrl
+                });
+            } catch (e) {}
+        } else {
+            document.getElementById('action-copy-url')?.click();
+        }
+    });
+
+    // Quality slider
+    document.getElementById('opt-quality')?.addEventListener('input', (e) => {
+        document.getElementById('opt-quality-value').textContent = e.target.value;
+    });
+
+    // Apply optimization
+    document.getElementById('apply-optimization')?.addEventListener('click', () => {
+        if (!currentFile) return;
+        
+        const format = document.getElementById('opt-format').value;
+        const quality = document.getElementById('opt-quality').value;
+        const width = document.getElementById('opt-width').value;
+        const height = document.getElementById('opt-height').value;
+        
+        const baseUrl = window.location.origin;
+        let cdnUrl = `${baseUrl}/api/image/${encodeURIComponent(currentFile)}?`;
+        const params = [];
+        if (format) params.push(`fm=${format}`);
+        if (quality) params.push(`q=${quality}`);
+        if (width) params.push(`w=${width}`);
+        if (height) params.push(`h=${height}`);
+        
+        cdnUrl += params.join('&');
+        document.getElementById('cdn-url').value = cdnUrl;
+        document.getElementById('html-embed').value = `<img src="${cdnUrl}" alt="${currentFile}" />`;
+        document.getElementById('markdown-embed').value = `![${currentFile}](${cdnUrl})`;
+    });
+
+    // Check URL params on load
+    const urlParams = new URLSearchParams(window.location.search);
+    const fileParam = urlParams.get('file');
+    if (fileParam) {
+        loadFile(fileParam);
+    }
+</script>
