@@ -4,6 +4,18 @@ import { configured } from './server/utils/config.js';
 import { Database } from './server/utils/database.js';
 import API from './server/routes/api.js';
 import WEB from './client/routes/web.js';
+
+// Add global error handlers
+process.on('uncaughtException', (error) => {
+    console.error('❌ Uncaught Exception:', error);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+    process.exit(1);
+});
+
 const app = express();
 
 /**
@@ -13,6 +25,7 @@ Database.initialize().then(() => {
     console.log('✅ Database initialized successfully');
 }).catch((error) => {
     console.error('❌ Failed to initialize database:', error);
+    process.exit(1);
 });
 
 /**

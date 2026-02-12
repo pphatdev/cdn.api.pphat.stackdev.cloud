@@ -9,6 +9,7 @@ import fileRoutes from './file.js';
 import databaseRoutes from './database.js';
 import folderRoutes from './folder.js';
 import storageRoutes from './storage.js';
+import authRoutes from './auth.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -50,6 +51,11 @@ app.use('/folder', folderRoutes);
  * Storage routes
  */
 app.use('/storage', storageRoutes);
+
+/**
+ * Auth routes
+ */
+app.use('/auth', authRoutes);
 
 /**
  * Default End point

@@ -281,10 +281,119 @@ export default {
     return filePath;
 };
 
+/**
+ * Run all seed files
+ */
+export const runSeeds = async (seedsDir: string): Promise<void> => {
+    console.log('🌱 Starting seed process...');
+
+    if (!fs.existsSync(seedsDir)) {
+        console.log('ℹ️  No seeds directory found');
+        return;
+    }
+
+    const seedFiles = fs.readdirSync(seedsDir)
+        .filter(file => file.endsWith('.ts') || file.endsWith('.js'))
+        .sort(); // Sort by filename
+
+    if (seedFiles.length === 0) {
+        console.log('ℹ️  No seed files found');
+        return;
+    }
+
+    console.log(`📁 Found ${seedFiles.length} seed file(s)`);
+
+    let executedCount = 0;
+
+    // Run each seed
+    for (const file of seedFiles) {
+        const seedName = file.replace(/\.(ts|js)$/, '');
+        const filePath = path.join(seedsDir, file);
+
+        console.log(`⚡ Running seed: ${seedName}`);
+
+        const startTime = Date.now();
+
+        try {
+            const seed = await loadMigration(filePath);
+
+            if (typeof seed.up !== 'function') {
+                throw new Error(`Seed ${seedName} does not export an 'up' function`);
+            }
+
+            // Run the seed
+            await seed.up();
+
+            const executionTime = Date.now() - startTime;
+
+            console.log(`✅ Successfully executed ${seedName} (${executionTime}ms)`);
+            executedCount++;
+
+        } catch (error: any) {
+            console.error(`❌ Seed ${seedName} failed:`, error.message);
+            throw new Error(`Seed failed: ${seedName}. Error: ${error.message}`);
+        }
+    }
+
+    console.log(`\n✨ Seeding complete!`);
+    console.log(`   Executed: ${executedCount}`);
+    console.log(`   Total: ${seedFiles.length}`);
+};
+
+/**
+ * Create a new seed file
+ */
+export const createSeed = (seedsDir: string, name: string): string => {
+    if (!fs.existsSync(seedsDir)) {
+        fs.mkdirSync(seedsDir, { recursive: true });
+    }
+
+    // Generate timestamp
+    const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '').replace('T', '_');
+    const fileName = `${timestamp}_${name.replace(/\s+/g, '_')}.ts`;
+    const filePath = path.join(seedsDir, fileName);
+
+    // Seed template
+    const template = `import { getDbClient } from '../utils/db.js';
+
+/**
+ * Seed: ${name}
+ * Created: ${new Date().toISOString()}
+ */
+
+export default {
+    /**
+     * Run the seed
+     */
+    async up() {
+        const sql = getDbClient();
+
+        // TODO: Write your seed logic here
+        // Example:
+        // await sql\`
+        //     INSERT INTO categories (name, slug) VALUES
+        //     ('Technology', 'technology'),
+        //     ('Business', 'business'),
+        //     ('Entertainment', 'entertainment')
+        // \`;
+
+        console.log('✅ Seed ${name} completed');
+    }
+};
+`;
+
+    fs.writeFileSync(filePath, template);
+    console.log(`✅ Created seed: ${fileName}`);
+    
+    return filePath;
+};
+
 export default {
     runMigrations,
     rollbackLastMigration,
     getMigrationStatus,
     createMigration,
-    getMigrationFiles
+    getMigrationFiles,
+    runSeeds,
+    createSeed
 };
