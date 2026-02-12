@@ -5,6 +5,8 @@ import { DashboardController } from '../controller/dashboard.js';
 import { MyFileController } from '../controller/my-file.js';
 import { StarredController } from '../controller/starred.js';
 import { Controller } from '../controller/controller.js';
+import { UploadController } from '../controller/upload.js';
+import { UploadHistoryController } from '../controller/upload-history.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,6 +16,7 @@ const app = express();
 // Serve static files from the dist directory
 app.use('/styles', express.static(path.join(__dirname, '../../../dist/client/styles')));
 app.use(express.static(path.join(__dirname, '../../../dist/client')));
+app.use('/utils', express.static(path.join(__dirname, '../utils')));
 
 
 // Set EJS as template engine
@@ -25,6 +28,8 @@ app.get('/', DashboardController.get);
 app.get('/files', MyFileController.get);
 app.get(/^\/files\/(.*)/, MyFileController.get);
 app.get('/starred', StarredController.get);
+app.get('/upload', UploadController.get);
+app.get('/upload/history', UploadHistoryController.get);
 
 // Catch-all 404 handler - render not-found page with default config
 app.use((req, res, next) => {
