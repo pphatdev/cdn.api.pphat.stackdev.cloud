@@ -1,0 +1,16 @@
+<div class="bg-white rounded-2xl overflow-hidden overflow-x-auto border border-black/5">
+    <table class="w-full text-left text-sm">
+        <thead class="bg-slate-50 text-slate-400 font-bold text-[11px] uppercase tracking-wider">
+            <tr>
+                <% headers.forEach((header, index) => { %>
+                    <th class="py-4 text-left whitespace-nowrap <%= index === headers.length - 1 ? 'text-right px-4' : 'px-6' %>"><%= header %></th>
+                <% }); %>
+            </tr>
+        </thead>
+        <tbody id="<%= bodyId %>" class="divide-y divide-slate-100">
+            <tr>
+                <td colspan="<%= headers.length %>" class="py-6 text-center text-slate-400"><%= emptyMessage %></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
