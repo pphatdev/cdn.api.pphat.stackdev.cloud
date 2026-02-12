@@ -1,3 +1,25 @@
+<%
+    // Helper function to format bytes
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Calculate storage metrics
+    const totalSizeGB = storageData ? storageData.totalSize / (1024 ** 3) : 0;
+    const usedPercentage = storageData ? Math.min((totalSizeGB / maxStorageGB) * 100, 100) : 0;
+    const freeGB = maxStorageGB - totalSizeGB;
+
+    // Pre-calculate percentage values for use in script
+    const imagesPercentage = categorizedData ? categorizedData.categories.images.percentage : 0;
+    const documentsPercentage = categorizedData ? categorizedData.categories.documents.percentage : 0;
+    const videosPercentage = categorizedData ? categorizedData.categories.videos.percentage : 0;
+    const othersPercentage = categorizedData ? categorizedData.categories.others.percentage : 0;
+%>
+
 <main class="flex-1 overflow-y-auto bg-background">
     <%- include('../components/header') %>
 
@@ -12,31 +34,31 @@
                         <div>
                             <h3 class="text-sm font-semibold text-slate-400 mb-1">Total Storage</h3>
                             <div class="flex items-baseline gap-2">
-                                <span class="text-3xl font-bold text-slate-900">150 GB</span>
-                                <span class="text-slate-400 text-sm">used of 200 GB</span>
+                                <span class="text-3xl font-bold text-slate-900"><%= storageData ? storageData.totalSizeFormatted : '0 GB' %></span>
+                                <span class="text-slate-400 text-sm">used of <%= maxStorageGB %> GB</span>
                             </div>
                         </div>
-                        <span class="px-2 py-1 bg-primary/5 text-primary text-[10px] font-bold rounded uppercase tracking-wider">200 GB Plan</span>
+                        <span class="px-2 py-1 bg-primary/5 text-primary text-[10px] font-bold rounded uppercase tracking-wider"><%= maxStorageGB %> GB Plan</span>
                     </div>
                     <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden mb-4">
-                        <div class="h-full bg-linear-to-r from-green-500 via-orange-500 to-red-400 rounded-full" style="width: 75%"></div>
+                        <div class="h-full bg-linear-to-r from-green-500 via-orange-500 to-red-400 rounded-full" data-used-percentage></div>
                     </div>
                     <div class="flex justify-between text-xs text-slate-400 mb-6">
-                        <span>Used: 150 GB</span>
-                        <span>Free: 50 GB</span>
+                        <span>Used: <%= storageData ? storageData.totalSizeFormatted : '0 GB' %></span>
+                        <span>Free: <%= freeGB.toFixed(2) %> GB</span>
                     </div>
                     <div class="grid grid-cols-3 gap-3">
                         <div class="p-3 bg-slate-50 rounded-xl">
                             <p class="text-[10px] text-slate-400 font-medium uppercase mb-1">Images</p>
-                            <p class="text-sm font-bold">60 GB</p>
+                            <p class="text-sm font-bold"><%= categorizedData ? formatBytes(categorizedData.categories.images.size) : '0 GB' %></p>
                         </div>
                         <div class="p-3 bg-slate-50 rounded-xl">
                             <p class="text-[10px] text-slate-400 font-medium uppercase mb-1">Documents</p>
-                            <p class="text-sm font-bold">45 GB</p>
+                            <p class="text-sm font-bold"><%= categorizedData ? formatBytes(categorizedData.categories.documents.size) : '0 GB' %></p>
                         </div>
                         <div class="p-3 bg-slate-50 rounded-xl">
                             <p class="text-[10px] text-slate-400 font-medium uppercase mb-1">Videos</p>
-                            <p class="text-sm font-bold">30 GB</p>
+                            <p class="text-sm font-bold"><%= categorizedData ? formatBytes(categorizedData.categories.videos.size) : '0 GB' %></p>
                         </div>
                     </div>
                 </div>
@@ -52,52 +74,52 @@
                             <div class="space-y-1">
                                 <div class="flex justify-between items-center text-xs">
                                     <span class="font-medium">Images</span>
-                                    <span class="text-slate-400">60 GB</span>
+                                    <span class="text-slate-400"><%= categorizedData ? formatBytes(categorizedData.categories.images.size) : '0 GB' %></span>
                                 </div>
                                 <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                    <div class="bg-primary h-full rounded-full" style="width: 70%"></div>
+                                    <div class="bg-primary h-full rounded-full" data-images-percentage>
                                 </div>
                             </div>
                             <div class="space-y-1">
                                 <div class="flex justify-between items-center text-xs">
                                     <span class="font-medium">Documents</span>
-                                    <span class="text-slate-400">45 GB</span>
+                                    <span class="text-slate-400"><%= categorizedData ? formatBytes(categorizedData.categories.documents.size) : '0 GB' %></span>
                                 </div>
                                 <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                    <div class="bg-orange-500 h-full rounded-full" style="width: 50%"></div>
+                                    <div class="bg-orange-500 h-full rounded-full" data-documents-percentage>
                                 </div>
                             </div>
                             <div class="space-y-1">
                                 <div class="flex justify-between items-center text-xs">
                                     <span class="font-medium">Videos</span>
-                                    <span class="text-slate-400">30 GB</span>
+                                    <span class="text-slate-400"><%= categorizedData ? formatBytes(categorizedData.categories.videos.size) : '0 GB' %></span>
                                 </div>
                                 <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                    <div class="bg-green-500 h-full rounded-full" style="width: 35%"></div>
+                                    <div class="bg-green-500 h-full rounded-full" data-videos-percentage>
                                 </div>
                             </div>
                             <div class="space-y-1">
                                 <div class="flex justify-between items-center text-xs">
                                     <span class="font-medium">Others</span>
-                                    <span class="text-slate-400">15 GB</span>
+                                    <span class="text-slate-400"><%= categorizedData ? formatBytes(categorizedData.categories.others.size) : '0 GB' %></span>
                                 </div>
                                 <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                    <div class="bg-orange-300 h-full rounded-full" style="width: 20%"></div>
+                                    <div class="bg-orange-300 h-full rounded-full" data-others-percentage>
                                 </div>
                             </div>
                         </div>
                         <div class="space-y-2">
                             <div class="flex items-center gap-2 text-xs text-slate-500">
-                                <span class="w-2 h-2 rounded-full bg-primary"></span> Images <span class="ml-auto font-bold">40%</span>
+                                <span class="w-2 h-2 rounded-full bg-primary"></span> Images <span class="ml-auto font-bold"><%= categorizedData ? Math.round(categorizedData.categories.images.percentage) : 0 %>%</span>
                             </div>
                             <div class="flex items-center gap-2 text-xs text-slate-500">
-                                <span class="w-2 h-2 rounded-full bg-orange-500"></span> Documents <span class="ml-auto font-bold">30%</span>
+                                <span class="w-2 h-2 rounded-full bg-orange-500"></span> Documents <span class="ml-auto font-bold"><%= categorizedData ? Math.round(categorizedData.categories.documents.percentage) : 0 %>%</span>
                             </div>
                             <div class="flex items-center gap-2 text-xs text-slate-500">
-                                <span class="w-2 h-2 rounded-full bg-green-500"></span> Videos <span class="ml-auto font-bold">20%</span>
+                                <span class="w-2 h-2 rounded-full bg-green-500"></span> Videos <span class="ml-auto font-bold"><%= categorizedData ? Math.round(categorizedData.categories.videos.percentage) : 0 %>%</span>
                             </div>
                             <div class="flex items-center gap-2 text-xs text-slate-500">
-                                <span class="w-2 h-2 rounded-full bg-orange-300"></span> Others <span class="ml-auto font-bold">10%</span>
+                                <span class="w-2 h-2 rounded-full bg-orange-300"></span> Others <span class="ml-auto font-bold"><%= categorizedData ? Math.round(categorizedData.categories.others.percentage) : 0 %>%</span>
                             </div>
                         </div>
                     </div>
@@ -115,46 +137,33 @@
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <%
-                    const quickAccessItems = [
-                        {
-                            icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>',
-                            title: 'Design System',
-                            label: 'Pinned',
-                            size: '4.7 GB',
-                            fileCount: '21 files',
-                            updated: 'Updated 2h ago',
-                            className: 'bg-primary/10 text-primary'
-                        },
-                        {
-                            icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>',
-                            title: 'Marketing Assets',
-                            label: 'Pinned',
-                            size: '12.8 GB',
-                            fileCount: '340 files',
-                            updated: 'Updated yesterday',
-                            className: 'bg-primary/10 text-primary',
-                        },
-                        {
-                            icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
-                            title: 'Contracts & Legal',
-                            label: 'Pinned',
-                            size: '3.1 GB',
-                            fileCount: '96 files',
-                            updated: 'Updated 5d ago',
-                            className: 'bg-primary/10 text-primary'
-                        },
-                        {
-                            icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>',
-                            title: 'Shared with me',
-                            label: 'Shortcut',
-                            size: '8.6 GB',
-                            fileCount: '58 items',
-                            updated: 'Updated 1h ago',
-                            className: 'bg-primary/10 text-primary',
-                        }
-                    ];
+                    const folderIcon = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>';
+                    const topFolders = storageData && storageData.folderBreakdown ? storageData.folderBreakdown.slice(0, 4) : [];
+                    
+                    const quickAccessItems = topFolders.map(folder => ({
+                        icon: folderIcon,
+                        title: folder.name,
+                        label: 'Folder',
+                        size: folder.formattedSize,
+                        fileCount: `${folder.fileCount} files`,
+                        updated: 'Recent',
+                        className: 'bg-primary/10 text-primary'
+                    }));
+
+                    // Fill remaining slots with placeholders if less than 4 folders
+                    while (quickAccessItems.length < 4) {
+                        quickAccessItems.push({
+                            icon: folderIcon,
+                            title: 'No data',
+                            label: 'Empty',
+                            size: '0 GB',
+                            fileCount: '0 files',
+                            updated: 'N/A',
+                            className: 'bg-slate-50 text-slate-400'
+                        });
+                    }
                 %>
-                <% quickAccessItems.forEach(item => { %>
+                <% quickAccessItems.forEach((item) => { %>
                     <%- include('../components/quick-access-item', item) %>
                 <% }); %>
             </div>
@@ -165,60 +174,57 @@
             <h2 class="text-xl font-bold text-slate-900 mb-6">File Types Details</h2>
             <%
                 const tableHeaders = ['Type', 'Total Files', 'Storage Used', 'Average Size', 'Share of Total'];
-                const tableRows = [
-                    {
-                        icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>',
-                        iconBg: 'primary-50',
-                        iconColor: 'primary',
-                        name: 'Images (JPG, PNG, SVG)',
-                        totalFiles: '8,420',
-                        storageUsed: '60 GB',
-                        averageSize: '7.3 MB',
-                        shareOfTotal: '40%'
-                    },
-                    {
-                        icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
-                        iconBg: 'orange-50',
-                        iconColor: 'orange-600',
-                        name: 'Documents (PDF, DOCX)',
-                        totalFiles: '3,210',
-                        storageUsed: '45 GB',
-                        averageSize: '5.6 MB',
-                        shareOfTotal: '30%'
-                    },
-                    {
-                        icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>',
-                        iconBg: 'green-50',
-                        iconColor: 'green-600',
-                        name: 'Videos (MP4, MOV)',
-                        totalFiles: '640',
-                        storageUsed: '30 GB',
-                        averageSize: '48 MB',
-                        shareOfTotal: '20%'
-                    },
-                    {
-                        icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>',
-                        iconBg: 'primary-50',
-                        iconColor: 'primary',
-                        name: 'Archives (ZIP, RAR)',
-                        totalFiles: '210',
-                        storageUsed: '10 GB',
-                        averageSize: '48 MB',
-                        shareOfTotal: '7%'
-                    },
-                    {
-                        icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>',
-                        iconBg: 'slate-100',
-                        iconColor: 'slate-600',
-                        name: 'Code & Others',
-                        totalFiles: '1,120',
-                        storageUsed: '5 GB',
-                        averageSize: '4.5 MB',
-                        shareOfTotal: '3%'
-                    }
-                ];
+                const tableIcons = {
+                    'Images (JPG, PNG, SVG)': '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>',
+                    'Documents (PDF, DOCX)': '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
+                    'Videos (MP4, MOV)': '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>',
+                    'Archives (ZIP, RAR)': '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>',
+                    'Code & Others': '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>'
+                };
+                const tableBgColors = {
+                    'Images (JPG, PNG, SVG)': 'primary-50',
+                    'Documents (PDF, DOCX)': 'orange-50',
+                    'Videos (MP4, MOV)': 'green-50',
+                    'Archives (ZIP, RAR)': 'primary-50',
+                    'Code & Others': 'slate-100'
+                };
+                const tableTextColors = {
+                    'Images (JPG, PNG, SVG)': 'primary',
+                    'Documents (PDF, DOCX)': 'orange-600',
+                    'Videos (MP4, MOV)': 'green-600',
+                    'Archives (ZIP, RAR)': 'primary',
+                    'Code & Others': 'slate-600'
+                };
+
+                const tableRows = categorizedData ? categorizedData.tableData.map(item => ({
+                    icon: tableIcons[item.name],
+                    iconBg: tableBgColors[item.name],
+                    iconColor: tableTextColors[item.name],
+                    name: item.name,
+                    totalFiles: item.count.toLocaleString(),
+                    storageUsed: formatBytes(item.size),
+                    averageSize: item.count > 0 ? formatBytes(item.size / item.count) : '0 Bytes',
+                    shareOfTotal: Math.round(item.percentage) + '%'
+                })) : [];
             %>
             <%- include('../components/table', { headers: tableHeaders, rows: tableRows }) %>
         </section>
     </div>
 </main>
+
+<script>
+    const usedPercentage = document.querySelector('[data-used-percentage]');
+    usedPercentage.style.width = "<%= usedPercentage.toFixed(1) %>%";
+
+    const imagesPercentage = document.querySelector('[data-images-percentage]');
+    imagesPercentage.style.width = "<%= imagesPercentage.toFixed(1) %>%";
+
+    const documentsPercentage = document.querySelector('[data-documents-percentage]');
+    documentsPercentage.style.width = "<%= documentsPercentage.toFixed(1) %>%";
+
+    const videosPercentage = document.querySelector('[data-videos-percentage]');
+    videosPercentage.style.width = "<%= videosPercentage.toFixed(1) %>%";
+
+    const othersPercentage = document.querySelector('[data-others-percentage]');
+    othersPercentage.style.width = "<%= othersPercentage.toFixed(1) %>%";
+</script>
