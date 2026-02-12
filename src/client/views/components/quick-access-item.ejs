@@ -1,5 +1,5 @@
 <!-- Quick Access Item Component -->
-<div class="p-4 rounded-2xl hover:border-primary/20 transition-all cursor-pointer bg-white group">
+<div class="p-4 rounded-2xl hover:border-primary/20 relative transition-all cursor-pointer bg-white group">
     <div class="flex items-center gap-4 mb-4">
         <div class="p-2.5 <%= className %> rounded-lg group-hover:bg-primary group-hover:text-white transition-all">
             <%- icon %>
@@ -13,4 +13,6 @@
         <span><%= fileCount %></span>
         <span><%= updated %></span>
     </div>
+
+    <a href="<%= route %>" class="absolute inset-0 z-10"></a>
 </div>
