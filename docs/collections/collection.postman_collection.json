@@ -1,45 +1,254 @@
 {
   "info": {
     "_postman_id": "0dc532dd-8e71-4b0c-ac99-a0d152f22958",
-    "name": "CDN API - cdn.api.pphat.stackdev.cloud",
-    "description": "Complete API collection for CDN service including file uploads, image optimization, folder management, and database operations. All upload endpoints are protected with rate limiting.",
+    "name": "CDN API - assets.stackdev.cloud",
+    "description": "Complete API collection for CDN service including authentication, file uploads, image optimization, folder management, database operations, and migrations. Secured with JWT authentication and rate limiting.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "16827919",
-    "_collection_link": "https://go.postman.co/collection/16827919-0dc532dd-8e71-4b0c-ac99-a0d152f22958?source=collection_link"
+    "_exporter_id": "16827919"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
   },
   "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.accessToken) {",
+                  "        pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
+                  "        pm.collectionVariables.set('refreshToken', jsonData.data.refreshToken);",
+                  "        console.log('✅ Tokens saved to collection variables');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{url}}/auth/login",
+              "host": ["{{url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "**Login endpoint** - Authenticate and receive JWT tokens\n\n**Rate Limit:** 5 attempts per 15 minutes\n\n**Default Credentials:**\n- Username: `admin`\n- Password: `admin123`\n\n**Security Features:**\n- Account lockout after 5 failed attempts\n- Bcrypt password hashing (12 rounds)\n- JWT tokens with expiration\n- Session tracking and audit logging"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/auth/me",
+              "host": ["{{url}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Get information about the currently authenticated user."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.accessToken) {",
+                  "        pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
+                  "        pm.collectionVariables.set('refreshToken', jsonData.data.refreshToken);",
+                  "        console.log('✅ Tokens refreshed');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{url}}/auth/refresh",
+              "host": ["{{url}}"],
+              "path": ["auth", "refresh"]
+            },
+            "description": "Get a new access token using a refresh token.\n\n**Rate Limit:** 10 requests per 15 minutes"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/auth/logout",
+              "host": ["{{url}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Logout from current session (invalidates current token)."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout from All Devices",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/auth/logout-all",
+              "host": ["{{url}}"],
+              "path": ["auth", "logout-all"]
+            },
+            "description": "Invalidate all sessions for the current user (all devices)."
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"currentPassword\": \"admin123\",\n    \"newPassword\": \"NewSecurePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{url}}/auth/change-password",
+              "host": ["{{url}}"],
+              "path": ["auth", "change-password"]
+            },
+            "description": "Change user password. Invalidates all other sessions.\n\n**Password Requirements:**\n- Minimum 8 characters\n- At least one uppercase letter\n- At least one lowercase letter\n- At least one number"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Active Sessions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/auth/sessions",
+              "host": ["{{url}}"],
+              "path": ["auth", "sessions"]
+            },
+            "description": "List all active sessions for the current user."
+          },
+          "response": []
+        },
+        {
+          "name": "Revoke Session",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/auth/sessions/:sessionId",
+              "host": ["{{url}}"],
+              "path": ["auth", "sessions", ":sessionId"],
+              "variable": [
+                {
+                  "key": "sessionId",
+                  "value": "123e4567-e89b-12d3-a456-426614174000"
+                }
+              ]
+            },
+            "description": "Revoke a specific session by ID."
+          },
+          "response": []
+        }
+      ],
+      "description": "🔐 JWT-based authentication system with session management"
+    },
     {
       "name": "API Info",
       "item": [
         {
           "name": "Welcome",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{url}}/api/",
+              "raw": "{{url}}/",
               "host": ["{{url}}"],
-              "path": ["api", ""]
+              "path": [""]
             },
-            "description": "## Welcome endpoint\n\n**Endpoint:** `GET /api/`\n\n**Description:** Returns a welcome message to confirm the API is running."
+            "description": "Welcome endpoint - confirms the API is running."
           },
           "response": []
         },
         {
           "name": "Get Version",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{url}}/api/version",
+              "raw": "{{url}}/version",
               "host": ["{{url}}"],
-              "path": ["api", "version"]
+              "path": ["version"]
             },
-            "description": "## Get application version\n\n**Endpoint:** `GET /api/version`\n\n**Description:** Returns the current version and name of the application from package.json.\n\n### Example Response\n\n```json\n{\n    \"status\": 200,\n    \"message\": \"Version retrieved successfully\",\n    \"data\": {\n        \"version\": \"1.0.0\",\n        \"name\": \"cdn.api.pphat.stackdev.cloud\"\n    }\n}\n```"
+            "description": "Returns the current version and name from package.json."
           },
           "response": []
         }
-      ]
+      ],
+      "description": "ℹ️ General API information"
     },
     {
       "name": "Image",
@@ -47,6 +256,9 @@
         {
           "name": "Upload Image",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
             "header": [
               {
@@ -54,13 +266,6 @@
                 "value": "/images",
                 "description": "Optional: Specify storage folder",
                 "type": "text"
-              },
-              {
-                "key": "X-Prefix",
-                "value": "",
-                "description": "Optional: Add prefix to filename",
-                "type": "text",
-                "disabled": true
               }
             ],
             "body": {
@@ -69,75 +274,31 @@
                 {
                   "key": "images",
                   "type": "file",
-                  "value": null
+                  "src": []
                 }
               ]
             },
             "url": {
-              "raw": "{{url}}/api/image/upload",
+              "raw": "{{url}}/image/upload",
               "host": ["{{url}}"],
-              "path": ["api", "image", "upload"]
+              "path": ["image", "upload"]
             },
-            "description": "## Image upload endpoint\n\n**Endpoint:** `POST /api/image/upload`\n\n**Rate Limit:** 30 requests per 15 minutes per IP\n\n**Description:** Upload one or more image files to the server.\n\n### Headers\n- `storage`: (Optional) Specify storage folder path\n- `X-Prefix`: (Optional) Add prefix to filename\n\n### Form Data\n\n| Key | Type | Description |\n| --- | --- | --- |\n| images | File | The image file(s) to upload |\n\n### Rate Limit Headers\n\nWhen rate limit is active, responses include:\n- `RateLimit-Limit`: Maximum requests allowed\n- `RateLimit-Remaining`: Requests remaining\n- `RateLimit-Reset`: Time when limit resets\n\n### Rate Limit Error (429)\n\n```json\n{\n    \"success\": false,\n    \"message\": \"Too many image upload requests from this IP, please try again after 15 minutes\",\n    \"data\": null\n}\n```\n\n### Success Response\n\n```json\n{\n    \"status\": 200,\n    \"message\": \"Files uploaded successfully\",\n    \"result\": [\n        {\n            \"originalname\": \"image1.png\",\n            \"encoding\": \"7bit\",\n            \"mimetype\": \"image/png\",\n            \"destination\": \"storage/images\",\n            \"filename\": \"2026-02-11_a1b2c3d4.png\",\n            \"path\": \"storage/images/2026-02-11_a1b2c3d4.png\",\n            \"size\": 123456\n        }\n    ]\n}\n```"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Image (Legacy)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{url}}/api/image/:filename?fm=webp&q=80&w=500&h=500&fit=cover",
-              "host": ["{{url}}"],
-              "path": ["api", "image", ":filename"],
-              "query": [
-                {
-                  "key": "fm",
-                  "value": "webp",
-                  "description": "Format: jpg, png, webp, avif"
-                },
-                {
-                  "key": "q",
-                  "value": "80",
-                  "description": "Quality: 1-100"
-                },
-                {
-                  "key": "w",
-                  "value": "500",
-                  "description": "Width in pixels"
-                },
-                {
-                  "key": "h",
-                  "value": "500",
-                  "description": "Height in pixels"
-                },
-                {
-                  "key": "fit",
-                  "value": "cover",
-                  "description": "Fit mode: cover, contain, fill, inside, outside"
-                }
-              ],
-              "variable": [
-                {
-                  "key": "filename",
-                  "value": "example.jpg"
-                }
-              ]
-            },
-            "description": "## Get Image (Legacy Route)\n\n**Endpoint:** `GET /api/image/:filename`\n\n**Deprecated:** Use `/api/image/assets/:filename` instead\n\n**Description:** Retrieve and optimize an image file. This is the legacy route maintained for backward compatibility.\n\n### Query Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| fm | String | Format (jpg, png, webp, avif) |\n| q | Number | Quality (1-100) |\n| w | Number | Width in pixels |\n| h | Number | Height in pixels |\n| fit | String | Fit mode (cover, contain, fill, inside, outside) |"
+            "description": "Upload images with automatic optimization.\n\n**Rate Limit:** 30 requests per 15 minutes"
           },
           "response": []
         },
         {
           "name": "Get Image (Optimized)",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{url}}/api/image/assets/:filename?fm=webp&q=80&w=500&h=500&fit=cover",
+              "raw": "{{url}}/image/assets/:filename?fm=webp&q=80&w=500&h=500&fit=cover",
               "host": ["{{url}}"],
-              "path": ["api", "image", "assets", ":filename"],
+              "path": ["image", "assets", ":filename"],
               "query": [
                 {
                   "key": "fm",
@@ -162,7 +323,7 @@
                 {
                   "key": "fit",
                   "value": "cover",
-                  "description": "Fit mode: cover, contain, fill, inside, outside"
+                  "description": "cover, contain, fill, inside, outside"
                 }
               ],
               "variable": [
@@ -172,11 +333,12 @@
                 }
               ]
             },
-            "description": "## Image optimization endpoint\n\n**Endpoint:** `GET /api/image/assets/:filename`\n\n**Description:** Retrieve and optimize an image file with various transformation options.\n\n### URL Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| filename | String | The name of the image file |\n\n### Query Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| fm | String | Format (jpg, png, webp, avif) |\n| q | Number | Quality (1-100) |\n| w | Number | Width in pixels |\n| h | Number | Height in pixels |\n| fit | String | Fit mode (cover, contain, fill, inside, outside) |\n\n### Example cURL\n\n```sh\ncurl -X GET \"{{url}}/image/assets/sample.jpg?fm=webp&q=80&w=300&h=300&fit=cover\"\n```\n\n### Response\n\nReturns the optimized image file with appropriate Content-Type header."
+            "description": "Retrieve and optimize images with real-time transformations.\n\n**Features:**\n- Format conversion (WebP, AVIF, JPEG, PNG)\n- Resize and crop\n- Quality optimization\n- Automatic caching"
           },
           "response": []
         }
-      ]
+      ],
+      "description": "🖼️ Image upload and optimization with Sharp"
     },
     {
       "name": "File",
@@ -184,26 +346,15 @@
         {
           "name": "Upload File",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
             "header": [
               {
                 "key": "storage",
                 "value": "files",
-                "description": "Optional: Specify storage folder",
                 "type": "text"
-              },
-              {
-                "key": "X-Prefix",
-                "value": "document",
-                "description": "Optional: Add prefix to filename",
-                "type": "text",
-                "disabled": true
-              },
-              {
-                "key": "Content-Type",
-                "value": "multipart/form-data",
-                "type": "text",
-                "disabled": true
               }
             ],
             "body": {
@@ -212,151 +363,59 @@
                 {
                   "key": "files",
                   "type": "file",
-                  "value": null
+                  "src": []
                 }
               ]
             },
             "url": {
-              "raw": "{{url}}/api/file/upload",
+              "raw": "{{url}}/file/upload",
               "host": ["{{url}}"],
-              "path": ["api", "file", "upload"]
+              "path": ["file", "upload"]
             },
-            "description": "## File upload endpoint\n\n**Endpoint:** `POST /api/file/upload`\n\n**Rate Limit:** 15 requests per 15 minutes per IP\n\n**Description:** Upload files using three different methods:\n\n---\n\n## Method 1: Multipart Form Data Upload\n\n**Headers:**\n- `Content-Type: multipart/form-data`\n- `storage`: (Optional) Specify storage folder\n- `X-Prefix`: (Optional) Add prefix to filename\n\n### Form Data\n\n| Key | Type | Description |\n| --- | --- | --- |\n| files | File | The file(s) to upload |\n\n---\n\n## Method 2: Single File Upload via JSON Body (Base64)\n\n**Headers:**\n- `Content-Type: application/json`\n\n### JSON Body\n\n```json\n{\n    \"base64\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...\",\n    \"filename\": \"myimage.png\",\n    \"mimetype\": \"image/png\"\n}\n```\n\n---\n\n## Method 3: Multiple File Uploads via JSON Body (Base64)\n\n**Headers:**\n- `Content-Type: application/json`\n\n### JSON Body\n\n```json\n{\n    \"files\": [\n        {\n            \"base64\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...\",\n            \"filename\": \"myimage.png\",\n            \"mimetype\": \"image/png\"\n        },\n        {\n            \"base64\": \"data:application/pdf;base64,JVBERi0xLjQKJeLjz9MK...\",\n            \"filename\": \"document.pdf\",\n            \"mimetype\": \"application/pdf\"\n        }\n    ]\n}\n```\n\n---\n\n### Rate Limit Headers\n\n- `RateLimit-Limit`: Maximum requests allowed\n- `RateLimit-Remaining`: Requests remaining\n- `RateLimit-Reset`: Time when limit resets\n\n### Rate Limit Error (429)\n\n```json\n{\n    \"success\": false,\n    \"message\": \"Too many file upload requests from this IP, please try again after 15 minutes\",\n    \"data\": null\n}\n```"
-          },
-          "response": []
-        },
-        {
-          "name": "Upload File (Base64 Single)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              },
-              {
-                "key": "storage",
-                "value": "files",
-                "description": "Optional: Specify storage folder",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"base64\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...\",\n    \"filename\": \"myimage.png\",\n    \"mimetype\": \"image/png\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{url}}/api/file/upload",
-              "host": ["{{url}}"],
-              "path": ["api", "file", "upload"]
-            },
-            "description": "## File upload via Base64 (Single File)\n\n**Endpoint:** `POST /api/file/upload`\n\n**Rate Limit:** 15 requests per 15 minutes per IP\n\n**Headers:**\n- `Content-Type: application/json`\n\n**Body:**\n```json\n{\n    \"base64\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...\",\n    \"filename\": \"myimage.png\",\n    \"mimetype\": \"image/png\"\n}\n```"
-          },
-          "response": []
-        },
-        {
-          "name": "Upload File (Base64 Multiple)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              },
-              {
-                "key": "storage",
-                "value": "files",
-                "description": "Optional: Specify storage folder",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"files\": [\n        {\n            \"base64\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...\",\n            \"filename\": \"myimage.png\",\n            \"mimetype\": \"image/png\"\n        },\n        {\n            \"base64\": \"data:application/pdf;base64,JVBERi0xLjQKJeLjz9MK...\",\n            \"filename\": \"document.pdf\",\n            \"mimetype\": \"application/pdf\"\n        }\n    ]\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{url}}/api/file/upload",
-              "host": ["{{url}}"],
-              "path": ["api", "file", "upload"]
-            },
-            "description": "## File upload via Base64 (Multiple Files)\n\n**Endpoint:** `POST /api/file/upload`\n\n**Rate Limit:** 15 requests per 15 minutes per IP\n\n**Headers:**\n- `Content-Type: application/json`\n\n**Body:**\n```json\n{\n    \"files\": [\n        {\n            \"base64\": \"data:...\",\n            \"filename\": \"file1.png\",\n            \"mimetype\": \"image/png\"\n        }\n    ]\n}\n```"
+            "description": "Upload files (supports multipart and Base64).\n\n**Rate Limit:** 15 requests per 15 minutes"
           },
           "response": []
         },
         {
           "name": "Search Files",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{url}}/api/file/search?q=example&type=image",
+              "raw": "{{url}}/file/search?q=example&type=image",
               "host": ["{{url}}"],
-              "path": ["api", "file", "search"],
+              "path": ["file", "search"],
               "query": [
                 {
                   "key": "q",
-                  "value": "example",
-                  "description": "Search query for filename"
+                  "value": "example"
                 },
                 {
                   "key": "type",
                   "value": "image",
-                  "description": "Optional: Filter by type (image, office)"
+                  "description": "image, office, or omit for all"
                 }
               ]
             },
-            "description": "## File search endpoint\n\n**Endpoint:** `GET /api/file/search`\n\n**Description:** Search for files by filename and optionally filter by type.\n\n### Query Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| q | String | Search query for filename (required) |\n| type | String | Filter by type: 'image' or 'office' (optional) |\n\n### Example Response\n\n```json\n{\n    \"status\": 200,\n    \"message\": \"Files retrieved successfully\",\n    \"result\": [\n        {\n            \"dir\": \"./storage/images\",\n            \"name\": \"example.jpg\",\n            \"size\": 102028,\n            \"createdAt\": \"2026-02-11T11:32:48.184Z\",\n            \"modifiedAt\": \"2026-02-11T11:32:48.205Z\",\n            \"relativePath\": \"./storage/images/example.jpg\",\n            \"previewUrl\": \"/file/preview/example.jpg\"\n        }\n    ]\n}\n```"
-          },
-          "response": []
-        },
-        {
-          "name": "Move File",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "storage",
-                "value": "new-folder",
-                "description": "Target folder path",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{url}}/api/file/move/:filename",
-              "host": ["{{url}}"],
-              "path": ["api", "file", "move", ":filename"],
-              "variable": [
-                {
-                  "key": "filename",
-                  "value": "example.png"
-                }
-              ]
-            },
-            "description": "## Move file endpoint\n\n**Endpoint:** `PUT /api/file/move/:filename`\n\n**Description:** Move a file to a different directory.\n\n### URL Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| filename | String | The name of the file to move |\n\n### Headers\n\n| Key | Type | Description |\n| --- | --- | --- |\n| storage | String | Target folder path |\n\n### Example Response\n\n```json\n{\n    \"status\": 200,\n    \"message\": \"File moved successfully\",\n    \"data\": {\n        \"oldPath\": \"storage/images/example.png\",\n        \"newPath\": \"storage/new-folder/example.png\"\n    }\n}\n```"
+            "description": "Search for files by filename and optional type filter."
           },
           "response": []
         },
         {
           "name": "Delete File",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{url}}/api/file/delete/:filename",
+              "raw": "{{url}}/file/delete/:filename",
               "host": ["{{url}}"],
-              "path": ["api", "file", "delete", ":filename"],
+              "path": ["file", "delete", ":filename"],
               "variable": [
                 {
                   "key": "filename",
@@ -364,19 +423,51 @@
                 }
               ]
             },
-            "description": "## Delete file endpoint\n\n**Endpoint:** `DELETE /api/file/delete/:filename`\n\n**Description:** Delete a file from storage.\n\n### URL Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| filename | String | The name of the file to delete |\n\n### Example Response\n\n```json\n{\n    \"status\": 200,\n    \"message\": \"File deleted successfully\",\n    \"data\": {\n        \"filename\": \"example.png\",\n        \"deleted\": true\n    }\n}\n```"
+            "description": "Delete a file from storage."
+          },
+          "response": []
+        },
+        {
+          "name": "Move File",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "storage",
+                "value": "new-folder",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/file/move/:filename",
+              "host": ["{{url}}"],
+              "path": ["file", "move", ":filename"],
+              "variable": [
+                {
+                  "key": "filename",
+                  "value": "example.png"
+                }
+              ]
+            },
+            "description": "Move a file to a different directory."
           },
           "response": []
         },
         {
           "name": "Download File",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{url}}/api/file/download/:filename",
+              "raw": "{{url}}/file/download/:filename",
               "host": ["{{url}}"],
-              "path": ["api", "file", "download", ":filename"],
+              "path": ["file", "download", ":filename"],
               "variable": [
                 {
                   "key": "filename",
@@ -384,19 +475,22 @@
                 }
               ]
             },
-            "description": "## Download file endpoint\n\n**Endpoint:** `GET /api/file/download/:filename`\n\n**Description:** Download a file from storage.\n\n### URL Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| filename | String | The name of the file to download |\n\n### Response\n\nReturns the file as an attachment with appropriate Content-Type and Content-Disposition headers."
+            "description": "Download a file from storage."
           },
           "response": []
         },
         {
           "name": "Preview File",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{url}}/api/file/preview/:filename",
+              "raw": "{{url}}/file/preview/:filename",
               "host": ["{{url}}"],
-              "path": ["api", "file", "preview", ":filename"],
+              "path": ["file", "preview", ":filename"],
               "variable": [
                 {
                   "key": "filename",
@@ -404,11 +498,12 @@
                 }
               ]
             },
-            "description": "## Preview file endpoint\n\n**Endpoint:** `GET /api/file/preview/:filename`\n\n**Description:** Preview a file (images, PDFs, Office documents) in the browser.\n\n### URL Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| filename | String | The name of the file to preview |\n\n### Supported File Types\n\n- Images: jpg, png, gif, webp, svg\n- Documents: pdf, docx, xlsx, pptx\n- Others: Various office formats\n\n### Response\n\nReturns the file content or a rendered preview with appropriate Content-Type header."
+            "description": "Preview files (images, PDFs, Office documents) in browser."
           },
           "response": []
         }
-      ]
+      ],
+      "description": "📁 File upload, management, and preview"
     },
     {
       "name": "Folder",
@@ -416,39 +511,45 @@
         {
           "name": "Get Folder Structure (Root)",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{url}}/api/folder",
+              "raw": "{{url}}/folder",
               "host": ["{{url}}"],
-              "path": ["api", "folder"]
+              "path": ["folder"]
             },
-            "description": "## Get folder structure (Root)\n\n**Endpoint:** `GET /api/folder`\n\n**Description:** Get the top-level folder structure and files in storage.\n\n### Example Response\n\n```json\n{\n    \"status\": 200,\n    \"message\": \"Folder structure retrieved successfully\",\n    \"result\": [\n        {\n            \"name\": \"images\",\n            \"type\": \"folder\",\n            \"children\": [\n                {\n                    \"name\": \"example.jpg\",\n                    \"type\": \"file\"\n                }\n            ]\n        },\n        {\n            \"name\": \"files\",\n            \"type\": \"folder\",\n            \"children\": []\n        }\n    ]\n}\n```"
+            "description": "Get the top-level folder structure and files in storage."
           },
           "response": []
         },
         {
           "name": "Get Folder Structure (Nested)",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{url}}/api/folder/:path",
+              "raw": "{{url}}/folder/:path",
               "host": ["{{url}}"],
-              "path": ["api", "folder", ":path"],
+              "path": ["folder", ":path"],
               "variable": [
                 {
                   "key": "path",
-                  "value": "images/subfolder",
-                  "description": "Path to folder (can be nested: folder/subfolder/subfolder)"
+                  "value": "images/subfolder"
                 }
               ]
             },
-            "description": "## Get folder structure (Nested)\n\n**Endpoint:** `GET /api/folder/:path`\n\n**Description:** Get the folder structure and files in a specific folder path.\n\n### URL Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| path | String | The folder path (supports nested paths) |\n\n### Examples\n\n- `/api/folder/images` - Shows contents of 'images' folder\n- `/api/folder/files/documents` - Shows contents of 'files/documents' folder\n\n### Example Response\n\n```json\n{\n    \"status\": 200,\n    \"message\": \"Folder structure retrieved successfully\",\n    \"result\": [\n        {\n            \"name\": \"subfolder\",\n            \"type\": \"folder\",\n            \"children\": []\n        },\n        {\n            \"name\": \"image1.jpg\",\n            \"type\": \"file\"\n        },\n        {\n            \"name\": \"image2.png\",\n            \"type\": \"file\"\n        }\n    ]\n}\n```"
+            "description": "Get folder contents at a specific path."
           },
           "response": []
         }
-      ]
+      ],
+      "description": "📂 Folder structure and navigation"
     },
     {
       "name": "Database",
@@ -459,11 +560,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{url}}/api/database/files",
+              "raw": "{{url}}/database/files",
               "host": ["{{url}}"],
-              "path": ["api", "database", "files"]
+              "path": ["database", "files"]
             },
-            "description": "## Get all files from database\n\n**Endpoint:** `GET /api/database/files`\n\n**Description:** Retrieve all files from the database.\n\n### Example Response\n\n```json\n{\n    \"status\": 200,\n    \"message\": \"Files retrieved from database\",\n    \"data\": [\n        {\n            \"id\": \"1\",\n            \"filename\": \"example.jpg\",\n            \"path\": \"storage/images/example.jpg\",\n            \"size\": 102400,\n            \"mimetype\": \"image/jpeg\",\n            \"createdAt\": \"2026-02-11T10:00:00.000Z\"\n        }\n    ]\n}\n```"
+            "description": "Retrieve all files from the database.\n\n**Authentication:** Required"
           },
           "response": []
         },
@@ -473,11 +574,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{url}}/api/database/stats",
+              "raw": "{{url}}/database/stats",
               "host": ["{{url}}"],
-              "path": ["api", "database", "stats"]
+              "path": ["database", "stats"]
             },
-            "description": "## Get database statistics\n\n**Endpoint:** `GET /api/database/stats`\n\n**Description:** Retrieve statistics about files in the database.\n\n### Example Response\n\n```json\n{\n    \"status\": 200,\n    \"message\": \"Database statistics retrieved\",\n    \"data\": {\n        \"totalFiles\": 1250,\n        \"totalSize\": 5368709120,\n        \"totalSizeFormatted\": \"5.0 GB\",\n        \"fileTypes\": {\n            \"images\": 800,\n            \"documents\": 350,\n            \"others\": 100\n        },\n        \"averageFileSize\": 4294967\n    }\n}\n```"
+            "description": "Get statistics about files in the database.\n\n**Authentication:** Required"
           },
           "response": []
         },
@@ -487,23 +588,17 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{url}}/api/database/search?q=example&type=image",
+              "raw": "{{url}}/database/search?q=example",
               "host": ["{{url}}"],
-              "path": ["api", "database", "search"],
+              "path": ["database", "search"],
               "query": [
                 {
                   "key": "q",
-                  "value": "example",
-                  "description": "Search query (required)"
-                },
-                {
-                  "key": "type",
-                  "value": "image",
-                  "description": "Filter by type (optional)"
+                  "value": "example"
                 }
               ]
             },
-            "description": "## Search files in database\n\n**Endpoint:** `GET /api/database/search`\n\n**Description:** Search for files in the database by query and optional type filter.\n\n### Query Parameters\n\n| Key | Type | Description |\n| --- | --- | --- |\n| q | String | Search query (required) |\n| type | String | Filter by type (optional) |\n\n### Example Response\n\n```json\n{\n    \"status\": 200,\n    \"message\": \"Search results retrieved\",\n    \"data\": [\n        {\n            \"id\": \"1\",\n            \"filename\": \"example.jpg\",\n            \"path\": \"storage/images/example.jpg\",\n            \"size\": 102400,\n            \"mimetype\": \"image/jpeg\",\n            \"createdAt\": \"2026-02-11T10:00:00.000Z\"\n        }\n    ]\n}\n```"
+            "description": "Search files in database.\n\n**Authentication:** Required"
           },
           "response": []
         },
@@ -513,15 +608,16 @@
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "{{url}}/api/database/backup",
+              "raw": "{{url}}/database/backup",
               "host": ["{{url}}"],
-              "path": ["api", "database", "backup"]
+              "path": ["database", "backup"]
             },
-            "description": "## Backup database\n\n**Endpoint:** `POST /api/database/backup`\n\n**Description:** Create a backup of the database.\n\n### Example Response\n\n```json\n{\n    \"status\": 200,\n    \"message\": \"Database backed up successfully\",\n    \"data\": {\n        \"backupPath\": \"storage/backups/database_2026-02-11_10-30-00.json\"\n    }\n}\n```"
+            "description": "Create a database backup.\n\n**Authentication:** Required"
           },
           "response": []
         }
-      ]
+      ],
+      "description": "🗄️ Database operations (requires authentication)"
     },
     {
       "name": "Storage",
@@ -532,11 +628,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{url}}/api/storage",
+              "raw": "{{url}}/storage",
               "host": ["{{url}}"],
-              "path": ["api", "storage"]
+              "path": ["storage"]
             },
-            "description": "## Get detailed storage statistics\n\n**Endpoint:** `GET /api/storage`\n\n**Description:** Retrieve comprehensive storage statistics including folder breakdown, file types, and largest files.\n\n### Response Data\n\n- `totalSize`: Total storage size in bytes\n- `totalSizeFormatted`: Human-readable total size\n- `totalFiles`: Total number of files\n- `totalFolders`: Total number of folders\n- `folderBreakdown`: Array of folder statistics\n- `fileTypeBreakdown`: Statistics by file type\n- `largestFiles`: Top 10 largest files\n- `storageDirectory`: Storage directory path\n\n### Example Response\n\n```json\n{\n    \"status\": 200,\n    \"message\": \"Storage statistics retrieved successfully\",\n    \"data\": {\n        \"totalSize\": 5368709120,\n        \"totalSizeFormatted\": \"5.0 GB\",\n        \"totalFiles\": 1250,\n        \"totalFolders\": 45,\n        \"folderBreakdown\": [\n            {\n                \"name\": \"images\",\n                \"path\": \"storage/images\",\n                \"fileCount\": 800,\n                \"totalSize\": 4294967296,\n                \"formattedSize\": \"4.0 GB\"\n            },\n            {\n                \"name\": \"files\",\n                \"path\": \"storage/files\",\n                \"fileCount\": 350,\n                \"totalSize\": 1073741824,\n                \"formattedSize\": \"1.0 GB\"\n            }\n        ],\n        \"fileTypeBreakdown\": {\n            \"jpg\": {\n                \"count\": 450,\n                \"size\": 2147483648,\n                \"formattedSize\": \"2.0 GB\"\n            },\n            \"png\": {\n                \"count\": 350,\n                \"size\": 2147483648,\n                \"formattedSize\": \"2.0 GB\"\n            },\n            \"pdf\": {\n                \"count\": 200,\n                \"size\": 536870912,\n                \"formattedSize\": \"512 MB\"\n            },\n            \"docx\": {\n                \"count\": 150,\n                \"size\": 268435456,\n                \"formattedSize\": \"256 MB\"\n            }\n        },\n        \"largestFiles\": [\n            {\n                \"path\": \"images/large-image.jpg\",\n                \"name\": \"large-image.jpg\",\n                \"size\": 104857600,\n                \"type\": \"jpg\"\n            },\n            {\n                \"path\": \"files/presentation.pptx\",\n                \"name\": \"presentation.pptx\",\n                \"size\": 52428800,\n                \"type\": \"pptx\"\n            }\n        ],\n        \"storageDirectory\": \"D:/Project/Sophat/stackdev.cloud/cdn.api.pphat.stackdev.cloud/storage\"\n    }\n}\n```"
+            "description": "Get detailed storage statistics including folder breakdown, file types, and largest files.\n\n**Authentication:** Required"
           },
           "response": []
         },
@@ -546,21 +642,32 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{url}}/api/storage/summary",
+              "raw": "{{url}}/storage/summary",
               "host": ["{{url}}"],
-              "path": ["api", "storage", "summary"]
+              "path": ["storage", "summary"]
             },
-            "description": "## Get quick storage summary\n\n**Endpoint:** `GET /api/storage/summary`\n\n**Description:** Retrieve a quick summary of storage usage. This is a lighter/faster version that doesn't include detailed breakdowns.\n\n### Response Data\n\n- `totalSize`: Total storage size in bytes\n- `totalSizeFormatted`: Human-readable total size\n- `totalFiles`: Total number of files\n- `totalFolders`: Total number of folders\n- `storageDirectory`: Storage directory path\n\n### Example Response\n\n```json\n{\n    \"status\": 200,\n    \"message\": \"Storage summary retrieved successfully\",\n    \"data\": {\n        \"totalSize\": 5368709120,\n        \"totalSizeFormatted\": \"5.0 GB\",\n        \"totalFiles\": 1250,\n        \"totalFolders\": 45,\n        \"storageDirectory\": \"D:/Project/Sophat/stackdev.cloud/cdn.api.pphat.stackdev.cloud/storage\"\n    }\n}\n```\n\n### Use Cases\n\n- Dashboard widgets showing quick storage info\n- API responses where detailed breakdown is not needed\n- Frequent polling for storage metrics\n- Mobile applications with limited bandwidth"
+            "description": "Get quick storage summary.\n\n**Authentication:** Required"
           },
           "response": []
         }
-      ]
+      ],
+      "description": "💾 Storage statistics and management (requires authentication)"
     }
   ],
   "variable": [
     {
       "key": "url",
       "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
       "type": "string"
     }
   ]
