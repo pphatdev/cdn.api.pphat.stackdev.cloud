@@ -10,7 +10,16 @@
         </thead>
         <tbody class="divide-y divide-slate-100">
             <% rows.forEach(row => { %>
-                <%- include('./table-row', { icon: row.icon, iconBg: row.iconBg, iconColor: row.iconColor, name: row.name, totalFiles: row.totalFiles, storageUsed: row.storageUsed, averageSize: row.averageSize, shareOfTotal: row.shareOfTotal }) %>
+                <%- include('./table-row', {
+                        icon: row.icon,
+                        iconClassName: row.iconClassName,
+                        name: row.name,
+                        totalFiles: row.totalFiles,
+                        storageUsed: row.storageUsed,
+                        averageSize: row.averageSize,
+                        shareOfTotal: row.shareOfTotal
+                    })
+                %>
             <% }); %>
         </tbody>
     </table>
