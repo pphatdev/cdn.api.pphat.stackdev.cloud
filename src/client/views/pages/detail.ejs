@@ -114,7 +114,7 @@
                         <div id="audio-preview-container" class="hidden p-8 bg-gradient-to-br from-slate-50 to-slate-100">
                             <div class="max-w-xl mx-auto">
                                 <div class="flex items-center gap-4 mb-6">
-                                    <div class="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                                    <div class="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center shrink-0">
                                         <svg class="size-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
                                     </div>
                                     <div class="flex-1 min-w-0">
@@ -148,138 +148,142 @@
                         </div>
                     </div>
 
-                    <!-- Usage & Embed Section -->
-                    <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-                        <div class="p-4 border-b border-slate-100">
-                            <h2 class="font-semibold text-slate-900 flex items-center gap-2">
-                                <svg class="size-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-                                Usage & Embed Codes
-                            </h2>
+                    <div class="grid gap-6 grid-cols-1 lg:grid-cols-2">
+                        <!-- File Information -->
+                        <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+                            <div class="p-4 border-b border-slate-100">
+                                <h2 class="font-semibold text-slate-900 flex items-center gap-2">
+                                    <svg class="size-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    File Information
+                                </h2>
+                            </div>
+                            <div class="p-6">
+                                <dl class="space-y-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center shrink-0">
+                                            <svg class="size-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <dt class="text-xs text-slate-400 uppercase tracking-wide">Filename</dt>
+                                            <dd id="info-filename" class="text-sm font-medium line-clamp-1 leading-5 text-slate-900 mt-1 break-all">—</dd>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center shrink-0">
+                                            <svg class="size-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <dt class="text-xs text-slate-400 uppercase tracking-wide">File Type</dt>
+                                            <dd id="info-type" class="text-sm font-medium line-clamp-1 leading-5 text-slate-900 mt-1">—</dd>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center shrink-0">
+                                            <svg class="size-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path></svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <dt class="text-xs text-slate-400 uppercase tracking-wide">File Size</dt>
+                                            <dd id="info-size" class="text-sm font-medium line-clamp-1 leading-5 text-slate-900 mt-1">—</dd>
+                                        </div>
+                                    </div>
+                                    <div id="info-dimensions-row" class="flex items-start gap-3">
+                                        <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center shrink-0">
+                                            <svg class="size-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <dt class="text-xs text-slate-400 uppercase tracking-wide">Dimensions</dt>
+                                            <dd id="info-dimensions" class="text-sm font-medium line-clamp-1 leading-5 text-slate-900 mt-1">—</dd>
+                                        </div>
+                                    </div>
+                                    <div id="info-duration-row" class="flex items-start gap-3">
+                                        <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center shrink-0">
+                                            <svg class="size-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <dt class="text-xs text-slate-400 uppercase tracking-wide">Duration</dt>
+                                            <dd id="info-duration" class="text-sm font-medium line-clamp-1 leading-5 text-slate-900 mt-1">—</dd>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center shrink-0">
+                                            <svg class="size-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <dt class="text-xs text-slate-400 uppercase tracking-wide">Modified</dt>
+                                            <dd id="info-modified" class="text-sm font-medium line-clamp-1 leading-5 text-slate-900 mt-1">—</dd>
+                                        </div>
+                                    </div>
+                                </dl>
+                            </div>
                         </div>
-                        <div class="p-6">
-                            <div class="space-y-4">
-                                <!-- Direct URL -->
-                                <div>
-                                    <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Direct URL</label>
-                                    <div class="flex gap-2">
-                                        <input type="text" id="direct-url" readonly class="flex-1 px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none font-mono" />
-                                        <button type="button" data-copy="direct-url" class="copy-btn px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 flex items-center gap-2">
-                                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                                            Copy
-                                        </button>
-                                    </div>
-                                </div>
 
-                                <!-- HTML Embed (for images) -->
-                                <div id="html-embed-row">
-                                    <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">HTML Embed</label>
-                                    <div class="flex gap-2">
-                                        <input type="text" id="html-embed" readonly class="flex-1 px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none font-mono" />
-                                        <button type="button" data-copy="html-embed" class="copy-btn px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 flex items-center gap-2">
-                                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                                            Copy
-                                        </button>
+                        <!-- Usage & Embed Section -->
+                        <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+                            <div class="p-4 border-b border-slate-100">
+                                <h2 class="font-semibold text-slate-900 flex items-center gap-2">
+                                    <svg class="size-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                                    Usage & Embed Codes
+                                </h2>
+                            </div>
+                            <div class="p-6">
+                                <div class="space-y-4">
+                                    <!-- Direct URL -->
+                                    <div>
+                                        <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Direct URL</label>
+                                        <div class="flex gap-2">
+                                            <input type="text" id="direct-url" readonly class="flex-1 px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none font-mono" />
+                                            <button type="button" data-copy="direct-url" class="copy-btn px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 flex items-center gap-2">
+                                                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                                Copy
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-
-                                <!-- Markdown (for images) -->
-                                <div id="markdown-embed-row">
-                                    <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Markdown</label>
-                                    <div class="flex gap-2">
-                                        <input type="text" id="markdown-embed" readonly class="flex-1 px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none font-mono" />
-                                        <button type="button" data-copy="markdown-embed" class="copy-btn px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 flex items-center gap-2">
-                                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                                            Copy
-                                        </button>
+    
+                                    <!-- HTML Embed (for images) -->
+                                    <div id="html-embed-row">
+                                        <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">HTML Embed</label>
+                                        <div class="flex gap-2">
+                                            <input type="text" id="html-embed" readonly class="flex-1 px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none font-mono" />
+                                            <button type="button" data-copy="html-embed" class="copy-btn px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 flex items-center gap-2">
+                                                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                                Copy
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-
-                                <!-- CDN URL with optimization (for images) -->
-                                <div id="cdn-url-row">
-                                    <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">CDN URL (Optimized)</label>
-                                    <div class="flex gap-2">
-                                        <input type="text" id="cdn-url" readonly class="flex-1 px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none font-mono" />
-                                        <button type="button" data-copy="cdn-url" class="copy-btn px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 flex items-center gap-2">
-                                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                                            Copy
-                                        </button>
+    
+                                    <!-- Markdown (for images) -->
+                                    <div id="markdown-embed-row">
+                                        <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Markdown</label>
+                                        <div class="flex gap-2">
+                                            <input type="text" id="markdown-embed" readonly class="flex-1 px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none font-mono" />
+                                            <button type="button" data-copy="markdown-embed" class="copy-btn px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 flex items-center gap-2">
+                                                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                                Copy
+                                            </button>
+                                        </div>
+                                    </div>
+    
+                                    <!-- CDN URL with optimization (for images) -->
+                                    <div id="cdn-url-row">
+                                        <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">CDN URL (Optimized)</label>
+                                        <div class="flex gap-2">
+                                            <input type="text" id="cdn-url" readonly class="flex-1 px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none font-mono" />
+                                            <button type="button" data-copy="cdn-url" class="copy-btn px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 flex items-center gap-2">
+                                                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                                Copy
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                     </div>
+
                 </div>
 
                 <!-- Sidebar -->
                 <div class="space-y-6">
-                    <!-- File Information -->
-                    <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-                        <div class="p-4 border-b border-slate-100">
-                            <h2 class="font-semibold text-slate-900 flex items-center gap-2">
-                                <svg class="size-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                File Information
-                            </h2>
-                        </div>
-                        <div class="p-6">
-                            <dl class="space-y-4">
-                                <div class="flex items-start gap-3">
-                                    <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <svg class="size-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <dt class="text-xs text-slate-400 uppercase tracking-wide">Filename</dt>
-                                        <dd id="info-filename" class="text-sm font-medium text-slate-900 mt-1 break-all">—</dd>
-                                    </div>
-                                </div>
-                                <div class="flex items-start gap-3">
-                                    <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <svg class="size-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <dt class="text-xs text-slate-400 uppercase tracking-wide">File Type</dt>
-                                        <dd id="info-type" class="text-sm font-medium text-slate-900 mt-1">—</dd>
-                                    </div>
-                                </div>
-                                <div class="flex items-start gap-3">
-                                    <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <svg class="size-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path></svg>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <dt class="text-xs text-slate-400 uppercase tracking-wide">File Size</dt>
-                                        <dd id="info-size" class="text-sm font-medium text-slate-900 mt-1">—</dd>
-                                    </div>
-                                </div>
-                                <div id="info-dimensions-row" class="hidden flex items-start gap-3">
-                                    <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <svg class="size-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <dt class="text-xs text-slate-400 uppercase tracking-wide">Dimensions</dt>
-                                        <dd id="info-dimensions" class="text-sm font-medium text-slate-900 mt-1">—</dd>
-                                    </div>
-                                </div>
-                                <div id="info-duration-row" class="hidden flex items-start gap-3">
-                                    <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <svg class="size-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <dt class="text-xs text-slate-400 uppercase tracking-wide">Duration</dt>
-                                        <dd id="info-duration" class="text-sm font-medium text-slate-900 mt-1">—</dd>
-                                    </div>
-                                </div>
-                                <div class="flex items-start gap-3">
-                                    <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <svg class="size-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <dt class="text-xs text-slate-400 uppercase tracking-wide">Modified</dt>
-                                        <dd id="info-modified" class="text-sm font-medium text-slate-900 mt-1">—</dd>
-                                    </div>
-                                </div>
-                            </dl>
-                        </div>
-                    </div>
-
                     <!-- Actions -->
                     <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
                         <div class="p-4 border-b border-slate-100">
@@ -313,36 +317,96 @@
                         <div class="p-4 border-b border-slate-100">
                             <h2 class="font-semibold text-slate-900 flex items-center gap-2">
                                 <svg class="size-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-                                Image Optimization
+                                Optimize Configuration
                             </h2>
                         </div>
                         <div class="p-4 space-y-4">
+                            <!-- Format -->
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Format</label>
+                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Output Format</label>
                                 <select id="opt-format" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20">
                                     <option value="">Original</option>
-                                    <option value="webp">WebP</option>
-                                    <option value="avif">AVIF</option>
-                                    <option value="png">PNG</option>
-                                    <option value="jpg">JPEG</option>
+                                    <option value="webp" selected>WebP (Recommended)</option>
+                                    <option value="avif">AVIF (Best compression)</option>
+                                    <option value="png">PNG (Lossless)</option>
+                                    <option value="jpg">JPEG (Compatible)</option>
                                 </select>
                             </div>
+
+                            <!-- Quality -->
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Quality: <span id="opt-quality-value">80</span>%</label>
-                                <input type="range" id="opt-quality" min="1" max="100" value="80" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Width</label>
-                                    <input type="number" id="opt-width" placeholder="Auto" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Quality</label>
+                                    <span id="opt-quality-value" class="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded">80%</span>
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Height</label>
-                                    <input type="number" id="opt-height" placeholder="Auto" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                                <input type="range" id="opt-quality" min="1" max="100" value="80" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-primary" />
+                                <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                                    <span>Low (1)</span>
+                                    <span>High (100)</span>
                                 </div>
                             </div>
-                            <button type="button" id="apply-optimization" class="w-full px-4 py-2.5 text-sm font-semibold text-white bg-primary rounded-xl hover:bg-primary/80 transition-colors">
+
+                            <!-- Dimensions -->
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Dimensions</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="relative">
+                                        <input type="number" id="opt-width" placeholder="Auto" class="w-full px-3 py-2 pr-8 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">W</span>
+                                    </div>
+                                    <div class="relative">
+                                        <input type="number" id="opt-height" placeholder="Auto" class="w-full px-3 py-2 pr-8 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">H</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Fit Mode -->
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Fit Mode</label>
+                                <select id="opt-fit" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                    <option value="">Default</option>
+                                    <option value="cover">Cover (Fill & crop)</option>
+                                    <option value="contain">Contain (Fit inside)</option>
+                                    <option value="fill">Fill (Stretch)</option>
+                                    <option value="inside">Inside (Preserve aspect)</option>
+                                </select>
+                            </div>
+
+                            <!-- Quick Presets -->
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Quick Presets</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button type="button" data-preset="thumbnail" class="preset-btn px-2 py-1.5 text-xs font-medium border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                                        Thumbnail
+                                    </button>
+                                    <button type="button" data-preset="medium" class="preset-btn px-2 py-1.5 text-xs font-medium border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                                        Medium
+                                    </button>
+                                    <button type="button" data-preset="large" class="preset-btn px-2 py-1.5 text-xs font-medium border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                                        Large
+                                    </button>
+                                    <button type="button" data-preset="avatar" class="preset-btn px-2 py-1.5 text-xs font-medium border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                                        Avatar
+                                    </button>
+                                    <button type="button" data-preset="banner" class="preset-btn px-2 py-1.5 text-xs font-medium border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                                        Banner
+                                    </button>
+                                    <button type="button" data-preset="social" class="preset-btn px-2 py-1.5 text-xs font-medium border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                                        Social
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Apply Button -->
+                            <button type="button" id="apply-optimization" class="w-full px-4 py-2.5 text-sm font-semibold text-white bg-primary rounded-xl hover:bg-primary/80 transition-colors flex items-center justify-center gap-2">
+                                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                                 Apply & Update URLs
+                            </button>
+
+                            <!-- Reset -->
+                            <button type="button" id="reset-optimization" class="w-full px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
+                                Reset to defaults
                             </button>
                         </div>
                     </div>
@@ -543,7 +607,7 @@
 
             // Build URLs
             const fileUrl = `/api/file/preview/${encodeURIComponent(filename)}`;
-            const imageUrl = `/api/image/${encodeURIComponent("<%= typeof file !== 'undefined' ? file : '' %>")}`;
+            const imageUrl = `/api/image/${encodeURIComponent(filename)}`;
 
             // Fetch file info via HEAD request
             let fileSize = null;
@@ -704,7 +768,47 @@
 
     // Quality slider
     document.getElementById('opt-quality')?.addEventListener('input', (e) => {
-        document.getElementById('opt-quality-value').textContent = e.target.value;
+        document.getElementById('opt-quality-value').textContent = e.target.value + '%';
+    });
+
+    // Presets
+    const presets = {
+        thumbnail: { width: 150, height: 150, quality: 80, format: 'webp', fit: 'cover' },
+        medium: { width: 600, height: 400, quality: 85, format: 'webp', fit: 'inside' },
+        large: { width: 1200, height: 800, quality: 90, format: 'webp', fit: 'inside' },
+        avatar: { width: 200, height: 200, quality: 85, format: 'webp', fit: 'cover' },
+        banner: { width: 1920, height: 400, quality: 85, format: 'webp', fit: 'cover' },
+        social: { width: 1200, height: 630, quality: 85, format: 'webp', fit: 'cover' }
+    };
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const presetName = btn.dataset.preset;
+            const preset = presets[presetName];
+            if (preset) {
+                document.getElementById('opt-width').value = preset.width;
+                document.getElementById('opt-height').value = preset.height;
+                document.getElementById('opt-quality').value = preset.quality;
+                document.getElementById('opt-quality-value').textContent = preset.quality + '%';
+                document.getElementById('opt-format').value = preset.format;
+                document.getElementById('opt-fit').value = preset.fit;
+                
+                // Highlight selected preset
+                document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('bg-primary/10', 'border-primary', 'text-primary'));
+                btn.classList.add('bg-primary/10', 'border-primary', 'text-primary');
+            }
+        });
+    });
+
+    // Reset optimization
+    document.getElementById('reset-optimization')?.addEventListener('click', () => {
+        document.getElementById('opt-format').value = 'webp';
+        document.getElementById('opt-quality').value = 80;
+        document.getElementById('opt-quality-value').textContent = '80%';
+        document.getElementById('opt-width').value = '';
+        document.getElementById('opt-height').value = '';
+        document.getElementById('opt-fit').value = '';
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('bg-primary/10', 'border-primary', 'text-primary'));
     });
 
     // Apply optimization
@@ -715,19 +819,26 @@
         const quality = document.getElementById('opt-quality').value;
         const width = document.getElementById('opt-width').value;
         const height = document.getElementById('opt-height').value;
+        const fit = document.getElementById('opt-fit').value;
         
         const baseUrl = window.location.origin;
-        let cdnUrl = `${baseUrl}/api/image/${encodeURIComponent(currentFile)}?`;
         const params = [];
         if (format) params.push(`fm=${format}`);
         if (quality) params.push(`q=${quality}`);
         if (width) params.push(`w=${width}`);
         if (height) params.push(`h=${height}`);
+        if (fit) params.push(`fit=${fit}`);
         
-        cdnUrl += params.join('&');
+        const cdnUrl = `${baseUrl}/api/image/${encodeURIComponent(currentFile)}${params.length ? '?' + params.join('&') : ''}`;
         document.getElementById('cdn-url').value = cdnUrl;
         document.getElementById('html-embed').value = `<img src="${cdnUrl}" alt="${currentFile}" />`;
         document.getElementById('markdown-embed').value = `![${currentFile}](${cdnUrl})`;
+
+        // Update preview image
+        const previewImg = document.getElementById('preview-image');
+        if (previewImg && fileType === 'image') {
+            previewImg.src = cdnUrl;
+        }
     });
 
     // Check URL params on load
