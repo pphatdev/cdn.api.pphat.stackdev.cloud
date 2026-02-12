@@ -1,0 +1,17 @@
+<div class="flex items-center gap-2 text-xs text-foreground/60 mb-2">
+    <% items.forEach((item, index) => { %>
+        <% if (index > 0) { %>
+            <span>/</span>
+        <% } %>
+        <% if (item.href) { %>
+            <a href="<%= item.href %>" class="flex items-center gap-1 hover:text-slate-600">
+                <% if (item.icon) { %>
+                    <%- item.icon %>
+                <% } %>
+                <span><%= item.label %></span>
+            </a>
+        <% } else { %>
+            <span class="font-semibold text-slate-900"><%= item.label %></span>
+        <% } %>
+    <% }); %>
+</div>
