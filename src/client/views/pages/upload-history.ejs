@@ -1,0 +1,260 @@
+<main class="flex-1 overflow-y-auto bg-background relative">
+    <%- include('../components/header') %>
+
+    <div class="container mx-auto p-8">
+        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-8">
+            <div>
+                <p class="text-xs uppercase tracking-widest text-slate-400">Uploads</p>
+                <%- include('../components/breadcrumbs', {
+                    items: [
+                        {
+                            label: 'Dashboard',
+                            href: '/',
+                            icon: '<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>'
+                        },
+                        { label: 'Upload', href: '/upload' },
+                        { label: 'History' }
+                    ]
+                }) %>
+                <h1 class="text-2xl font-bold text-slate-900">Upload history</h1>
+                <p class="text-sm text-slate-500">Review and manage your uploaded files.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="/upload" class="px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50">Back to upload</a>
+                <a href="/files" class="px-4 py-2 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-primary/80">Browse files</a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white rounded-2xl border border-slate-100 p-6">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <div class="relative w-full md:max-w-sm">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            </span>
+                            <input id="history-search" type="text" placeholder="Search uploads..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg bg-white" />
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <select id="history-filter" class="px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white">
+                                <option value="all" selected>All types</option>
+                                <option value="images">Images</option>
+                                <option value="documents">Documents</option>
+                                <option value="videos">Videos</option>
+                                <option value="archives">Archives</option>
+                                <option value="others">Others</option>
+                            </select>
+                            <select id="history-sort" class="px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white">
+                                <option value="newest" selected>Newest first</option>
+                                <option value="oldest">Oldest first</option>
+                                <option value="largest">Largest size</option>
+                                <option value="smallest">Smallest size</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <%- include('../components/upload-history-table', {
+                            headers: ['File', 'Type', 'Size', 'Uploaded', 'Action'],
+                            bodyId: 'history-table',
+                            emptyMessage: 'Loading upload history...'
+                        }) %>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white rounded-2xl border border-slate-100 p-6">
+                    <h3 class="text-lg font-semibold text-slate-900 mb-4">Summary</h3>
+                    <div class="space-y-3 text-sm text-slate-600">
+                        <div class="flex items-center justify-between">
+                            <span>Total uploads</span>
+                            <span id="history-total" class="font-semibold text-slate-900">0</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span>Total size</span>
+                            <span id="history-size" class="font-semibold text-slate-900">0 KB</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span>Latest upload</span>
+                            <span id="history-latest" class="font-semibold text-slate-900">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-100 p-6">
+                    <h3 class="text-lg font-semibold text-slate-900 mb-4">Tips</h3>
+                    <ul class="space-y-3 text-sm text-slate-600">
+                        <li class="flex items-start gap-2">
+                            <span class="mt-1 h-2 w-2 rounded-full bg-primary"></span>
+                            Use search to locate files by name or extension.
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="mt-1 h-2 w-2 rounded-full bg-primary"></span>
+                            Click a file to preview it instantly.
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="mt-1 h-2 w-2 rounded-full bg-primary"></span>
+                            Filter by type to focus on a specific asset set.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    const historyTable = document.getElementById('history-table');
+    const historySearch = document.getElementById('history-search');
+    const historyFilter = document.getElementById('history-filter');
+    const historySort = document.getElementById('history-sort');
+    const historyTotal = document.getElementById('history-total');
+    const historySize = document.getElementById('history-size');
+    const historyLatest = document.getElementById('history-latest');
+
+    const typeGroups = {
+        images: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'],
+        documents: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'rtf', 'odt'],
+        videos: ['mp4', 'mov', 'avi', 'mkv', 'flv', 'wmv'],
+        archives: ['zip', 'rar', '7z', 'tar', 'gz']
+    };
+
+    const formatBytes = (bytes) => {
+        if (!bytes) return '0 KB';
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), sizes.length - 1);
+        return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
+    };
+
+    const timeAgo = (isoString) => {
+        if (!isoString) return '—';
+        const time = new Date(isoString).getTime();
+        const now = Date.now();
+        const diff = Math.max(now - time, 0);
+        const seconds = Math.floor(diff / 1000);
+        if (seconds < 60) return `${seconds}s ago`;
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        const days = Math.floor(hours / 24);
+        if (days < 7) return `${days}d ago`;
+        return new Date(isoString).toLocaleDateString();
+    };
+
+    const classifyType = (extension = '') => {
+        const ext = extension.toLowerCase();
+        if (typeGroups.images.includes(ext)) return 'Images';
+        if (typeGroups.documents.includes(ext)) return 'Documents';
+        if (typeGroups.videos.includes(ext)) return 'Videos';
+        if (typeGroups.archives.includes(ext)) return 'Archives';
+        return 'Others';
+    };
+
+    const renderRows = (files) => {
+        if (!historyTable) return;
+        if (!files.length) {
+            historyTable.innerHTML = `
+                <tr>
+                    <td colspan="5" class="py-6 text-center text-slate-400">No uploads found.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        historyTable.innerHTML = files.map((file) => `
+            <tr class="hover:bg-slate-50">
+                <td class="p-4">
+                    <div class="flex flex-col">
+                        <a href="/api/file/preview/${file.filename}" class="font-semibold text-slate-900 hover:underline whitespace-nowrap">${file.originalFilename || file.filename}</a>
+                        <span class="text-xs text-slate-400">${file.folderPath || 'root'}</span>
+                    </div>
+                </td>
+                <td class="p-4 text-slate-500 whitespace-nowrap">${classifyType(file.extension)}${file.extension ? ` · .${file.extension}` : ''}</td>
+                <td class="p-4 text-slate-500 whitespace-nowrap">${formatBytes(file.size)}</td>
+                <td class="p-4 text-slate-500 text-center whitespace-nowrap">${timeAgo(file.uploadedAt)}</td>
+                <td class="p-4 text-right">
+                    <a href="/api/file/preview/${file.filename}" class="text-xs font-semibold text-primary hover:underline">Preview</a>
+                </td>
+            </tr>
+        `).join('');
+    };
+
+    const updateSummary = (files) => {
+        if (!historyTotal || !historySize || !historyLatest) return;
+        const totalSize = files.reduce((sum, file) => sum + (file.size || 0), 0);
+        historyTotal.textContent = files.length.toString();
+        historySize.textContent = formatBytes(totalSize);
+        historyLatest.textContent = files.length ? timeAgo(files[0].uploadedAt) : '—';
+    };
+
+    const applyFilters = (files) => {
+        let filtered = [...files];
+        const query = historySearch?.value?.trim().toLowerCase() || '';
+        const filter = historyFilter?.value || 'all';
+        const sort = historySort?.value || 'newest';
+
+        if (query) {
+            filtered = filtered.filter(file =>
+                (file.originalFilename || file.filename || '').toLowerCase().includes(query) ||
+                (file.extension || '').toLowerCase().includes(query)
+            );
+        }
+
+        if (filter !== 'all') {
+            filtered = filtered.filter(file => {
+                const group = classifyType(file.extension).toLowerCase();
+                return group === filter;
+            });
+        }
+
+        if (sort === 'oldest') {
+            filtered.sort((a, b) => new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime());
+        } else if (sort === 'largest') {
+            filtered.sort((a, b) => (b.size || 0) - (a.size || 0));
+        } else if (sort === 'smallest') {
+            filtered.sort((a, b) => (a.size || 0) - (b.size || 0));
+        } else {
+            filtered.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+        }
+
+        return filtered;
+    };
+
+    let allUploads = [];
+
+    const loadHistory = async () => {
+        if (!historyTable) return;
+        try {
+            const response = await fetch('/api/database/files');
+            if (!response.ok) {
+                throw new Error('Failed to load uploads');
+            }
+            const data = await response.json();
+            const files = Array.isArray(data?.result) ? data.result : [];
+            allUploads = files;
+            const filtered = applyFilters(allUploads);
+            renderRows(filtered);
+            updateSummary(filtered);
+        } catch (error) {
+            historyTable.innerHTML = `
+                <tr>
+                    <td colspan="5" class="py-6 text-center text-red-500">Unable to load upload history.</td>
+                </tr>
+            `;
+        }
+    };
+
+    const handleFilters = () => {
+        const filtered = applyFilters(allUploads);
+        renderRows(filtered);
+        updateSummary(filtered);
+    };
+
+    historySearch?.addEventListener('input', handleFilters);
+    historyFilter?.addEventListener('change', handleFilters);
+    historySort?.addEventListener('change', handleFilters);
+
+    loadHistory();
+</script>
