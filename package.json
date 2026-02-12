@@ -9,7 +9,8 @@
     "css": "npx @tailwindcss/cli -i ./src/client/styles/main.css -o ./dist/client/styles/output.css --watch",
     "dev": "node --watch --no-warnings=ExperimentalWarning --loader ts-node/esm ./src/app.ts",
     "build:css": "npx @tailwindcss/cli -i ./src/client/styles/main.css -o ./dist/client/styles/output.css --minify",
-    "build": "tsc && npm run build:css",
+    "copy:views": "node -e \"require('fs-extra').copySync('src/client/views', 'dist/client/views')\"",
+    "build": "tsc && npm run build:css && npm run copy:views",
     "start": "node ./dist/app.js"
   },
   "author": "",
