@@ -1,18 +1,22 @@
 <!-- File Card Component -->
-<div class="bg-white border border-foreground/10 rounded-xl overflow-hidden hover:border-primary transition-all cursor-pointer">
-    <div class="h-32 bg-slate-50 relative flex items-center justify-center overflow-hidden">
-        <%- thumbnail %>
-    </div>
-    <div class="p-3">
-        <div class="flex items-center justify-between mb-1">
-            <div class="flex items-center gap-2">
-                <div class="p-1 rounded <%= className %>">
-                    <%- icon %>
-                </div>
-                <span class="text-xs font-bold text-slate-900 truncate"><%= title %></span>
+<div class="rounded-2xl bg-white hover:shadow-lg shadow-primary/10 transition-all duration-300 overflow-hidden group border border-foreground/10">
+    <div class="relative aspect-video bg-slate-50 flex items-center justify-center overflow-hidden">
+        <% if (typeof isImage !== 'undefined' && isImage && typeof imageSrc !== 'undefined') { %>
+            <img src="<%= imageSrc %>" alt="<%= title %>" class="w-full bg-primary/5 h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="hidden items-center justify-center w-full h-full <%= typeof iconClassName !== 'undefined' ? iconClassName : 'bg-slate-50 text-slate-600' %>">
+                <%- (typeof icon !== 'undefined' ? icon : '<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>') %>
             </div>
-            <button class="text-slate-300"><%- moreIcon %></button>
-        </div>
-        <p class="text-[9px] text-slate-400"><%= subtitle %></p>
+        <% } else { %>
+            <div class="flex items-center justify-center w-full h-full <%= typeof iconClassName !== 'undefined' ? iconClassName : 'bg-slate-50 text-slate-600' %>">
+                <%- (typeof icon !== 'undefined' ? icon : '<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>') %>
+            </div>
+        <% } %>
+        <button class="absolute top-3 right-3 p-2 bg-white rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-sm" onclick="event.stopPropagation();">
+            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01"></path></svg>
+        </button>
+    </div>
+    <div class="p-4">
+        <h4 class="text-sm font-bold text-slate-900 mb-1 truncate" title="<%= title %>"><%= title %></h4>
+        <p class="text-xs text-foreground/60"><%= subtitle %></p>
     </div>
 </div>
