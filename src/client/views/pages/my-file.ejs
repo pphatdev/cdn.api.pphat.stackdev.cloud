@@ -52,25 +52,32 @@
     <!-- MY FILES VIEW -->
     <div id="view-my-files" class="container mx-auto p-8">
         <!-- Breadcrumbs & Title Bar -->
-        <div class="flex items-center gap-4 text-xs text-foreground/60 mb-6" id="breadcrumbs">
-            <a href="/files" class="flex items-center cursor-pointer hover:text-slate-600">
-                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-            </a>
-            <a href="/files" class="breadcrumb-item cursor-pointer hover:text-slate-600">My Files</a>
-            <% if (breadcrumbs && breadcrumbs.length > 0) { %>
-                <% breadcrumbs.forEach((crumb, index) => { %>
-                    <% if (index < breadcrumbs.length - 1) { %>
-                        <span>/</span>
-                        <a href="<%= crumb.path %>" class="cursor-pointer hover:text-slate-600"><%= crumb.name %></a>
-                    <% } else { %>
-                        <span>/</span>
-                        <span class="font-semibold text-slate-900"><%= crumb.name %></span>
-                    <% } %>
-                <% }); %>
-            <% } %>
-        </div>
+        <%
+            const breadcrumbItems = [
+                {
+                    label: 'Dashboard',
+                    href: '/',
+                    icon: '<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>'
+                },
+                {
+                    label: 'My Files',
+                    href: '/files',
+                }
+            ];
 
-        <div class="flex items-center justify-between mb-8">
+            if (breadcrumbs && breadcrumbs.length > 0) {
+                breadcrumbs.forEach((crumb, index) => {
+                    if (index < breadcrumbs.length - 1) {
+                        breadcrumbItems.push({ label: crumb.name, href: crumb.path });
+                    } else {
+                        breadcrumbItems.push({ label: crumb.name });
+                    }
+                });
+            }
+        %>
+        <%- include('../components/breadcrumbs', { items: breadcrumbItems }) %>
+
+        <div class="flex items-center justify-between mb-8 mt-4">
             <div class="flex items-center gap-4">
                 <div class="p-3 bg-primary/5 text-primary rounded-xl">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
@@ -143,7 +150,7 @@
                         title: file.name,
                         subtitle: formatDate(file.modifiedAt) + ' • ' + formatBytes(file.size),
                         isImage: fileInfo.isImage,
-                        imageSrc: fileInfo.isImage ? '/api/image/' + file.name + '?w=200&h=200' : undefined,
+                        imageSrc: fileInfo.isImage ? '/api/image/' + file.name + '?fm=webp&w=200&h=200&q=80' : undefined,
                         icon: fileInfo.icon,
                         iconClassName: fileInfo.className
                     }) %>
