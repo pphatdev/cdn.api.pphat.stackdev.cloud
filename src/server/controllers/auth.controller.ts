@@ -169,10 +169,8 @@ export class AuthController {
         const sql = getDbClient();
         const config = getAuthConfig();
 
-        const existingAdmin = await queryOne<User>(
-            'SELECT id FROM users WHERE role = $1 LIMIT 1',
-            ['admin']
-        );
+        const existingAdminResult = await sql`SELECT id FROM users WHERE role = 'admin' LIMIT 1`;
+        const existingAdmin = existingAdminResult.length > 0 ? existingAdminResult[0] as User : null;
 
         if (!existingAdmin) {
             const passwordHash = await bcrypt.hash('admin123', config.bcryptRounds);
@@ -256,11 +254,13 @@ export class AuthController {
                 return;
             }
 
-            // Find user
-            const user = await queryOne<User>(
-                'SELECT * FROM users WHERE username = $1 OR email = $1',
-                [username]
-            );
+            // Find user - using Neon SQL directly instead of queryOne helper
+            const users = await sql`
+                SELECT * FROM users 
+                WHERE username = ${username} OR email = ${username}
+                LIMIT 1
+            `;
+            const user = users.length > 0 ? users[0] as User : null;
 
             if (!user) {
                 await logAuditEvent(null, 'LOGIN_FAILED_USER_NOT_FOUND', req, { username });
@@ -456,10 +456,12 @@ export class AuthController {
                 return;
             }
 
-            const fullUser = await queryOne<User>(
-                'SELECT id, username, email, name, avatar, role, last_login_at, created_at FROM users WHERE id = $1',
-                [user.id]
-            );
+            const sql = getDbClient();
+            const fullUserResult = await sql`
+                SELECT id, username, email, name, avatar, role, last_login_at, created_at 
+                FROM users WHERE id = ${user.id}
+            `;
+            const fullUser = fullUserResult.length > 0 ? fullUserResult[0] as User : null;
 
             if (!fullUser) {
                 sendUnauthorized(res, 'User not found.');
@@ -504,10 +506,14 @@ export class AuthController {
             }
 
             // Verify session exists and is valid
-            const session = await queryOne<Session>(
-                'SELECT * FROM sessions WHERE id = $1 AND refresh_token_hash = $2 AND is_valid = true',
-                [payload.sessionId, hashToken(refreshToken)]
-            );
+            const sql = getDbClient();
+            const sessionResult = await sql`
+                SELECT * FROM sessions 
+                WHERE id = ${payload.sessionId} 
+                AND refresh_token_hash = ${hashToken(refreshToken)} 
+                AND is_valid = true
+            `;
+            const session = sessionResult.length > 0 ? sessionResult[0] as Session : null;
 
             if (!session) {
                 sendUnauthorized(res, 'Session not found or invalid.');
@@ -515,7 +521,8 @@ export class AuthController {
             }
 
             // Get user
-            const user = await queryOne<User>('SELECT * FROM users WHERE id = $1', [payload.userId]);
+            const userResult = await sql`SELECT * FROM users WHERE id = ${payload.userId}`;
+            const user = userResult.length > 0 ? userResult[0] as User : null;
             if (!user || !user.is_active) {
                 sendUnauthorized(res, 'User not found or disabled.');
                 return;
@@ -588,7 +595,9 @@ export class AuthController {
             }
 
             // Get full user data
-            const fullUser = await queryOne<User>('SELECT * FROM users WHERE id = $1', [user.id]);
+            const sql = getDbClient();
+            const fullUserResult = await sql`SELECT * FROM users WHERE id = ${user.id}`;
+            const fullUser = fullUserResult.length > 0 ? fullUserResult[0] as User : null;
             if (!fullUser) {
                 sendBadRequest(res, 'User not found.');
                 return;
@@ -717,10 +726,13 @@ export class AuthController {
             }
 
             // Verify session is still valid
-            const session = await queryOne<Session>(
-                'SELECT is_valid FROM sessions WHERE id = $1 AND token_hash = $2',
-                [payload.sessionId, hashToken(token)]
-            );
+            const sql = getDbClient();
+            const sessionResult = await sql`
+                SELECT is_valid FROM sessions 
+                WHERE id = ${payload.sessionId} 
+                AND token_hash = ${hashToken(token)}
+            `;
+            const session = sessionResult.length > 0 ? sessionResult[0] as Session : null;
 
             if (!session || !session.is_valid) {
                 return null;
