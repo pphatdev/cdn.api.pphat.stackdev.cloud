@@ -252,6 +252,8 @@ export class FilesController {
         try {
             // Normalize path separators
             const normalizedPath = filePath.replace(/\\/g, '/');
+            const baseDirNormalized = configured.baseDirectory.replace(/\\/g, '/').replace(/\/+$/, '');
+            const relativeNormalized = normalizedPath.replace(/^\.{1,2}\//, '');
 
             // Get the actual file path on disk
             let actualFilePath: string;
@@ -259,8 +261,12 @@ export class FilesController {
                 // If it's already an absolute path, use it directly
                 actualFilePath = normalizedPath;
             } else {
-                // If it's relative, prepend the base directory
-                actualFilePath = path.join(process.cwd(), configured.baseDirectory, normalizedPath).replace(/\\/g, '/');
+                // If it's relative, avoid duplicating the base directory
+                if (relativeNormalized.startsWith(`${baseDirNormalized}/`)) {
+                    actualFilePath = path.join(process.cwd(), relativeNormalized).replace(/\\/g, '/');
+                } else {
+                    actualFilePath = path.join(process.cwd(), baseDirNormalized, relativeNormalized).replace(/\\/g, '/');
+                }
             }
 
             // Check if file exists
