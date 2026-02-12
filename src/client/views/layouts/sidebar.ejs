@@ -11,7 +11,7 @@
 
     <nav class="space-y-1 mb-10">
         <% modules.forEach(function(module) { %>
-            <a href="<%= module.url %>" class="<%= currentPath === module.url ? module.activeClassName : module.className %>">
+            <a href="<%= module.url %>" class="<%= (currentPath === module.url || currentPath.startsWith(module.url + '/')) ? module.activeClassName : module.className %>">
                 <%- module.icon %>
                 <%= module.name %>
             </a>
