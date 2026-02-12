@@ -154,9 +154,10 @@
                         imageSrc: fileInfo.isImage ? '/api/image/' + file.name + '?fm=webp&w=200&h=200&q=80' : undefined,
                         icon: fileInfo.icon,
                         previewUrl: detailUrl,
-                        downloadUrl: '/api/file/' + encodeURIComponent(file.name),
+                        downloadUrl: '/api/file/download/' + encodeURIComponent(file.name),
                         link: detailUrl,
-                        iconClassName: fileInfo.className
+                        iconClassName: fileInfo.className,
+                        deleteAction: file.name
                     }) %>
                 <% }); %>
             </div>
@@ -174,4 +175,54 @@
         </div>
         <% } %>
     </div>
+
+    <script type="module">
+        // Initialize delete action handlers
+        const initDeleteActions = () => {
+            document.querySelectorAll('[data-action="delete"]').forEach(btn => {
+                if (btn.dataset.actionInitialized) return;
+                btn.dataset.actionInitialized = 'true';
+
+                btn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const filename = String(btn.getAttribute('data-filename')).replace(/^\"|\"$/g, '');
+                    console.log('Delete action triggered for:', filename);
+                    if (!filename) return;
+
+                    if (confirm(`Are you sure you want to delete "${filename}"?`)) {
+                        try {
+                            const res = await fetch(`/api/file/delete/${filename}`, {
+                                method: 'DELETE'
+                            });
+
+                            if (res.ok) {
+                                // Remove the card from DOM or reload page
+                                const card = btn.closest('.rounded-2xl');
+                                if (card) {
+                                    card.remove();
+                                } else {
+                                    window.location.reload();
+                                }
+                            } else {
+                                const data = await res.json().catch(() => ({}));
+                                alert(data.message || 'Failed to delete file.');
+                            }
+                        } catch (err) {
+                            console.error('Delete error:', err);
+                            alert('Failed to delete file.');
+                        }
+                    }
+                });
+            });
+        };
+
+        // Run on DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initDeleteActions);
+        } else {
+            initDeleteActions();
+        }
+    </script>
 </main>

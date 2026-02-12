@@ -316,10 +316,11 @@
         // Handle delete action
         document.querySelectorAll('#history-table [data-action="delete"]').forEach(btn => {
             btn.addEventListener('click', async () => {
-                const filename = btn.getAttribute('data-filename');
+                const filename = String(btn.getAttribute('data-filename') || '').replace(/^\"|\"$/g, '');
+                log('Attempting to delete file:', filename);
                 if (filename && confirm('Are you sure you want to delete this file?')) {
                     try {
-                        const res = await fetch(`/api/file/${filename}`, { method: 'DELETE' });
+                        const res = await fetch(`/api/file/delete/${filename}`, { method: 'DELETE' });
                         if (res.ok) {
                             loadHistory();
                         } else {
