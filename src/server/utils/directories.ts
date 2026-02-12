@@ -101,10 +101,17 @@ export const getDirectories = (): string[] => {
  * @returns string | null
 */
 export const findFileInDirectories = async (filename: string): Promise<string | null> => {
+    const cwdPath = process.cwd();
+
+    // First, check if file exists directly in storage root
+    const rootStoragePath = path.join(cwdPath, './storage', filename);
+    if (fs.existsSync(rootStoragePath)) {
+        return rootStoragePath;
+    }
+
+    // Then check in subdirectories
     const directories = getDirectories();
     for (const dir of directories) {
-
-        const cwdPath = process.cwd();
         const filePath = path.join(cwdPath, `./storage/${dir}`, filename);
         if (fs.existsSync(filePath)) {
             return filePath;
