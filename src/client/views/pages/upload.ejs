@@ -1,0 +1,426 @@
+<main class="flex-1 overflow-y-auto bg-background relative">
+    <%- include('../components/header') %>
+
+    <div class="container mx-auto p-8">
+        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-8">
+            <div>
+                <%- include('../components/breadcrumbs', {
+                    items: [
+                        {
+                            label: 'Dashboard',
+                            href: '/',
+                            icon: '<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>'
+                        },
+                        { label: 'Upload' }
+                    ]
+                }) %>
+                <h1 class="text-2xl mt-4 font-bold text-slate-900">Upload Center</h1>
+                <p class="text-sm text-slate-500">Drag and drop files, manage upload options, and track progress in one place.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="/files" class="px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50">View files</a>
+                <a href="/upload/history" class="px-4 py-2 text-sm font-semibold text-white bg-slate-900 rounded-lg hover:bg-slate-800">Upload history</a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-6">
+                <form id="upload-form" action="/api/file/upload" method="post" enctype="multipart/form-data" class="bg-white rounded-2xl border border-slate-100 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-lg font-semibold text-slate-900">Upload files</h2>
+                            <p class="text-sm text-slate-500">Add files or images to your storage.</p>
+                        </div>
+                        <span class="px-2.5 py-1 text-xs font-semibold text-emerald-600 bg-emerald-50 rounded-full">Ready</span>
+                    </div>
+
+                    <label for="upload-input" data-dropzone class="group relative flex flex-col items-center justify-center gap-3 border-2 border-dashed border-slate-200 rounded-2xl p-10 text-center cursor-pointer transition hover:border-primary hover:bg-primary/5">
+                        <span class="p-3 rounded-full bg-primary/10 text-primary">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        </span>
+                        <div>
+                            <p class="text-sm font-semibold text-slate-900">Drop files here or click to browse</p>
+                            <p class="text-xs text-slate-500 mt-1">Supports documents, images, videos, and archives</p>
+                        </div>
+                        <span class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-primary rounded-lg shadow-primary-100">Choose files</span>
+                    </label>
+                    <input id="upload-input" name="files" type="file" class="sr-only" multiple>
+
+                    <div class="mt-6">
+                        <div class="flex items-center justify-between text-sm">
+                            <p class="font-semibold text-slate-900">Selected files</p>
+                            <button id="clear-upload" type="button" class="text-xs font-semibold text-slate-500 hover:text-slate-700">Clear list</button>
+                        </div>
+                        <ul id="upload-list" class="mt-3 space-y-2 max-h-56 overflow-auto">
+                            <li class="flex items-center justify-between text-sm text-slate-400 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2">
+                                <span>No files selected yet.</span>
+                                <span class="text-xs">0 KB</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div class="flex flex-col gap-2">
+                            <label for="upload-type" class="text-sm font-medium text-slate-700">Upload type</label>
+                            <select id="upload-type" class="px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white">
+                                <option value="files" selected>Files & documents</option>
+                                <option value="images">Images only</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label for="storage-path" class="text-sm font-medium text-slate-700">Destination folder</label>
+                            <input id="storage-path" type="text" placeholder="e.g. /documents or /images" class="px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white" />
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <p class="text-xs text-slate-500">Uploads go directly to your storage via the API endpoints.</p>
+                        <button id="upload-submit" type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-primary rounded-lg shadow-primary-100 hover:bg-primary/80">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            Start upload
+                        </button>
+                    </div>
+                </form>
+
+                <div class="bg-white rounded-2xl border border-slate-100 p-6">
+                    <h3 class="text-lg font-semibold text-slate-900 mb-4">Upload tips</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex items-start gap-3 rounded-xl border border-slate-100 p-4">
+                            <span class="p-2 rounded-lg bg-primary/10 text-primary">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 18a6 6 0 100-12 6 6 0 000 12z"></path></svg>
+                            </span>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-900">Use consistent folders</p>
+                                <p class="text-xs text-slate-500 mt-1">Organize uploads by project for faster search and sharing.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 rounded-xl border border-slate-100 p-4">
+                            <span class="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            </span>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-900">Check file naming</p>
+                                <p class="text-xs text-slate-500 mt-1">Avoid duplicates by using clear, descriptive names.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white rounded-2xl border border-slate-100 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-slate-900">Upload status</h3>
+                        <span id="upload-status-badge" class="px-2.5 py-1 text-xs font-semibold text-slate-500 bg-slate-50 rounded-full">Idle</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div id="upload-progress" class="h-full w-0 bg-primary transition-all duration-300"></div>
+                    </div>
+                    <p id="upload-status-text" class="text-xs text-slate-500 mt-3">No uploads in progress.</p>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-100 p-6">
+                    <h3 class="text-lg font-semibold text-slate-900 mb-4">Upload rules</h3>
+                    <ul class="space-y-3 text-sm text-slate-600">
+                        <li class="flex items-start gap-2">
+                            <span class="mt-1 h-2 w-2 rounded-full bg-primary"></span>
+                            Upload up to 100 files at a time.
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="mt-1 h-2 w-2 rounded-full bg-primary"></span>
+                            Maximum file size: 50 MB each.
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="mt-1 h-2 w-2 rounded-full bg-primary"></span>
+                            Supported types: JPG, PNG, PDF, DOCX, MP4, ZIP.
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-100 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-slate-900">Recent uploads</h3>
+                        <a href="/files" class="text-xs font-semibold text-primary hover:underline">See all</a>
+                    </div>
+                    <div id="recent-uploads" class="space-y-3">
+                        <div class="flex items-center justify-between p-3 rounded-xl border border-slate-100 text-slate-400 text-sm">
+                            Loading recent uploads...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    const uploadInput = document.getElementById('upload-input');
+    const uploadList = document.getElementById('upload-list');
+    const clearButton = document.getElementById('clear-upload');
+    const uploadForm = document.getElementById('upload-form');
+    const uploadType = document.getElementById('upload-type');
+    const uploadSubmit = document.getElementById('upload-submit');
+    const dropzone = document.querySelector('[data-dropzone]');
+    const storagePath = document.getElementById('storage-path');
+    const uploadProgress = document.getElementById('upload-progress');
+    const uploadStatusText = document.getElementById('upload-status-text');
+    const uploadStatusBadge = document.getElementById('upload-status-badge');
+    const recentUploads = document.getElementById('recent-uploads');
+
+    const formatBytes = (bytes) => {
+        if (!bytes) return '0 KB';
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), sizes.length - 1);
+        return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
+    };
+
+    const timeAgo = (isoString) => {
+        if (!isoString) return 'Just now';
+        const time = new Date(isoString).getTime();
+        const now = Date.now();
+        const diff = Math.max(now - time, 0);
+        const seconds = Math.floor(diff / 1000);
+        if (seconds < 60) return `${seconds}s ago`;
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        const days = Math.floor(hours / 24);
+        if (days < 7) return `${days}d ago`;
+        return new Date(isoString).toLocaleDateString();
+    };
+
+    const renderRecentUploads = (files) => {
+        if (!recentUploads) return;
+        if (!files || files.length === 0) {
+            recentUploads.innerHTML = `
+                <div class="flex items-center justify-between p-3 rounded-xl border border-slate-100 text-slate-400 text-sm">
+                    No uploads yet.
+                </div>
+            `;
+            return;
+        }
+
+        recentUploads.innerHTML = files.map((file) => `
+            <div class="flex items-center justify-between p-3 rounded-xl border border-slate-100">
+                <div class="w-full line-clamp-1">
+                    <a href="/api/file/preview/${file.filename}" class="text-sm font-semibold text-slate-900 hover:underline">${file.originalFilename || file.filename}</a>
+                    <p class="text-xs text-slate-500 line-clamp-1">Uploaded ${timeAgo(file.uploadedAt)}</p>
+                </div>
+                <span class="text-xs font-semibold text-emerald-600">Complete</span>
+            </div>
+        `).join('');
+    };
+
+    const loadRecentUploads = async () => {
+        if (!recentUploads) return;
+        try {
+            const response = await fetch('/api/database/files');
+            if (!response.ok) {
+                throw new Error('Failed to load uploads');
+            }
+            const data = await response.json();
+            const files = Array.isArray(data?.result) ? data.result : [];
+            const sorted = files.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+            renderRecentUploads(sorted.slice(0, 3));
+        } catch (error) {
+            recentUploads.innerHTML = `
+                <div class="flex items-center justify-between p-3 rounded-xl border border-slate-100 text-red-500 text-sm">
+                    Unable to load recent uploads.
+                </div>
+            `;
+        }
+    };
+
+    const renderPlaceholder = () => {
+        uploadList.innerHTML = `
+            <li class="flex items-center justify-between text-sm text-slate-400 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2">
+                <span>No files selected yet.</span>
+                <span class="text-xs">0 KB</span>
+            </li>
+        `;
+        uploadSubmit.disabled = true;
+        uploadSubmit.classList.add('opacity-60', 'cursor-not-allowed');
+    };
+
+    const renderFiles = (files) => {
+        if (!files || files.length === 0) {
+            renderPlaceholder();
+            return;
+        }
+
+        uploadList.innerHTML = Array.from(files).map((file, index) => `
+            <li class="flex items-center justify-between text-sm text-slate-700 bg-white border border-slate-100 rounded-lg px-3 py-2">
+                <div>
+                    <p class="font-medium">${file.name}</p>
+                    <p class="text-xs text-slate-400">${file.type || 'Unknown type'}</p>
+                </div>
+                <span class="text-xs text-slate-500" data-file-status="${index}">${formatBytes(file.size)}</span>
+            </li>
+        `).join('');
+
+        uploadSubmit.disabled = false;
+        uploadSubmit.classList.remove('opacity-60', 'cursor-not-allowed');
+    };
+
+    const updateFormAction = () => {
+        if (!uploadForm) return;
+        const isImages = uploadType.value === 'images';
+        uploadForm.action = isImages ? '/api/image/upload' : '/api/file/upload';
+        uploadInput.name = isImages ? 'images' : 'files';
+        uploadInput.accept = isImages ? 'image/*' : '';
+    };
+
+    const setStatus = (state, message) => {
+        if (!uploadStatusBadge || !uploadStatusText) return;
+        uploadStatusBadge.textContent = state;
+        uploadStatusText.textContent = message;
+
+        uploadStatusBadge.className = 'px-2.5 py-1 text-xs font-semibold rounded-full';
+        if (state === 'Uploading') {
+            uploadStatusBadge.classList.add('text-primary', 'bg-primary/10');
+        } else if (state === 'Success') {
+            uploadStatusBadge.classList.add('text-emerald-600', 'bg-emerald-50');
+        } else if (state === 'Error') {
+            uploadStatusBadge.classList.add('text-red-600', 'bg-red-50');
+        } else {
+            uploadStatusBadge.classList.add('text-slate-500', 'bg-slate-50');
+        }
+    };
+
+    const setProgress = (value) => {
+        if (!uploadProgress) return;
+        uploadProgress.style.width = `${Math.min(Math.max(value, 0), 100)}%`;
+    };
+
+    const setFileStatus = (index, text, tone) => {
+        const statusElement = uploadList.querySelector(`[data-file-status="${index}"]`);
+        if (!statusElement) return;
+        statusElement.textContent = text;
+        statusElement.classList.remove('text-slate-500', 'text-emerald-600', 'text-red-600');
+        statusElement.classList.add(tone);
+    };
+
+    if (uploadInput && uploadList) {
+        renderPlaceholder();
+        uploadInput.addEventListener('change', (event) => {
+            renderFiles(event.target.files);
+        });
+    }
+
+    if (clearButton && uploadInput) {
+        clearButton.addEventListener('click', () => {
+            uploadInput.value = '';
+            renderPlaceholder();
+        });
+    }
+
+    if (uploadType) {
+        updateFormAction();
+        uploadType.addEventListener('change', updateFormAction);
+    }
+
+    if (dropzone && uploadInput) {
+        const resetDropzone = () => {
+            dropzone.classList.remove('border-primary', 'bg-primary/5');
+        };
+
+        dropzone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropzone.classList.add('border-primary', 'bg-primary/5');
+        });
+
+        dropzone.addEventListener('dragleave', (event) => {
+            event.preventDefault();
+            resetDropzone();
+        });
+
+        dropzone.addEventListener('drop', (event) => {
+            event.preventDefault();
+            resetDropzone();
+            if (event.dataTransfer && event.dataTransfer.files) {
+                uploadInput.files = event.dataTransfer.files;
+                renderFiles(uploadInput.files);
+            }
+        });
+    }
+
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            if (!uploadInput || !uploadInput.files || uploadInput.files.length === 0) {
+                renderPlaceholder();
+                return;
+            }
+
+            const files = Array.from(uploadInput.files);
+            const formData = new FormData();
+            const fieldName = uploadInput.name || 'files';
+
+            files.forEach((file, index) => {
+                formData.append(fieldName, file);
+                setFileStatus(index, 'Queued', 'text-slate-500');
+            });
+
+            setStatus('Uploading', `Uploading ${files.length} file(s)...`);
+            setProgress(0);
+            uploadSubmit.disabled = true;
+            uploadSubmit.classList.add('opacity-60', 'cursor-not-allowed');
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', uploadForm.action, true);
+
+            if (storagePath && storagePath.value.trim()) {
+                xhr.setRequestHeader('storage', storagePath.value.trim());
+            }
+
+            xhr.upload.addEventListener('progress', (event) => {
+                if (event.lengthComputable) {
+                    const percent = (event.loaded / event.total) * 100;
+                    setProgress(percent);
+                    setStatus('Uploading', `Uploading ${files.length} file(s)... ${Math.round(percent)}%`);
+                }
+            });
+
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState !== XMLHttpRequest.DONE) return;
+
+                uploadSubmit.disabled = false;
+                uploadSubmit.classList.remove('opacity-60', 'cursor-not-allowed');
+
+                let response;
+                try {
+                    response = JSON.parse(xhr.responseText || '{}');
+                } catch (error) {
+                    response = null;
+                }
+
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    setProgress(100);
+                    setStatus('Success', response?.message || 'Upload completed successfully.');
+                    files.forEach((file, index) => {
+                        setFileStatus(index, 'Complete', 'text-emerald-600');
+                    });
+                    loadRecentUploads();
+                } else {
+                    setStatus('Error', response?.message || 'Upload failed. Please try again.');
+                    files.forEach((file, index) => {
+                        setFileStatus(index, 'Failed', 'text-red-600');
+                    });
+                }
+            };
+
+            xhr.onerror = () => {
+                uploadSubmit.disabled = false;
+                uploadSubmit.classList.remove('opacity-60', 'cursor-not-allowed');
+                setStatus('Error', 'Network error. Please check your connection.');
+                files.forEach((file, index) => {
+                    setFileStatus(index, 'Failed', 'text-red-600');
+                });
+            };
+
+            xhr.send(formData);
+        });
+    }
+
+    loadRecentUploads();
+</script>
