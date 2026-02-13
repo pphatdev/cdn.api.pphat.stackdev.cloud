@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url("./dropdown.css");
 
 @custom-variant dark (&:is(.dark *));
 
@@ -166,8 +167,4 @@
     button {
         @apply cursor-pointer;
     }
-}
-
-@layer components {
-    @import url("./dropdown.css");
 }

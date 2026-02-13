@@ -22,7 +22,7 @@ interface AuthConfig {
 const getAuthConfig = (): AuthConfig => {
     const envPath = path.join(process.cwd(), 'env.json');
     let envData: any = {};
-    
+
     if (fs.existsSync(envPath)) {
         envData = JSON.parse(fs.readFileSync(envPath, 'utf-8'));
     }
@@ -529,7 +529,7 @@ export class AuthController {
             }
 
             // Generate new tokens
-            const { accessToken: newAccessToken, refreshToken: newRefreshToken, expiresAt, refreshExpiresAt } = 
+            const { accessToken: newAccessToken, refreshToken: newRefreshToken, expiresAt, refreshExpiresAt } =
                 this.generateTokens(user, session.id);
 
             // Update session
