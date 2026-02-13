@@ -4,9 +4,6 @@ import { sendNotFound } from "../utils/response.js";
 import { FilesController } from './files.controller.js';
 import { findFileInDirectories } from "../utils/directories.js";
 import fs from 'fs';
-import JSZip from 'jszip';
-// @ts-ignore
-import Tiff from 'tiff.js';
 
 export class PreviewController {
 
@@ -25,24 +22,6 @@ export class PreviewController {
         return PreviewController.all(request, response);
 
     }
-
-    static async preprocessTiff(blob: Blob): Promise<Blob> {
-        let zip = await JSZip.loadAsync(blob);
-        const tiffs = zip.file(/[.]tiff?$/);
-
-        if (tiffs.length == 0)
-            return blob;
-
-        for (let f of tiffs) {
-            const buffer = await f.async("uint8array");
-            const tiff = new Tiff({ buffer });
-            const blob = await new Promise<Blob>((res) => tiff.toCanvas().toBlob((blob: Blob | null) => res(blob!), "image/png"));
-            zip.file(f.name, blob);
-        }
-
-        return await zip.generateAsync({ type: "blob" });
-    }
-
 
     /**
      * Preview a file by filename
@@ -94,9 +73,7 @@ export class PreviewController {
                             <meta charset="UTF-8">
                             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                             <script crossorigin src="https://unpkg.com/jszip/dist/jszip.min.js"></script>
-                            <script crossorigin src="https://unpkg.com/tiff.js@1.0.0/tiff.min.js"></script>
                             <script src="https://volodymyrbaydalka.github.io/docxjs/dist/docx-preview.js"></script>
-                            <script src="https://volodymyrbaydalka.github.io/docxjs/demo/tiff-preprocessor.js"></script>
                             <script src="https://cdn.tailwindcss.com"></script>
                         </head>
 
@@ -111,10 +88,8 @@ export class PreviewController {
 
                                 async function renderDocxFromBuffer(buffer) {
                                     if (!buffer) return;
-                                    // optional, find and convert all tiff images
-                                    let docxBlob = preprocessTiff(new Blob([buffer]));
                                     // render document
-                                    await docx.renderAsync(docxBlob, document.querySelector("#document-container"), null, docxOptions);
+                                    await docx.renderAsync(new Blob([buffer]), document.querySelector("#document-container"), null, docxOptions);
                                 }
 
                                 // Render the document immediately

@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { sendNotFound } from './server/utils/response.js';
 import { configured } from './server/utils/config.js';
 import { Database } from './server/utils/database.js';
+import { securityHeadersMiddleware } from './server/middlewares/security.js';
 import API from './server/routes/api.js';
 import WEB from './client/routes/web.js';
 
@@ -17,6 +18,8 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 const app = express();
+
+app.use(securityHeadersMiddleware);
 
 /**
  * Initialize Database

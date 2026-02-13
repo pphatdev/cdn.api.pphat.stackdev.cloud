@@ -5,7 +5,7 @@
             <%- icon %>
         </div>
         <div class="flex-1 overflow-hidden">
-            <h4 class="font-bold text-slate-900 text-sm truncate"><%= title %></h4>
+            <p class="font-bold text-slate-900 text-sm truncate"><%= title %></p>
             <p class="text-[10px] text-slate-400"><%= label %> • <%= size %></p>
         </div>
     </div>
@@ -14,5 +14,5 @@
         <span><%= updated %></span>
     </div>
 
-    <a href="<%= route %>" class="absolute inset-0 z-10"></a>
+    <a href="<%= route %>" class="absolute inset-0 z-10" aria-label="Open <%= title %>"></a>
 </div>
