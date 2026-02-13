@@ -108,30 +108,3 @@ export const requireRoles = (...roles: string[]) => {
         next();
     };
 };
-
-/**
- * Rate limiting for auth endpoints
- */
-import rateLimit from 'express-rate-limit';
-
-export const loginRateLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // 5 login attempts per window
-    message: {
-        status: 429,
-        message: 'Too many login attempts. Please try again in 15 minutes.'
-    },
-    standardHeaders: true,
-    legacyHeaders: false
-});
-
-export const authRateLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 10, // 10 requests per window for auth endpoints
-    message: {
-        status: 429,
-        message: 'Too many authentication attempts. Please try again later.'
-    },
-    standardHeaders: true,
-    legacyHeaders: false
-});

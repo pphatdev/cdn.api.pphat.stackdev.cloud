@@ -1,5 +1,6 @@
 import express from 'express';import { AuthController } from '../controllers/auth.controller.js';
-import { jwtAuthMiddleware, loginRateLimiter, authRateLimiter } from '../middlewares/auth.js';
+import { jwtAuthMiddleware } from '../middlewares/auth.js';
+import { authRateLimiter, loginRateLimiter } from '../middlewares/rate-limit.js';
 
 const router = express.Router();
 
