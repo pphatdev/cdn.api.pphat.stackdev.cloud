@@ -168,3 +168,9 @@
         @apply cursor-pointer;
     }
 }
+
+@layer components {
+    .button {
+        @apply w-full rounded-xl px-4 py-3 text-sm inline-flex items-center gap-1 justify-center font-semibold shadow-lg shadow-emerald-200/40 transition focus:outline-none focus:ring-4 focus:ring-primary;
+    }
+}
