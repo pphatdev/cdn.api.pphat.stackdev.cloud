@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import url("./dropdown.css");
+@import "./dropdown.css";
 
 @custom-variant dark (&:is(.dark *));
 
