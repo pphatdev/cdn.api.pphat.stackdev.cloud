@@ -803,7 +803,7 @@
                 document.getElementById('opt-quality-value').textContent = preset.quality + '%';
                 document.getElementById('opt-format').value = preset.format;
                 document.getElementById('opt-fit').value = preset.fit;
-                
+
                 // Highlight selected preset
                 document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('bg-primary/10', 'border-primary', 'text-primary'));
                 btn.classList.add('bg-primary/10', 'border-primary', 'text-primary');
@@ -825,13 +825,13 @@
     // Apply optimization
     document.getElementById('apply-optimization')?.addEventListener('click', () => {
         if (!currentFile) return;
-        
+
         const format = document.getElementById('opt-format').value;
         const quality = document.getElementById('opt-quality').value;
         const width = document.getElementById('opt-width').value;
         const height = document.getElementById('opt-height').value;
         const fit = document.getElementById('opt-fit').value;
-        
+
         const baseUrl = window.location.origin;
         const params = [];
         if (format) params.push(`fm=${format}`);
@@ -839,7 +839,7 @@
         if (width) params.push(`w=${width}`);
         if (height) params.push(`h=${height}`);
         if (fit) params.push(`fit=${fit}`);
-        
+
         const cdnUrl = `${baseUrl}/api/image/${encodeURIComponent(currentFile)}${params.length ? '?' + params.join('&') : ''}`;
         document.getElementById('cdn-url').value = cdnUrl;
         document.getElementById('html-embed').value = `<img src="${cdnUrl}" alt="${currentFile}" />`;
