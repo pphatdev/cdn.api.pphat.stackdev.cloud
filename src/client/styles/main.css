@@ -179,4 +179,29 @@
     .text-slate-400 {
         color: rgb(100 116 139);
     }
+
+    .lively-blob {
+        animation: float-blob 8s ease-in-out infinite;
+        transform-origin: center;
+    }
+
+    .lively-blob:nth-of-type(2) {
+        animation-duration: 6s;
+        animation-delay: -3s;
+    }
+
+    .lively-blob:nth-of-type(3) {
+        animation-duration: 10s;
+        animation-delay: -4s;
+    }
+}
+
+@keyframes float-blob {
+    0%,
+    100% {
+        transform: translate3d(150, 0, 0) scale(1);
+    }
+    50% {
+        transform: translate3d(312px, -214px, 0) scale(1.05);
+    }
 }
