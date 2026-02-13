@@ -10,6 +10,7 @@ import { UploadHistoryController } from '../controller/upload-history.js';
 import { RecentController } from '../controller/recent.js';
 import { DetailController } from '../controller/detail.js';
 import { ShareController } from '../controller/share.js';
+import { UsersController } from '../controller/users.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,6 +37,7 @@ app.get('/detail', DetailController.get);
 app.get('/share', ShareController.get);
 app.get('/upload', UploadController.get);
 app.get('/upload/history', UploadHistoryController.get);
+app.get('/users', UsersController.get);
 
 // Catch-all 404 handler - render not-found page with default config
 app.use((req, res, next) => {
