@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 // Configure Neon for better performance
-neonConfig.fetchConnectionCache = true;
+// neonConfig.fetchConnectionCache = true;
 
 interface DatabaseConfig {
     connectionString: string;

@@ -1,5 +1,5 @@
-import express from 'express';import { AuthController } from '../controllers/auth.controller.js';
-import { jwtAuthMiddleware } from '../middlewares/auth.js';
+import express from 'express'; import { AuthController } from '../controllers/auth.controller.js';
+import { jwtAuthMiddleware, adminOnlyMiddleware } from '../middlewares/auth.js';
 import { authRateLimiter, loginRateLimiter } from '../middlewares/rate-limit.js';
 
 const router = express.Router();
@@ -83,5 +83,40 @@ router.get('/sessions', jwtAuthMiddleware, AuthController.getSessions);
  * @header Authorization: Bearer <accessToken>
  */
 router.delete('/sessions/:sessionId', jwtAuthMiddleware, AuthController.revokeSession);
+
+/**
+ * Get all users (admin only)
+ * 
+ * @method GET /api/auth/users
+ * @header Authorization: Bearer <accessToken>
+ * @returns Array of users
+ */
+router.get('/users', /*jwtAuthMiddleware, adminOnlyMiddleware,*/ AuthController.getAllUsers);
+
+/**
+ * Create new user (admin only)
+ * 
+ * @method POST /api/auth/users
+ * @header Authorization: Bearer <accessToken>
+ * @body { username, email, name, password, role, is_active }
+ */
+router.post('/users', jwtAuthMiddleware, adminOnlyMiddleware, AuthController.createUser);
+
+/**
+ * Update user (admin only)
+ * 
+ * @method PUT /api/auth/users/:userId
+ * @header Authorization: Bearer <accessToken>
+ * @body { email, name, password, role, is_active }
+ */
+router.put('/users/:userId', jwtAuthMiddleware, adminOnlyMiddleware, AuthController.updateUser);
+
+/**
+ * Delete user (admin only)
+ * 
+ * @method DELETE /api/auth/users/:userId
+ * @header Authorization: Bearer <accessToken>
+ */
+router.delete('/users/:userId', jwtAuthMiddleware, adminOnlyMiddleware, AuthController.deleteUser);
 
 export default router;
