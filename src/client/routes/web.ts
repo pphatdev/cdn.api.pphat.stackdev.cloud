@@ -11,6 +11,8 @@ import { RecentController } from '../controller/recent.js';
 import { DetailController } from '../controller/detail.js';
 import { ShareController } from '../controller/share.js';
 import { UsersController } from '../controller/users.js';
+import { LoginController } from '../controller/login.js';
+import { clientAuthMiddleware } from '../middlewares/auth.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,8 +29,11 @@ app.use('/utils', express.static(path.join(__dirname, '../../../dist/client/util
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, './../views'));
 
+app.use(clientAuthMiddleware);
+
 
 app.get('/', DashboardController.get);
+app.get('/login', LoginController.get);
 app.get('/files', MyFileController.get);
 app.get(/^\/files\/(.*)/, MyFileController.get);
 app.get('/starred', StarredController.get);
