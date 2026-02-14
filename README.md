@@ -9,7 +9,7 @@
 
 A high-performance CDN API service for image optimization, file management, and asset delivery built with Express.js and TypeScript.
 
-[Features](#features) • [Installation](#installation) • [API Documentation](#api-documentation) • [Contributing](#contributing)
+[Features](#features) • [Installation](#installation) • [API Documentation](#api-documentation) • [Development](#development)
 
 </div>
 
@@ -43,9 +43,11 @@ CDN API is a production-ready content delivery network service that provides int
 - **Database**: Drizzle ORM with SQLite (Better-SQLite3)
 - **Authentication**: JWT-based with bcrypt password hashing
 - **Image Processing**: Sharp (high-performance image optimization)
+- **Document Preview**: Puppeteer for PDF generation and document previews
+- **TIFF Support**: TIFF.js for TIFF image handling
 - **File Handling**: Multer, fs-extra
 - **Security**: Express Rate Limiting, CORS, Session Management
-- **Frontend**: EJS templating with Tailwind CSS
+- **Frontend**: EJS templating with Tailwind CSS 4.x
 - **Development**: TypeScript, ts-node with hot reload
 
 ---
@@ -100,10 +102,17 @@ CDN API is a production-ready content delivery network service that provides int
 - **Performance Metrics**: Response time and throughput monitoring
 
 ### 🎨 Web Dashboard
-- **File Browser**: Visual interface for browsing and managing files
-- **Quick Access**: Starred files and recent items
+- **Authentication**: Login page with JWT-based authentication
+- **Dashboard**: Overview of storage usage and recent activity
+- **File Browser**: Visual interface for browsing and managing files with breadcrumb navigation
+- **My Files**: Organize and manage files in folders
+- **Quick Access**: Starred files and recent items for fast retrieval
+- **Upload Interface**: User-friendly file upload with progress tracking
+- **Upload History**: Track all upload activities with user information
+- **Shared Files**: Manage and view shared resources
+- **User Management**: Admin interface for managing user accounts
 - **Search**: Powerful filename search capabilities
-- **Responsive Design**: Mobile-friendly interface
+- **Responsive Design**: Mobile-friendly interface with modern UI
 
 ---
 
@@ -131,8 +140,8 @@ Before installing, ensure you have the following:
 
 ```bash
 # Clone the repository
-git clone https://github.com/pphatdev/cdn.api.pphat.stackdev.cloud.git
-cd cdn.api.pphat.stackdev.cloud
+git clone <repository-url>
+cd assets.stackdev.cloud
 
 # Install dependencies
 npm install
@@ -156,8 +165,8 @@ npm run dev
 #### 1. Clone and Install
 
 ```bash
-git clone https://github.com/pphatdev/cdn.api.pphat.stackdev.cloud.git
-cd cdn.api.pphat.stackdev.cloud
+git clone <repository-url>
+cd assets.stackdev.cloud
 npm install
 ```
 
@@ -230,6 +239,20 @@ The server will be available at `http://localhost:3000` (or your configured port
         "patterns": [                   // Regex patterns for origins
             "^https?://.*\\.stackdev\\.cloud$"
         ]
+    },
+    "database": {
+        "dbPath": "src/data/app.db",   // SQLite database path
+        "autoRunMigrations": true,      // Run migrations on startup
+        "autoRunSeeds": false           // Run seeds on startup
+    },
+    "auth": {
+        "jwtSecret": "your-super-secret-jwt-key-min-32-characters-long",
+        "jwtExpiresIn": "1h",           // Access token expiration
+        "refreshTokenExpiresIn": "7d",  // Refresh token expiration
+        "bcryptRounds": 12,             // Password hashing rounds
+        "maxLoginAttempts": 5,          // Failed login limit
+        "lockoutDuration": 15,          // Account lockout minutes
+        "maxSessionsPerUser": 5         // Max concurrent sessions
     }
 }
 ```
@@ -244,6 +267,16 @@ The server will be available at `http://localhost:3000` (or your configured port
 | `directories` | array | Storage directory patterns | `["./storage/**/**"]` |
 | `allow.origins` | array | Exact CORS origins | `[]` |
 | `allow.patterns` | array | Regex patterns for CORS | `[]` |
+| `database.dbPath` | string | SQLite database file path | "src/data/app.db" |
+| `database.autoRunMigrations` | boolean | Auto-run migrations on startup | true |
+| `database.autoRunSeeds` | boolean | Auto-run seeds on startup | false |
+| `auth.jwtSecret` | string | JWT secret key (min 32 chars) | Required |
+| `auth.jwtExpiresIn` | string | Access token TTL | "1h" |
+| `auth.refreshTokenExpiresIn` | string | Refresh token TTL | "7d" |
+| `auth.bcryptRounds` | number | Password hashing strength | 12 |
+| `auth.maxLoginAttempts` | number | Failed login threshold | 5 |
+| `auth.lockoutDuration` | number | Lockout duration (minutes) | 15 |
+| `auth.maxSessionsPerUser` | number | Max concurrent sessions per user | 5 |
 
 ### Storage Structure
 
@@ -251,9 +284,12 @@ The default storage structure:
 
 ```
 storage/
-├── images/          # Optimized images
-├── test/            # Test files
-└── example/         # Example assets
+├── background/      # Background images
+│   └── cover/       # Cover images
+├── documents/       # Document uploads
+├── example/         # Example assets
+│   └── site.webmanifest
+└── files/           # General file uploads
 ```
 
 You can customize storage locations in `env.json`.
@@ -335,7 +371,7 @@ To backup the database:
 
 ```bash
 # Windows
-copy src\server\data\app.db src\server\data\app.db.backup
+copy src\data\app.db src\data\app.db.backup
 
 # Linux/macOS
 cp src/data/app.db src/data/app.db.backup
@@ -367,7 +403,8 @@ npm run css
 
 - **Web Dashboard**: http://localhost:3000/
 - **API Base URL**: http://localhost:3000/api/
-- **Health Check**: http://localhost:3000/api/ping
+- **API Welcome**: http://localhost:3000/api/
+- **API Version**: http://localhost:3000/api/version
 - **Database Studio**: Run `npm run db:studio` and visit http://localhost:4983/
 
 ### Default Admin Credentials
@@ -414,13 +451,41 @@ http://localhost:3000/api
 
 ### Authentication
 
-Currently, the API does not require authentication. For production use, implement authentication middleware.
+The API supports JWT-based authentication. While many endpoints work without authentication, protected endpoints require a valid JWT token.
+
+#### Getting a Token
+
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "admin123"
+  }'
+```
+
+#### Using the Token
+
+Include the JWT token in the Authorization header:
+
+```bash
+curl http://localhost:3000/api/auth/me \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+#### Token Management
+
+- **Access Token**: Valid for 1 hour (configurable)
+- **Refresh Token**: Valid for 7 days (configurable)
+- Use `/auth/logout` to invalidate current session
+- Use `/auth/logout-all` to invalidate all user sessions
 
 ### Endpoints Overview
 
 | Category | Endpoint | Method | Description | Auth Required |
 |----------|----------|--------|-------------|---------------|
-| **Health** | `/ping` | GET | API health check | No |
+| **Health** | `/` | GET | API welcome message | No |
+| **Health** | `/version` | GET | Get API version info | No |
 | **Auth** | `/auth/login` | POST | User login (rate limited) | No |
 | **Auth** | `/auth/logout` | POST | Logout current session | Yes |
 | **Auth** | `/auth/logout-all` | POST | Logout all sessions | Yes |
@@ -444,12 +509,12 @@ Currently, the API does not require authentication. For production use, implemen
 ### Detailed API Documentation
 
 For comprehensive API documentation with examples, see:
-- [Authentication API](docs/how-to-use/authentication-api.md) - Complete auth guide with JWT
 - [Migration Guide](docs/how-to-use/MIGRATION_GUIDE.md) - Database migration system
 - [Image Upload Endpoint](docs/how-to-use/image-upload-endpoint.md)
 - [File Upload Endpoint](docs/how-to-use/file-upload-endpoint.md)
 - [Storage API Endpoint](docs/how-to-use/storage-api-endpoint.md)
 - [Get Image Endpoint](docs/how-to-use/get-image-endpoint.md)
+- [Get Content Structure](docs/how-to-use/get-content-stracture.md)
 - [Move File Endpoint](docs/how-to-use/move-file-endpoint.md)
 - [Search Filename](docs/how-to-use/search-filename.md)
 - [Rate Limiting](docs/how-to-use/rate-limiting.md)
@@ -460,6 +525,26 @@ Import the Postman collection for testing:
 ```
 docs/collections/collection.postman_collection.json
 ```
+
+### Web Dashboard Routes
+
+The application includes a full-featured web interface accessible via browser:
+
+| Route | Description | Auth Required |
+|-------|-------------|---------------|
+| `/` | Dashboard overview with storage stats | Yes |
+| `/login` | User authentication page | No |
+| `/files` | File browser and manager | Yes |
+| `/files/*` | Navigate through folder structure | Yes |
+| `/starred` | Quick access to starred files | Yes |
+| `/recent` | Recently accessed files | Yes |
+| `/detail` | Detailed file information | Yes |
+| `/share` | Shared files management | Yes |
+| `/upload` | File upload interface | Yes |
+| `/upload/history` | Upload activity history | Yes |
+| `/users` | User management (Admin only) | Yes |
+
+**Note**: Web authentication is handled via JWT tokens stored in browser cookies. Users are automatically redirected to `/login` if not authenticated.
 
 ---
 
@@ -553,12 +638,26 @@ cdn.api.pphat.stackdev.cloud/
 │   │   ├── middlewares/                # Client middlewares
 │   │   │   └── auth.ts                 # Client auth middleware
 │   │   ├── routes/                     # Client routes
+│   │   │   └── web.ts                  # Web routes
 │   │   ├── styles/                     # CSS/Tailwind styles
 │   │   ├── utils/                      # Client utilities
 │   │   └── views/                      # EJS templates
 │   │       ├── components/             # Reusable components
 │   │       ├── layouts/                # Layout templates
 │   │       └── pages/                  # Page templates
+│   ├── data/                           # Data storage
+│   │   ├── app.db                      # SQLite database
+│   │   ├── database.json               # Legacy JSON store
+│   │   ├── migrations/                 # Database migrations
+│   │   │   ├── 0000_youthful_ozymandias.sql
+│   │   │   ├── 20260213_000000_create_initial_auth_tables_sqlite.ts
+│   │   │   ├── 20260214_000000_create_files_uploads_tables_sqlite.ts
+│   │   │   ├── meta/                   # Drizzle metadata
+│   │   │   └── README.md
+│   │   ├── schema/                     # Database schemas
+│   │   │   └── schema.ts               # Drizzle ORM schema
+│   │   └── seeds/                      # Database seeds
+│   │       └── 20260213_010000_demo_users_sqlite.ts
 │   └── server/                         # Backend API
 │       ├── controllers/                # API controllers
 │       │   ├── auth.controller.ts      # Authentication controller
@@ -570,20 +669,11 @@ cdn.api.pphat.stackdev.cloud/
 │       │   ├── storage.controller.ts
 │       │   ├── upload.controller.ts
 │       │   └── users.controller.ts     # User management
-│       ├── data/                       # Data storage
-│       │   ├── app.db                  # SQLite database
-│       │   └── database.json           # Legacy JSON store
 │       ├── middlewares/                # Express middlewares
 │       │   ├── auth.ts                 # JWT auth middleware
 │       │   ├── cors.ts
 │       │   ├── rate-limit.ts
 │       │   └── security.ts             # Security headers
-│       ├── migrations/                 # Database migrations
-│       │   ├── 0000_youthful_ozymandias.sql
-│       │   ├── 20260213_000000_create_initial_auth_tables_sqlite.ts
-│       │   ├── 20260214_000000_create_files_uploads_tables_sqlite.ts
-│       │   ├── meta/                   # Drizzle metadata
-│       │   └── README.md
 │       ├── routes/                     # API routes
 │       │   ├── api.ts                  # Main API router
 │       │   ├── auth.ts                 # Auth routes
@@ -592,10 +682,6 @@ cdn.api.pphat.stackdev.cloud/
 │       │   ├── folder.ts
 │       │   ├── image.ts
 │       │   └── storage.ts
-│       ├── schema/                     # Database schemas
-│       │   └── schema.ts               # Drizzle ORM schema
-│       ├── seeds/                      # Database seeds
-│       │   └── 20260213_010000_demo_users_sqlite.ts
 │       ├── types/                      # TypeScript types
 │       │   └── user.ts                 # User & auth types
 │       └── utils/                      # Server utilities
@@ -611,16 +697,18 @@ cdn.api.pphat.stackdev.cloud/
 │           ├── response.ts             # Response helpers
 │           └── storage.ts              # Storage statistics
 ├── storage/                            # File storage directory
-│   ├── images/                         # Optimized images
-│   ├── test/                           # Test files
-│   └── example/                        # Example assets
+│   ├── background/                     # Background images
+│   │   └── cover/                      # Cover images
+│   ├── documents/                      # Document files
+│   ├── example/                        # Example assets
+│   └── files/                          # General file uploads
 ├── docs/                               # Documentation
 │   ├── collections/                    # Postman collections
+│   │   └── collection.postman_collection.json
 │   └── how-to-use/                     # Endpoint documentation
 ├── scripts/                            # Build and utility scripts
 │   ├── migrate.ts                      # Migration CLI
-│   ├── register.mjs                    # TS-Node registration
-│   └── run-migrate.mjs                 # Migration runner
+│   └── register.mjs                    # TS-Node registration
 ├── dist/                               # Compiled output (gitignored)
 ├── drizzle.config.ts                   # Drizzle ORM config
 ├── env.json                            # Configuration (gitignored)
