@@ -40,9 +40,11 @@ CDN API is a production-ready content delivery network service that provides int
 ### Key Technologies
 
 - **Backend**: Express.js 5.x with TypeScript
+- **Database**: Drizzle ORM with SQLite (Better-SQLite3)
+- **Authentication**: JWT-based with bcrypt password hashing
 - **Image Processing**: Sharp (high-performance image optimization)
 - **File Handling**: Multer, fs-extra
-- **Security**: Express Rate Limiting, CORS
+- **Security**: Express Rate Limiting, CORS, Session Management
 - **Frontend**: EJS templating with Tailwind CSS
 - **Development**: TypeScript, ts-node with hot reload
 
@@ -63,6 +65,25 @@ CDN API is a production-ready content delivery network service that provides int
 - **File Operations**: Move, delete, rename, and search files
 - **Preview Generation**: Document preview for supported formats
 - **Direct Download**: Secure file download endpoints
+- **Upload Tracking**: Complete audit trail of all uploads with user association
+- **Metadata Storage**: File metadata and tags in SQLite database
+
+### 🔐 Authentication & Authorization
+- **JWT Authentication**: Secure token-based authentication
+- **Role-Based Access**: Admin, user, and viewer roles
+- **Session Management**: Active session tracking with refresh tokens
+- **Account Security**: Failed login attempt tracking and account locking
+- **Audit Logging**: Complete authentication audit trail
+- **Password Security**: Bcrypt hashing with configurable rounds
+- **Default Admin**: Auto-created admin account for initial setup
+
+### 💾 Database & Migrations
+- **SQLite Database**: Lightweight, serverless database with Drizzle ORM
+- **Type-Safe Queries**: Full TypeScript support with Drizzle
+- **Migration System**: Timestamp-based schema migration tracking
+- **Seed Data**: Database seeding for demo users and test data
+- **Database Studio**: Built-in Drizzle Studio for visual database management
+- **Schema Export**: Export database schema for documentation
 
 ### 🔒 Security & Performance
 - **Rate Limiting**: Configurable rate limits for all endpoints
@@ -120,6 +141,12 @@ npm install
 cp env.json.example env.json
 # Edit env.json with your configuration
 
+# Initialize database
+npm run migrate:up
+
+# (Optional) Seed demo data
+npm run seed
+
 # Run in development mode
 npm run dev
 ```
@@ -144,7 +171,20 @@ cp env.json.example env.json
 
 Edit `env.json` with your settings (see [Configuration](#configuration) section).
 
-#### 3. Build Assets
+#### 3. Initialize Database
+
+```bash
+# Run database migrations
+npm run migrate:up
+
+# Check migration status
+npm run migrate:status
+
+# (Optional) Seed demo users
+npm run seed
+```
+
+#### 4. Build Assets
 
 ```bash
 # Build CSS (Tailwind)
@@ -154,7 +194,7 @@ npm run build:css
 npm run build
 ```
 
-#### 4. Start the Server
+#### 5. Start the Server
 
 ```bash
 # Development (with hot reload)
@@ -220,6 +260,94 @@ You can customize storage locations in `env.json`.
 
 ---
 
+## 🗄️ Database Management
+
+### Database Overview
+
+The application uses **SQLite** with **Drizzle ORM** for data persistence. The database file is stored at `src/data/app.db`.
+
+### Database Schema
+
+The system includes the following tables:
+
+- **users** - User accounts with role-based access
+- **sessions** - JWT session management with refresh tokens
+- **auth_audit_log** - Security audit trail for authentication events
+- **files** - Uploaded files metadata
+- **uploads** - Upload tracking with user association
+- **migrations** - Migration execution history
+
+### Migration Commands
+
+```bash
+# Check migration status
+npm run migrate:status
+
+# Run all pending migrations
+npm run migrate:up
+
+# Rollback last migration
+npm run migrate:down
+
+# Create a new migration
+npm run migrate:create "migration_name"
+```
+
+### Seeding Data
+
+```bash
+# Run all seed files
+npm run seed
+
+# Create a new seed file
+npm run seed:create "seed_name"
+```
+
+### Drizzle Studio
+
+Launch the visual database browser:
+
+```bash
+npm run db:studio
+```
+
+Then visit http://localhost:4983/ to:
+- Browse all tables and data
+- Run queries visually
+- Edit records directly
+- Export/import data
+
+### Manual Database Operations
+
+```bash
+# Generate schema from TypeScript code
+npm run db:generate
+
+# Push schema changes directly to database
+npm run db:push
+```
+
+⚠️ **Note**: Use `db:push` for rapid development, but use migrations (`migrate:up`) for production environments.
+
+### Database Backup
+
+To backup the database:
+
+```bash
+# Windows
+copy src\server\data\app.db src\server\data\app.db.backup
+
+# Linux/macOS
+cp src/data/app.db src/data/app.db.backup
+```
+
+Or use the API endpoint:
+```bash
+curl -X POST http://localhost:3000/api/database/backup
+```
+
+---
+
 ## 🎮 Usage
 
 ### Starting the Server
@@ -240,6 +368,16 @@ npm run css
 - **Web Dashboard**: http://localhost:3000/
 - **API Base URL**: http://localhost:3000/api/
 - **Health Check**: http://localhost:3000/api/ping
+- **Database Studio**: Run `npm run db:studio` and visit http://localhost:4983/
+
+### Default Admin Credentials
+
+After running migrations, a default admin account is created:
+- **Username**: `admin`
+- **Password**: `admin123`
+- **Email**: `admin@stackdev.cloud`
+
+⚠️ **Important**: Change the admin password immediately after first login!
 
 ### Basic Examples
 
@@ -280,26 +418,34 @@ Currently, the API does not require authentication. For production use, implemen
 
 ### Endpoints Overview
 
-| Category | Endpoint | Method | Description |
-|----------|----------|--------|-------------|
-| **Health** | `/ping` | GET | API health check |
-| **Images** | `/image/upload` | POST | Upload images (rate limited) |
-| **Images** | `/image/*` | GET | Retrieve optimized images |
-| **Images** | `/image/cache` | GET | Cached images list |
-| **Files** | `/file/upload` | POST | Upload files (rate limited) |
-| **Files** | `/file/search` | GET | Search files by name |
-| **Files** | `/file/move` | POST | Move files/folders |
-| **Files** | `/file/delete` | DELETE | Delete files |
-| **Files** | `/file/download/*` | GET | Download files |
-| **Files** | `/file/preview/*` | GET | Preview documents |
-| **Folders** | `/folder` | GET | Get folder structure |
-| **Database** | `/database` | GET | Get database JSON |
-| **Storage** | `/storage` | GET | Full storage statistics |
-| **Storage** | `/storage/summary` | GET | Quick storage summary |
+| Category | Endpoint | Method | Description | Auth Required |
+|----------|----------|--------|-------------|---------------|
+| **Health** | `/ping` | GET | API health check | No |
+| **Auth** | `/auth/login` | POST | User login (rate limited) | No |
+| **Auth** | `/auth/logout` | POST | Logout current session | Yes |
+| **Auth** | `/auth/logout-all` | POST | Logout all sessions | Yes |
+| **Auth** | `/auth/me` | GET | Get current user info | Yes |
+| **Images** | `/image/upload` | POST | Upload images (rate limited) | Optional |
+| **Images** | `/image/*` | GET | Retrieve optimized images | No |
+| **Files** | `/file/upload` | POST | Upload files (rate limited) | Optional |
+| **Files** | `/file/search` | GET | Search files by name | No |
+| **Files** | `/file/move` | PUT | Move files/folders | Optional |
+| **Files** | `/file/delete` | DELETE | Delete files | Optional |
+| **Files** | `/file/download/*` | GET | Download files | No |
+| **Files** | `/file/preview/*` | GET | Preview documents | No |
+| **Folders** | `/folder` | GET | Get folder structure | No |
+| **Database** | `/database/files` | GET | Get files database | No |
+| **Database** | `/database/stats` | GET | Database statistics | No |
+| **Database** | `/database/search` | GET | Search database | No |
+| **Database** | `/database/backup` | POST | Backup database | Optional |
+| **Storage** | `/storage` | GET | Full storage statistics | No |
+| **Storage** | `/storage/summary` | GET | Quick storage summary | No |
 
 ### Detailed API Documentation
 
 For comprehensive API documentation with examples, see:
+- [Authentication API](docs/how-to-use/authentication-api.md) - Complete auth guide with JWT
+- [Migration Guide](docs/how-to-use/MIGRATION_GUIDE.md) - Database migration system
 - [Image Upload Endpoint](docs/how-to-use/image-upload-endpoint.md)
 - [File Upload Endpoint](docs/how-to-use/file-upload-endpoint.md)
 - [Storage API Endpoint](docs/how-to-use/storage-api-endpoint.md)
@@ -321,6 +467,7 @@ docs/collections/collection.postman_collection.json
 
 ### Project Scripts
 
+#### Development
 ```bash
 # Development server with hot reload
 npm run dev
@@ -336,6 +483,36 @@ npm run build
 
 # Production server
 npm start
+```
+
+#### Database Management
+```bash
+# Run all pending migrations
+npm run migrate:up
+
+# Rollback last migration
+npm run migrate:down
+
+# Check migration status
+npm run migrate:status
+
+# Create new migration
+npm run migrate:create "migration name"
+
+# Run database seeds
+npm run seed
+
+# Create new seed file
+npm run seed:create "seed name"
+
+# Generate Drizzle schema
+npm run db:generate
+
+# Push schema changes
+npm run db:push
+
+# Open Drizzle Studio
+npm run db:studio
 ```
 
 ### Development Workflow
@@ -373,6 +550,8 @@ cdn.api.pphat.stackdev.cloud/
 │   ├── app.ts                          # Application entry point
 │   ├── client/                         # Frontend application
 │   │   ├── controller/                 # Client controllers
+│   │   ├── middlewares/                # Client middlewares
+│   │   │   └── auth.ts                 # Client auth middleware
 │   │   ├── routes/                     # Client routes
 │   │   ├── styles/                     # CSS/Tailwind styles
 │   │   ├── utils/                      # Client utilities
@@ -382,30 +561,52 @@ cdn.api.pphat.stackdev.cloud/
 │   │       └── pages/                  # Page templates
 │   └── server/                         # Backend API
 │       ├── controllers/                # API controllers
+│       │   ├── auth.controller.ts      # Authentication controller
 │       │   ├── files.controller.ts
 │       │   ├── folder.controller.ts
 │       │   ├── images.controller.ts
 │       │   ├── preview.controller.ts
+│       │   ├── session.controller.ts   # Session management
 │       │   ├── storage.controller.ts
-│       │   └── upload.controller.ts
+│       │   ├── upload.controller.ts
+│       │   └── users.controller.ts     # User management
 │       ├── data/                       # Data storage
-│       │   └── database.json
+│       │   ├── app.db                  # SQLite database
+│       │   └── database.json           # Legacy JSON store
 │       ├── middlewares/                # Express middlewares
+│       │   ├── auth.ts                 # JWT auth middleware
 │       │   ├── cors.ts
-│       │   └── rate-limit.ts
+│       │   ├── rate-limit.ts
+│       │   └── security.ts             # Security headers
+│       ├── migrations/                 # Database migrations
+│       │   ├── 0000_youthful_ozymandias.sql
+│       │   ├── 20260213_000000_create_initial_auth_tables_sqlite.ts
+│       │   ├── 20260214_000000_create_files_uploads_tables_sqlite.ts
+│       │   ├── meta/                   # Drizzle metadata
+│       │   └── README.md
 │       ├── routes/                     # API routes
 │       │   ├── api.ts                  # Main API router
+│       │   ├── auth.ts                 # Auth routes
 │       │   ├── database.ts
 │       │   ├── file.ts
 │       │   ├── folder.ts
 │       │   ├── image.ts
 │       │   └── storage.ts
+│       ├── schema/                     # Database schemas
+│       │   └── schema.ts               # Drizzle ORM schema
+│       ├── seeds/                      # Database seeds
+│       │   └── 20260213_010000_demo_users_sqlite.ts
+│       ├── types/                      # TypeScript types
+│       │   └── user.ts                 # User & auth types
 │       └── utils/                      # Server utilities
+│           ├── auth.ts                 # Auth utilities
 │           ├── config.ts               # Configuration loader
-│           ├── database.ts             # Database operations
+│           ├── database.ts             # Database operations (legacy)
+│           ├── db.ts                   # Drizzle DB client
 │           ├── directories.ts          # Directory utilities
 │           ├── files.ts                # File operations
 │           ├── image-cache.ts          # Image caching
+│           ├── migration-runner.ts     # Migration system
 │           ├── mine-types.ts           # MIME type detection
 │           ├── response.ts             # Response helpers
 │           └── storage.ts              # Storage statistics
@@ -416,7 +617,12 @@ cdn.api.pphat.stackdev.cloud/
 ├── docs/                               # Documentation
 │   ├── collections/                    # Postman collections
 │   └── how-to-use/                     # Endpoint documentation
+├── scripts/                            # Build and utility scripts
+│   ├── migrate.ts                      # Migration CLI
+│   ├── register.mjs                    # TS-Node registration
+│   └── run-migrate.mjs                 # Migration runner
 ├── dist/                               # Compiled output (gitignored)
+├── drizzle.config.ts                   # Drizzle ORM config
 ├── env.json                            # Configuration (gitignored)
 ├── env.json.example                    # Configuration template
 ├── package.json                        # Dependencies
@@ -521,14 +727,39 @@ docs/collections/collection.postman_collection.json
 
 ### Testing Checklist
 
-- [ ] Image upload with various formats
+#### Authentication Tests
+- [ ] User login with valid credentials
+- [ ] Login rate limiting (5 attempts)
+- [ ] Account locking after failed attempts
+- [ ] JWT token validation
+- [ ] Protected endpoint access
+- [ ] Logout functionality
+- [ ] Current user info retrieval
+
+#### File Operations Tests
+- [ ] Image upload with various formats (JPEG, PNG, WebP, TIFF)
 - [ ] File upload with different file types
-- [ ] Rate limiting verification
+- [ ] File search by name
+- [ ] File move operations
+- [ ] File deletion
+- [ ] File download
+- [ ] Document preview generation
+
+#### System Tests
+- [ ] Rate limiting verification (all endpoints)
 - [ ] CORS headers validation
 - [ ] Storage statistics accuracy
-- [ ] File operations (move, delete, search)
-- [ ] Preview generation
+- [ ] Database migrations (up/down)
+- [ ] Seed data creation
 - [ ] Error handling scenarios
+- [ ] Session management
+
+#### Database Tests
+- [ ] Migration execution
+- [ ] Rollback functionality
+- [ ] Seed data integrity
+- [ ] Foreign key constraints
+- [ ] Data validation
 
 ### Performance Testing
 
@@ -614,6 +845,8 @@ This project is licensed under the ISC License - see the [LICENSE](LICENSE) file
 - **Express.js** - Fast, minimalist web framework
 - **Multer** - Multipart/form-data handling
 - **Tailwind CSS** - Utility-first CSS framework
+- **Drizzle ORM** - TypeScript ORM for SQL databases
+- **Better-SQLite3** - Fast SQLite3 driver for Node.js
 
 ---
 
@@ -629,9 +862,22 @@ If you encounter any issues or have questions:
 
 ## 🗺️ Roadmap
 
+### Completed Features ✅
+
+- [x] **Authentication & Authorization** - JWT-based auth with role-based access
+- [x] **Database System** - SQLite with Drizzle ORM and migrations
+- [x] **Session Management** - Refresh tokens and session tracking
+- [x] **Security Audit** - Complete authentication audit trail
+- [x] **Image Optimization** - Multi-format support with Sharp
+- [x] **File Management** - Upload, organize, and manage files
+- [x] **Rate Limiting** - Endpoint-specific rate limiting
+- [x] **Storage Analytics** - Real-time storage statistics
+- [x] **Web Dashboard** - Visual interface for file management
+
 ### Upcoming Features
 
-- [ ] Authentication & Authorization (JWT)
+- [ ] User profile management UI
+- [ ] Two-factor authentication (2FA)
 - [ ] Image watermarking
 - [ ] Video processing support
 - [ ] CDN integration (CloudFlare, AWS CloudFront)
@@ -639,20 +885,29 @@ If you encounter any issues or have questions:
 - [ ] Advanced analytics dashboard
 - [ ] Webhook notifications
 - [ ] API versioning
-- [ ] Rate limiting per API key
+- [ ] API key system with per-key rate limiting
 - [ ] File compression (ZIP archives)
 - [ ] Batch operations API
 - [ ] GraphQL API endpoint
+- [ ] Email notifications
+- [ ] Shared folder/file links
 
 ### Version History
 
-- **1.0.0** (Current)
-  - Initial release
-  - Image optimization
-  - File management
-  - Rate limiting
-  - Storage statistics
-  - Web dashboard
+- **1.0.0** (February 2026)
+  - ✅ JWT authentication system
+  - ✅ SQLite database with Drizzle ORM
+  - ✅ Database migration system
+  - ✅ User management with roles
+  - ✅ Session tracking and refresh tokens
+  - ✅ Security audit logging
+  - ✅ File upload tracking in database
+  - ✅ Image optimization engine
+  - ✅ File management system
+  - ✅ Rate limiting
+  - ✅ Storage statistics
+  - ✅ Web dashboard
+  - ✅ Drizzle Studio integration
 
 ---
 
