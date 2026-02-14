@@ -14,10 +14,10 @@ export class UsersController {
             const sql = getDbClient();
 
             const usersResult = await sql`
-                SELECT 
-                    id, username, email, name, avatar, role, 
+                SELECT
+                    id, username, email, name, avatar, role,
                     is_active, last_login_at, created_at, updated_at
-                FROM users 
+                FROM users
                 ORDER BY created_at DESC
             `;
 
