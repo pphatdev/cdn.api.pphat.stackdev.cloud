@@ -256,7 +256,7 @@
     // Categorize files by date
     const categorizeFiles = (files) => {
         const categories = { today: [], yesterday: [], week: [], older: [] };
-        
+
         files.forEach(file => {
             const date = new Date(file.uploadedAt || file.createdAt);
             if (isToday(date)) {
@@ -280,7 +280,7 @@
         const dropdownId = `recent-dropdown-${file.id || index}-${Math.random().toString(36).slice(2, 6)}`;
 
         return `
-        <div class="rounded-2xl bg-white hover:shadow-lg shadow-primary/10 transition-all duration-300 overflow-hidden group border border-foreground/10">
+        <div class="rounded-2xl relative bg-white hover:shadow-lg shadow-primary/10 transition-all duration-300 overflow-hidden group border border-foreground/10">
             <div class="relative aspect-video bg-slate-50 flex items-center justify-center">
                 ${isImage ? `
                     <img src="/api/image/${file.filename}?w=400&h=300" alt="${file.originalFilename || file.filename}" loading="lazy" class="w-full bg-primary/5 h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -321,6 +321,7 @@
                 <h4 class="text-sm font-bold text-slate-900 mb-1 truncate" title="${file.originalFilename || file.filename}">${file.originalFilename || file.filename}</h4>
                 <p class="text-xs text-foreground/60">${formatBytes(file.size)} · ${timeAgo(file.uploadedAt)}</p>
             </div>
+            <a href="/detail?file=${file.filename}" class="absolute inset-0 z-10 cursor-pointer"></a>
         </div>
         `;
     };
@@ -331,7 +332,7 @@
         const dropdownId = `recent-list-dropdown-${file.id || index}-${Math.random().toString(36).slice(2, 6)}`;
 
         return `
-        <div class="flex items-center justify-between p-4 hover:bg-slate-50 border-b border-slate-100 last:border-b-0 group">
+        <div class="flex items-center justify-between p-4 hover:bg-slate-50 border-b border-slate-100 last:border-b-0 group relative">
             <div class="flex items-center gap-4 min-w-0">
                 <div class="w-10 h-10 rounded-lg flex items-center justify-center ${typeColors[fileType]}">
                     <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>

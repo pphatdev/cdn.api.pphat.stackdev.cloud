@@ -1,5 +1,5 @@
 <!-- File Card Component -->
-<div class="rounded-2xl bg-white hover:shadow-lg shadow-primary/10 transition-all duration-300 overflow-hidden group border border-foreground/10">
+<div class="rounded-2xl bg-white hover:shadow-lg shadow-primary/10 transition-all relative duration-300 overflow-hidden group border border-foreground/10">
     <div class="relative aspect-video bg-slate-50 flex items-center justify-center">
         <% if (typeof isImage !== 'undefined' && isImage && typeof imageSrc !== 'undefined') { %>
             <img src="<%= imageSrc %>" alt="<%= title %>" loading="lazy" class="w-full bg-primary/5 h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -75,4 +75,5 @@
         <p class="text-sm font-bold text-slate-900 mb-1 truncate" title="<%= title %>"><%= title %></p>
         <p class="text-xs text-foreground/60"><%= subtitle %></p>
     </div>
+    <a href="<%= previewUrl %>" class="inset-0 z-10 absolute cursor-pointer"></a>
 </div>
