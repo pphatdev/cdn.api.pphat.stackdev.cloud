@@ -3,144 +3,8 @@ import { sendSuccess, sendBadRequest, sendUnauthorized } from '../utils/response
 import { query, queryOne, getDbClient, initializeAuthTables } from '../utils/db.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
-import fs from 'fs';
-import path from 'path';
-
-// ==================== CONFIGURATION ====================
-
-interface AuthConfig {
-    jwtSecret: string;
-    jwtExpiresIn: string;
-    refreshTokenExpiresIn: string;
-    bcryptRounds: number;
-    maxLoginAttempts: number;
-    lockoutDuration: number; // minutes
-    maxSessionsPerUser: number;
-}
-
-const getAuthConfig = (): AuthConfig => {
-    const envPath = path.join(process.cwd(), 'env.json');
-    let envData: any = {};
-
-    if (fs.existsSync(envPath)) {
-        envData = JSON.parse(fs.readFileSync(envPath, 'utf-8'));
-    }
-
-    const authConfig = envData.auth || {};
-
-    return {
-        jwtSecret: authConfig.jwtSecret || process.env.JWT_SECRET || crypto.randomBytes(64).toString('hex'),
-        jwtExpiresIn: authConfig.jwtExpiresIn || '1h',
-        refreshTokenExpiresIn: authConfig.refreshTokenExpiresIn || '7d',
-        bcryptRounds: authConfig.bcryptRounds || 12,
-        maxLoginAttempts: authConfig.maxLoginAttempts || 5,
-        lockoutDuration: authConfig.lockoutDuration || 15,
-        maxSessionsPerUser: authConfig.maxSessionsPerUser || 5
-    };
-};
-
-// ==================== INTERFACES ====================
-
-interface User {
-    id: string;
-    username: string;
-    email?: string;
-    password_hash: string;
-    name: string;
-    avatar?: string;
-    role: 'admin' | 'user' | 'viewer';
-    is_active: boolean;
-    failed_login_attempts: number;
-    locked_until?: Date;
-    last_login_at?: Date;
-    password_changed_at?: Date;
-    created_at: Date;
-    updated_at: Date;
-}
-
-interface Session {
-    id: string;
-    user_id: string;
-    token_hash: string;
-    refresh_token_hash?: string;
-    ip_address?: string;
-    user_agent?: string;
-    is_valid: boolean;
-    expires_at: Date;
-    refresh_expires_at?: Date;
-    created_at: Date;
-    last_used_at: Date;
-}
-
-interface JwtPayload {
-    userId: string;
-    username: string;
-    role: string;
-    sessionId: string;
-    type: 'access' | 'refresh';
-}
-
-// ==================== UTILITY FUNCTIONS ====================
-
-/**
- * Hash a token for secure storage
- */
-const hashToken = (token: string): string => {
-    return crypto.createHash('sha256').update(token).digest('hex');
-};
-
-/**
- * Get client IP address
- */
-const getClientIp = (req: Request): string => {
-    const forwarded = req.headers['x-forwarded-for'];
-    if (typeof forwarded === 'string') {
-        return forwarded.split(',')[0].trim();
-    }
-    return req.ip || req.socket.remoteAddress || 'unknown';
-};
-
-/**
- * Log audit event
- */
-const logAuditEvent = async (
-    userId: string | null,
-    action: string,
-    req: Request,
-    details?: any
-): Promise<void> => {
-    try {
-        const sql = getDbClient();
-        await sql`
-            INSERT INTO auth_audit_log (user_id, action, ip_address, user_agent, details)
-            VALUES (${userId}, ${action}, ${getClientIp(req)}, ${req.headers['user-agent'] || null}, ${details ? JSON.stringify(details) : null})
-        `;
-    } catch (error) {
-        console.error('Failed to log audit event:', error);
-    }
-};
-
-/**
- * Parse duration string to milliseconds
- */
-const parseDuration = (duration: string): number => {
-    const match = duration.match(/^(\d+)([smhd])$/);
-    if (!match) return 3600000; // default 1 hour
-
-    const value = parseInt(match[1]);
-    const unit = match[2];
-
-    switch (unit) {
-        case 's': return value * 1000;
-        case 'm': return value * 60 * 1000;
-        case 'h': return value * 60 * 60 * 1000;
-        case 'd': return value * 24 * 60 * 60 * 1000;
-        default: return 3600000;
-    }
-};
-
-// ==================== AUTH CONTROLLER ====================
+import { JwtPayload, Session, User } from '../types/user.js';
+import { getAuthConfig, getClientIp, hashToken, logAuditEvent, parseDuration } from '../utils/auth.js';
 
 export class AuthController {
     private static initialized = false;
@@ -256,7 +120,7 @@ export class AuthController {
 
             // Find user - using Neon SQL directly instead of queryOne helper
             const users = await sql`
-                SELECT * FROM users 
+                SELECT * FROM users
                 WHERE username = ${username} OR email = ${username}
                 LIMIT 1
             `;
@@ -326,7 +190,7 @@ export class AuthController {
             if (userSessions.length >= config.maxSessionsPerUser) {
                 // Invalidate oldest session
                 await sql`
-                    UPDATE sessions SET is_valid = false 
+                    UPDATE sessions SET is_valid = false
                     WHERE id = ${userSessions[0].id}
                 `;
             }
@@ -351,7 +215,7 @@ export class AuthController {
 
             // Reset failed attempts and update last login
             await sql`
-                UPDATE users 
+                UPDATE users
                 SET failed_login_attempts = 0,
                     locked_until = NULL,
                     last_login_at = CURRENT_TIMESTAMP
@@ -508,9 +372,9 @@ export class AuthController {
             // Verify session exists and is valid
             const sql = getDbClient();
             const sessionResult = await sql`
-                SELECT * FROM sessions 
-                WHERE id = ${payload.sessionId} 
-                AND refresh_token_hash = ${hashToken(refreshToken)} 
+                SELECT * FROM sessions
+                WHERE id = ${payload.sessionId}
+                AND refresh_token_hash = ${hashToken(refreshToken)}
                 AND is_valid = true
             `;
             const session = sessionResult.length > 0 ? sessionResult[0] as Session : null;
@@ -616,7 +480,7 @@ export class AuthController {
 
             // Update password
             await sql`
-                UPDATE users 
+                UPDATE users
                 SET password_hash = ${newPasswordHash},
                     password_changed_at = CURRENT_TIMESTAMP,
                     updated_at = CURRENT_TIMESTAMP
@@ -638,77 +502,6 @@ export class AuthController {
 
         } catch (error: any) {
             sendBadRequest(res, error.message || 'Failed to change password.');
-        }
-    };
-
-    /**
-     * Get active sessions
-     * GET /api/auth/sessions
-     */
-    static getSessions = async (req: Request, res: Response): Promise<void> => {
-        try {
-            const user = (req as any).user;
-            if (!user) {
-                sendUnauthorized(res, 'Authentication required.');
-                return;
-            }
-
-            const sessions = await query<Session>(
-                `SELECT id, ip_address, user_agent, created_at, last_used_at, expires_at 
-                 FROM sessions 
-                 WHERE user_id = $1 AND is_valid = true AND expires_at > CURRENT_TIMESTAMP
-                 ORDER BY last_used_at DESC`,
-                [user.id]
-            );
-
-            const currentToken = req.headers.authorization?.replace('Bearer ', '');
-            const currentTokenHash = currentToken ? hashToken(currentToken) : null;
-
-            const sessionsWithCurrent = sessions.map(session => ({
-                ...session,
-                isCurrent: false // We can't easily determine this without storing token hash comparison
-            }));
-
-            sendSuccess(res, sessionsWithCurrent, 'Sessions retrieved');
-
-        } catch (error: any) {
-            sendBadRequest(res, error.message || 'Failed to get sessions.');
-        }
-    };
-
-    /**
-     * Revoke a specific session
-     * DELETE /api/auth/sessions/:sessionId
-     */
-    static revokeSession = async (req: Request, res: Response): Promise<void> => {
-        const sql = getDbClient();
-
-        try {
-            const user = (req as any).user;
-            if (!user) {
-                sendUnauthorized(res, 'Authentication required.');
-                return;
-            }
-
-            const { sessionId } = req.params;
-
-            const result = await sql`
-                UPDATE sessions SET is_valid = false 
-                WHERE id = ${sessionId} AND user_id = ${user.id}
-                RETURNING id
-            `;
-
-            if (result.length === 0) {
-                sendBadRequest(res, 'Session not found.');
-                return;
-            }
-
-            await logAuditEvent(user.id, 'SESSION_REVOKED', req, { sessionId });
-
-            sendSuccess(res, null, 'Session revoked');
-
-        } catch (error: any) {
-            sendBadRequest(res, error.message || 'Failed to revoke session.');
         }
     };
 
@@ -742,262 +535,6 @@ export class AuthController {
 
         } catch (error) {
             return null;
-        }
-    }
-
-    /**
-     * Get all users (Admin only)
-     */
-    static async getAllUsers(req: Request, res: Response): Promise<void> {
-        try {
-            const sql = getDbClient();
-
-            const usersResult = await sql`
-                SELECT 
-                    id, username, email, name, avatar, role, 
-                    is_active, last_login_at, created_at, updated_at
-                FROM users 
-                ORDER BY created_at DESC
-            `;
-
-            const users = usersResult.map((user: any) => ({
-                id: user.id,
-                username: user.username,
-                email: user.email,
-                name: user.name,
-                avatar: user.avatar,
-                role: user.role,
-                is_active: user.is_active,
-                last_login_at: user.last_login_at,
-                created_at: user.created_at,
-                updated_at: user.updated_at
-            }));
-
-            await logAuditEvent((req as any).user?.id, 'USERS_LISTED', req);
-
-            sendSuccess(res, users, 'Users retrieved successfully');
-
-        } catch (error: any) {
-            console.error('Get all users error:', error);
-            sendBadRequest(res, error.message || 'Failed to retrieve users.');
-        }
-    }
-
-    /**
-     * Create new user (Admin only)
-     */
-    static async createUser(req: Request, res: Response): Promise<void> {
-        try {
-            const { username, email, name, password, role, is_active } = req.body;
-
-            // Validate required fields
-            if (!username || !name || !password) {
-                sendBadRequest(res, 'Username, name, and password are required.');
-                return;
-            }
-
-            // Validate role
-            if (role && !['admin', 'user', 'viewer'].includes(role)) {
-                sendBadRequest(res, 'Invalid role. Must be admin, user, or viewer.');
-                return;
-            }
-
-            const config = getAuthConfig();
-            const sql = getDbClient();
-
-            // Check if username already exists
-            const existingUserResult = await sql`
-                SELECT id FROM users WHERE username = ${username}
-            `;
-
-            if (existingUserResult.length > 0) {
-                sendBadRequest(res, 'Username already exists.');
-                return;
-            }
-
-            // Hash password
-            const passwordHash = await bcrypt.hash(password, config.bcryptRounds);
-
-            // Create user
-            const newUserResult = await sql`
-                INSERT INTO users (
-                    username, email, password_hash, name, role, is_active
-                )
-                VALUES (
-                    ${username},
-                    ${email || null},
-                    ${passwordHash},
-                    ${name},
-                    ${role || 'user'},
-                    ${is_active !== undefined ? is_active : true}
-                )
-                RETURNING id, username, email, name, role, is_active, created_at
-            `;
-
-            const newUser = newUserResult[0];
-
-            await logAuditEvent((req as any).user?.id, 'USER_CREATED', req, {
-                createdUserId: newUser.id,
-                username: newUser.username
-            });
-
-            sendSuccess(res, newUser, 'User created successfully', 201);
-
-        } catch (error: any) {
-            console.error('Create user error:', error);
-            sendBadRequest(res, error.message || 'Failed to create user.');
-        }
-    }
-
-    /**
-     * Update user (Admin only)
-     */
-    static async updateUser(req: Request, res: Response): Promise<void> {
-        try {
-            const { userId } = req.params;
-            const { email, name, password, role, is_active } = req.body;
-
-            if (!userId) {
-                sendBadRequest(res, 'User ID is required.');
-                return;
-            }
-
-            // Validate role if provided
-            if (role && !['admin', 'user', 'viewer'].includes(role)) {
-                sendBadRequest(res, 'Invalid role. Must be admin, user, or viewer.');
-                return;
-            }
-
-            const config = getAuthConfig();
-            const sql = getDbClient();
-
-            // Check if user exists
-            const existingUserResult = await sql`
-                SELECT id FROM users WHERE id = ${userId}
-            `;
-
-            if (existingUserResult.length === 0) {
-                sendBadRequest(res, 'User not found.');
-                return;
-            }
-
-            // Build update query
-            const updates: string[] = [];
-            const values: any[] = [];
-
-            if (email !== undefined) {
-                updates.push(`email = $${values.length + 1}`);
-                values.push(email);
-            }
-            if (name !== undefined) {
-                updates.push(`name = $${values.length + 1}`);
-                values.push(name);
-            }
-            if (role !== undefined) {
-                updates.push(`role = $${values.length + 1}`);
-                values.push(role);
-            }
-            if (is_active !== undefined) {
-                updates.push(`is_active = $${values.length + 1}`);
-                values.push(is_active);
-            }
-            if (password) {
-                const passwordHash = await bcrypt.hash(password, config.bcryptRounds);
-                updates.push(`password_hash = $${values.length + 1}`);
-                values.push(passwordHash);
-                updates.push(`password_changed_at = CURRENT_TIMESTAMP`);
-            }
-
-            if (updates.length === 0) {
-                sendBadRequest(res, 'No fields to update.');
-                return;
-            }
-
-            updates.push(`updated_at = CURRENT_TIMESTAMP`);
-
-            // Execute update
-            const queryStr = `
-                UPDATE users 
-                SET ${updates.join(', ')}
-                WHERE id = $${values.length + 1}
-                RETURNING id, username, email, name, role, is_active, updated_at
-            `;
-            values.push(userId);
-
-            let finalQuery = queryStr;
-            values.forEach((value, index) => {
-                const placeholder = `$${index + 1}`;
-                const sqlValue = value === null ? 'NULL' :
-                    typeof value === 'string' ? `'${value.replace(/'/g, "''")}'` :
-                        String(value);
-                finalQuery = finalQuery.replace(placeholder, sqlValue);
-            });
-
-            const updatedUserResult = await sql.unsafe(finalQuery);
-            // @ts-ignore
-            const updatedUser = updatedUserResult[0];
-
-            await logAuditEvent((req as any).user?.id, 'USER_UPDATED', req, {
-                updatedUserId: userId,
-                changes: req.body
-            });
-
-            sendSuccess(res, updatedUser, 'User updated successfully');
-
-        } catch (error: any) {
-            console.error('Update user error:', error);
-            sendBadRequest(res, error.message || 'Failed to update user.');
-        }
-    }
-
-    /**
-     * Delete user (Admin only)
-     */
-    static async deleteUser(req: Request, res: Response): Promise<void> {
-        try {
-            const { userId } = req.params;
-
-            if (!userId) {
-                sendBadRequest(res, 'User ID is required.');
-                return;
-            }
-
-            const sql = getDbClient();
-
-            // Check if user exists
-            const existingUserResult = await sql`
-                SELECT id, username FROM users WHERE id = ${userId}
-            `;
-
-            if (existingUserResult.length === 0) {
-                sendBadRequest(res, 'User not found.');
-                return;
-            }
-
-            const userToDelete = existingUserResult[0] as User;
-
-            // Prevent deleting the current user
-            if ((req as any).user?.id === userId) {
-                sendBadRequest(res, 'You cannot delete your own account.');
-                return;
-            }
-
-            // Delete user's sessions first
-            await sql`DELETE FROM sessions WHERE user_id = ${userId}`;
-
-            // Delete user
-            await sql`DELETE FROM users WHERE id = ${userId}`;
-
-            await logAuditEvent((req as any).user?.id, 'USER_DELETED', req, {
-                deletedUserId: userId,
-                username: userToDelete.username
-            });
-
-            sendSuccess(res, null, 'User deleted successfully');
-
-        } catch (error: any) {
-            console.error('Delete user error:', error);
-            sendBadRequest(res, error.message || 'Failed to delete user.');
         }
     }
 }
