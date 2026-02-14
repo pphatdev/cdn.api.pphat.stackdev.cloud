@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { sendBadRequest, sendSuccess, sendUnauthorized } from '../utils/response.js';
-import { query, getDbClient } from '../utils/db.js';
+import { query, getSqliteClient } from '../utils/db.js';
 import { Session } from '../types/user.js';
 import { hashToken, logAuditEvent } from '../utils/auth.js';
 
@@ -20,7 +20,7 @@ export class SessionController {
             const sessions = await query<Session>(
                 `SELECT id, ip_address, user_agent, created_at, last_used_at, expires_at
                 FROM sessions
-                WHERE user_id = $1 AND is_valid = true AND expires_at > CURRENT_TIMESTAMP
+                WHERE user_id = ? AND is_valid = 1 AND expires_at > datetime('now')
                 ORDER BY last_used_at DESC`,
                 [user.id]
             );
@@ -45,8 +45,6 @@ export class SessionController {
      * DELETE /api/auth/sessions/:sessionId
      */
     static revokeSession = async (req: Request, res: Response): Promise<void> => {
-        const sql = getDbClient();
-
         try {
             const user = (req as any).user;
             if (!user) {
@@ -56,13 +54,13 @@ export class SessionController {
 
             const { sessionId } = req.params;
 
-            const result = await sql`
-                UPDATE sessions SET is_valid = false 
-                WHERE id = ${sessionId} AND user_id = ${user.id}
-                RETURNING id
-            `;
+            const sqlite = getSqliteClient();
+            const stmt = sqlite.prepare(
+                'UPDATE sessions SET is_valid = 0 WHERE id = ? AND user_id = ?'
+            );
+            const result = stmt.run(sessionId, user.id);
 
-            if (result.length === 0) {
+            if (result.changes === 0) {
                 sendBadRequest(res, 'Session not found.');
                 return;
             }

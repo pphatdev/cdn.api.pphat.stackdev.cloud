@@ -170,8 +170,8 @@ export const rollbackLastMigration = async (migrationsDir: string): Promise<void
         await migration.down();
 
         // Delete the migration record
-        const sql = getDbClient();
-        await sql`DELETE FROM migrations WHERE name = ${migrationName}`;
+        const db = getDbClient();
+        db.$client.prepare('DELETE FROM migrations WHERE name = ?').run(migrationName);
 
         console.log(`✅ Successfully rolled back ${migrationName}`);
     } catch (error: any) {
@@ -233,7 +233,7 @@ export const createMigration = (migrationsDir: string, name: string): string => 
     const filePath = path.join(migrationsDir, fileName);
 
     // Migration template
-    const template = `import { getDbClient } from '../utils/neon-db.js';
+    const template = `import { getSqliteClient } from '../utils/db.js';
 
 /**
  * Migration: ${name}
@@ -245,17 +245,17 @@ export default {
      * Run the migration
      */
     async up() {
-        const sql = getDbClient();
+        const db = getSqliteClient();
 
         // TODO: Write your migration logic here
         // Example:
-        // await sql\`
-        //     CREATE TABLE example (
-        //         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        //         name VARCHAR(255) NOT NULL,
-        //         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        // db.exec(\`
+        //     CREATE TABLE IF NOT EXISTS example (
+        //         id TEXT PRIMARY KEY,
+        //         name TEXT NOT NULL,
+        //         created_at TEXT DEFAULT (datetime('now'))
         //     )
-        // \`;
+        // \`);
 
         console.log('✅ Migration ${name} completed');
     },
@@ -264,11 +264,11 @@ export default {
      * Rollback the migration (optional)
      */
     async down() {
-        const sql = getDbClient();
+        const db = getSqliteClient();
 
         // TODO: Write your rollback logic here
         // Example:
-        // await sql\`DROP TABLE IF EXISTS example\`;
+        // db.exec(\`DROP TABLE IF EXISTS example\`);
 
         console.log('✅ Migration ${name} rolled back');
     }
@@ -277,7 +277,7 @@ export default {
 
     fs.writeFileSync(filePath, template);
     console.log(`✅ Created migration: ${fileName}`);
-    
+
     return filePath;
 };
 
@@ -384,7 +384,7 @@ export default {
 
     fs.writeFileSync(filePath, template);
     console.log(`✅ Created seed: ${fileName}`);
-    
+
     return filePath;
 };
 

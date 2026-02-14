@@ -7,8 +7,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const MIGRATIONS_DIR = path.join(__dirname, '..', 'src', 'server', 'migrations');
-const SEEDS_DIR = path.join(__dirname, '..', 'src', 'server', 'seeds');
+const MIGRATIONS_DIR = path.join(__dirname, '..', 'src', 'data', 'migrations');
+const SEEDS_DIR = path.join(__dirname, '..', 'src', 'data', 'seeds');
 
 /**
  * Display help message
@@ -113,4 +113,10 @@ const main = async () => {
 };
 
 // Run the CLI
-main();
+main().catch((error) => {
+    console.error('\n❌ Fatal Error:', error?.message || error);
+    if (error?.stack) {
+        console.error(error.stack);
+    }
+    process.exit(1);
+});

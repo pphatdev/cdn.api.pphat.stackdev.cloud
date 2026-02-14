@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { sendBadRequest, sendSuccess } from '../utils/response.js';
-import { getDbClient } from '../utils/db.js';
+import { query, queryOne, getSqliteClient } from '../utils/db.js';
 import { User } from '../types/user.js';
 import { getAuthConfig, logAuditEvent } from '../utils/auth.js';
 
@@ -11,15 +11,13 @@ export class UsersController {
      */
     static async getAllUsers(req: Request, res: Response): Promise<void> {
         try {
-            const sql = getDbClient();
-
-            const usersResult = await sql`
-                SELECT
+            const usersResult = await query<User>(
+                `SELECT
                     id, username, email, name, avatar, role,
                     is_active, last_login_at, created_at, updated_at
                 FROM users
-                ORDER BY created_at DESC
-            `;
+                ORDER BY created_at DESC`
+            );
 
             const users = usersResult.map((user: any) => ({
                 id: user.id,
@@ -64,14 +62,14 @@ export class UsersController {
             }
 
             const config = getAuthConfig();
-            const sql = getDbClient();
 
             // Check if username already exists
-            const existingUserResult = await sql`
-                SELECT id FROM users WHERE username = ${username}
-            `;
+            const existingUser = await queryOne<User>(
+                'SELECT id FROM users WHERE username = ?',
+                [username]
+            );
 
-            if (existingUserResult.length > 0) {
+            if (existingUser) {
                 sendBadRequest(res, 'Username already exists.');
                 return;
             }
@@ -80,22 +78,34 @@ export class UsersController {
             const passwordHash = await bcrypt.hash(password, config.bcryptRounds);
 
             // Create user
-            const newUserResult = await sql`
+            const userId = crypto.randomUUID();
+            const sqlite = getSqliteClient();
+            const stmt = sqlite.prepare(`
                 INSERT INTO users (
-                    username, email, password_hash, name, role, is_active
+                    id, username, email, password_hash, name, role, is_active
                 )
-                VALUES (
-                    ${username},
-                    ${email || null},
-                    ${passwordHash},
-                    ${name},
-                    ${role || 'user'},
-                    ${is_active !== undefined ? is_active : true}
-                )
-                RETURNING id, username, email, name, role, is_active, created_at
-            `;
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            `);
+            stmt.run(
+                userId,
+                username,
+                email || null,
+                passwordHash,
+                name,
+                role || 'user',
+                is_active !== undefined ? (is_active ? 1 : 0) : 1
+            );
 
-            const newUser = newUserResult[0];
+            // Fetch the created user
+            const newUser = await queryOne<User>(
+                'SELECT id, username, email, name, role, is_active, created_at FROM users WHERE id = ?',
+                [userId]
+            );
+
+            if (!newUser) {
+                sendBadRequest(res, 'Failed to create user.');
+                return;
+            }
 
             await logAuditEvent((req as any).user?.id, 'USER_CREATED', req, {
                 createdUserId: newUser.id,
@@ -130,43 +140,43 @@ export class UsersController {
             }
 
             const config = getAuthConfig();
-            const sql = getDbClient();
 
             // Check if user exists
-            const existingUserResult = await sql`
-                SELECT id FROM users WHERE id = ${userId}
-            `;
+            const existingUser = await queryOne<User>(
+                'SELECT id FROM users WHERE id = ?',
+                [userId]
+            );
 
-            if (existingUserResult.length === 0) {
+            if (!existingUser) {
                 sendBadRequest(res, 'User not found.');
                 return;
             }
 
-            // Build update query
+            // Build update query dynamically
             const updates: string[] = [];
             const values: any[] = [];
 
             if (email !== undefined) {
-                updates.push(`email = $${values.length + 1}`);
+                updates.push('email = ?');
                 values.push(email);
             }
             if (name !== undefined) {
-                updates.push(`name = $${values.length + 1}`);
+                updates.push('name = ?');
                 values.push(name);
             }
             if (role !== undefined) {
-                updates.push(`role = $${values.length + 1}`);
+                updates.push('role = ?');
                 values.push(role);
             }
             if (is_active !== undefined) {
-                updates.push(`is_active = $${values.length + 1}`);
-                values.push(is_active);
+                updates.push('is_active = ?');
+                values.push(is_active ? 1 : 0);
             }
             if (password) {
                 const passwordHash = await bcrypt.hash(password, config.bcryptRounds);
-                updates.push(`password_hash = $${values.length + 1}`);
+                updates.push('password_hash = ?');
                 values.push(passwordHash);
-                updates.push(`password_changed_at = CURRENT_TIMESTAMP`);
+                updates.push(`password_changed_at = datetime('now')`);
             }
 
             if (updates.length === 0) {
@@ -174,29 +184,20 @@ export class UsersController {
                 return;
             }
 
-            updates.push(`updated_at = CURRENT_TIMESTAMP`);
-
-            // Execute update
-            const queryStr = `
-                UPDATE users 
-                SET ${updates.join(', ')}
-                WHERE id = $${values.length + 1}
-                RETURNING id, username, email, name, role, is_active, updated_at
-            `;
+            updates.push(`updated_at = datetime('now')`);
             values.push(userId);
 
-            let finalQuery = queryStr;
-            values.forEach((value, index) => {
-                const placeholder = `$${index + 1}`;
-                const sqlValue = value === null ? 'NULL' :
-                    typeof value === 'string' ? `'${value.replace(/'/g, "''")}'` :
-                        String(value);
-                finalQuery = finalQuery.replace(placeholder, sqlValue);
-            });
+            // Execute update
+            const sqlite = getSqliteClient();
+            const queryStr = `UPDATE users SET ${updates.join(', ')} WHERE id = ?`;
+            const stmt = sqlite.prepare(queryStr);
+            stmt.run(...values);
 
-            const updatedUserResult = await sql.unsafe(finalQuery);
-            // @ts-ignore
-            const updatedUser = updatedUserResult[0];
+            // Fetch updated user
+            const updatedUser = await queryOne<User>(
+                'SELECT id, username, email, name, role, is_active, updated_at FROM users WHERE id = ?',
+                [userId]
+            );
 
             await logAuditEvent((req as any).user?.id, 'USER_UPDATED', req, {
                 updatedUserId: userId,
@@ -223,19 +224,16 @@ export class UsersController {
                 return;
             }
 
-            const sql = getDbClient();
-
             // Check if user exists
-            const existingUserResult = await sql`
-                SELECT id, username FROM users WHERE id = ${userId}
-            `;
+            const existingUser = await queryOne<User>(
+                'SELECT id, username FROM users WHERE id = ?',
+                [userId]
+            );
 
-            if (existingUserResult.length === 0) {
+            if (!existingUser) {
                 sendBadRequest(res, 'User not found.');
                 return;
             }
-
-            const userToDelete = existingUserResult[0] as User;
 
             // Prevent deleting the current user
             if ((req as any).user?.id === userId) {
@@ -244,14 +242,17 @@ export class UsersController {
             }
 
             // Delete user's sessions first
-            await sql`DELETE FROM sessions WHERE user_id = ${userId}`;
+            const sqlite = getSqliteClient();
+            const deleteSessionsStmt = sqlite.prepare('DELETE FROM sessions WHERE user_id = ?');
+            deleteSessionsStmt.run(userId);
 
             // Delete user
-            await sql`DELETE FROM users WHERE id = ${userId}`;
+            const deleteUserStmt = sqlite.prepare('DELETE FROM users WHERE id = ?');
+            deleteUserStmt.run(userId);
 
             await logAuditEvent((req as any).user?.id, 'USER_DELETED', req, {
                 deletedUserId: userId,
-                username: userToDelete.username
+                username: existingUser.username
             });
 
             sendSuccess(res, null, 'User deleted successfully');

@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import crypto from 'crypto';
 import { AuthConfig } from '../types/user.js';
-import { getDbClient } from './db.js';
+import { getSqliteClient } from './db.js';
 import { Request } from 'express';
 
 export const getAuthConfig = (): AuthConfig => {
@@ -56,11 +56,19 @@ export const logAuditEvent = async (
     details?: any
 ): Promise<void> => {
     try {
-        const sql = getDbClient();
-        await sql`
-            INSERT INTO auth_audit_log (user_id, action, ip_address, user_agent, details)
-            VALUES (${userId}, ${action}, ${getClientIp(req)}, ${req.headers['user-agent'] || null}, ${details ? JSON.stringify(details) : null})
-        `;
+        const sqlite = getSqliteClient();
+        const stmt = sqlite.prepare(`
+            INSERT INTO auth_audit_log (id, user_id, action, ip_address, user_agent, details)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `);
+        stmt.run(
+            crypto.randomUUID(),
+            userId,
+            action,
+            getClientIp(req),
+            req.headers['user-agent'] || null,
+            details ? JSON.stringify(details) : null
+        );
     } catch (error) {
         console.error('Failed to log audit event:', error);
     }

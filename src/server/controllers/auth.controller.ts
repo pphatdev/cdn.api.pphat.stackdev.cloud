@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { sendSuccess, sendBadRequest, sendUnauthorized } from '../utils/response.js';
-import { query, queryOne, getDbClient, initializeAuthTables } from '../utils/db.js';
+import { query, queryOne, initializeAuthTables, getSqliteClient } from '../utils/db.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { JwtPayload, Session, User } from '../types/user.js';
@@ -30,19 +30,19 @@ export class AuthController {
      * Ensure default admin user exists
      */
     private static async ensureDefaultAdmin(): Promise<void> {
-        const sql = getDbClient();
         const config = getAuthConfig();
 
-        const existingAdminResult = await sql`SELECT id FROM users WHERE role = 'admin' LIMIT 1`;
-        const existingAdmin = existingAdminResult.length > 0 ? existingAdminResult[0] as User : null;
+        const existingAdmin = await queryOne<User>(`SELECT id FROM users WHERE role = 'admin' LIMIT 1`);
 
         if (!existingAdmin) {
             const passwordHash = await bcrypt.hash('admin123', config.bcryptRounds);
-            await sql`
-                INSERT INTO users (username, email, password_hash, name, role)
-                VALUES ('admin', 'admin@stackdev.cloud', ${passwordHash}, 'Administrator', 'admin')
+            const sqlite = getSqliteClient();
+            const stmt = sqlite.prepare(`
+                INSERT INTO users (id, username, email, password_hash, name, role)
+                VALUES (?, ?, ?, ?, ?, ?)
                 ON CONFLICT (username) DO NOTHING
-            `;
+            `);
+            stmt.run(crypto.randomUUID(), 'admin', 'admin@stackdev.cloud', passwordHash, 'Administrator', 'admin');
             console.log('✅ Default admin user created (admin/admin123)');
         }
     }
@@ -51,11 +51,12 @@ export class AuthController {
      * Clean up expired sessions
      */
     private static async cleanupExpiredSessions(): Promise<void> {
-        const sql = getDbClient();
-        await sql`
+        const sqlite = getSqliteClient();
+        const stmt = sqlite.prepare(`
             DELETE FROM sessions 
-            WHERE expires_at < CURRENT_TIMESTAMP OR is_valid = false
-        `;
+            WHERE expires_at < datetime('now') OR is_valid = 0
+        `);
+        stmt.run();
     }
 
     /**
@@ -107,7 +108,6 @@ export class AuthController {
      * POST /api/auth/login
      */
     static login = async (req: Request, res: Response): Promise<void> => {
-        const sql = getDbClient();
         const config = getAuthConfig();
 
         try {
@@ -118,13 +118,11 @@ export class AuthController {
                 return;
             }
 
-            // Find user - using Neon SQL directly instead of queryOne helper
-            const users = await sql`
-                SELECT * FROM users
-                WHERE username = ${username} OR email = ${username}
-                LIMIT 1
-            `;
-            const user = users.length > 0 ? users[0] as User : null;
+            // Find user
+            const user = await queryOne<User>(
+                `SELECT * FROM users WHERE username = ? OR email = ? LIMIT 1`,
+                [username, username]
+            );
 
             if (!user) {
                 await logAuditEvent(null, 'LOGIN_FAILED_USER_NOT_FOUND', req, { username });
@@ -153,18 +151,20 @@ export class AuthController {
             if (!isValidPassword) {
                 // Increment failed attempts
                 const newFailedAttempts = user.failed_login_attempts + 1;
-                let lockUntil: Date | null = null;
+                let lockUntil: string | null = null;
 
                 if (newFailedAttempts >= config.maxLoginAttempts) {
-                    lockUntil = new Date(Date.now() + config.lockoutDuration * 60 * 1000);
+                    lockUntil = new Date(Date.now() + config.lockoutDuration * 60 * 1000).toISOString();
                 }
 
-                await sql`
+                const sqlite = getSqliteClient();
+                const stmt = sqlite.prepare(`
                     UPDATE users 
-                    SET failed_login_attempts = ${newFailedAttempts},
-                        locked_until = ${lockUntil}
-                    WHERE id = ${user.id}
-                `;
+                    SET failed_login_attempts = ?,
+                        locked_until = ?
+                    WHERE id = ?
+                `);
+                stmt.run(newFailedAttempts, lockUntil, user.id);
 
                 await logAuditEvent(user.id, 'LOGIN_FAILED_INVALID_PASSWORD', req, {
                     failedAttempts: newFailedAttempts
@@ -183,44 +183,46 @@ export class AuthController {
 
             // Check max sessions per user
             const userSessions = await query<Session>(
-                'SELECT id FROM sessions WHERE user_id = $1 AND is_valid = true ORDER BY created_at ASC',
+                'SELECT id FROM sessions WHERE user_id = ? AND is_valid = 1 ORDER BY created_at ASC',
                 [user.id]
             );
 
             if (userSessions.length >= config.maxSessionsPerUser) {
                 // Invalidate oldest session
-                await sql`
-                    UPDATE sessions SET is_valid = false
-                    WHERE id = ${userSessions[0].id}
-                `;
+                const sqlite = getSqliteClient();
+                const stmt = sqlite.prepare('UPDATE sessions SET is_valid = 0 WHERE id = ?');
+                stmt.run(userSessions[0].id);
             }
 
             // Create session
             const sessionId = crypto.randomUUID();
             const { accessToken, refreshToken, expiresAt, refreshExpiresAt } = this.generateTokens(user, sessionId);
 
-            await sql`
+            const sqlite = getSqliteClient();
+            const insertStmt = sqlite.prepare(`
                 INSERT INTO sessions (id, user_id, token_hash, refresh_token_hash, ip_address, user_agent, expires_at, refresh_expires_at)
-                VALUES (
-                    ${sessionId},
-                    ${user.id},
-                    ${hashToken(accessToken)},
-                    ${hashToken(refreshToken)},
-                    ${getClientIp(req)},
-                    ${req.headers['user-agent'] || null},
-                    ${expiresAt},
-                    ${refreshExpiresAt}
-                )
-            `;
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `);
+            insertStmt.run(
+                sessionId,
+                user.id,
+                hashToken(accessToken),
+                hashToken(refreshToken),
+                getClientIp(req),
+                req.headers['user-agent'] || null,
+                expiresAt.toISOString(),
+                refreshExpiresAt.toISOString()
+            );
 
             // Reset failed attempts and update last login
-            await sql`
+            const updateStmt = sqlite.prepare(`
                 UPDATE users
                 SET failed_login_attempts = 0,
                     locked_until = NULL,
-                    last_login_at = CURRENT_TIMESTAMP
-                WHERE id = ${user.id}
-            `;
+                    last_login_at = datetime('now')
+                WHERE id = ?
+            `);
+            updateStmt.run(user.id);
 
             await logAuditEvent(user.id, 'LOGIN_SUCCESS', req);
 
@@ -250,8 +252,6 @@ export class AuthController {
      * POST /api/auth/logout
      */
     static logout = async (req: Request, res: Response): Promise<void> => {
-        const sql = getDbClient();
-
         try {
             const token = req.headers.authorization?.replace('Bearer ', '');
 
@@ -262,15 +262,19 @@ export class AuthController {
 
             const tokenHash = hashToken(token);
 
-            // Invalidate session
-            const result = await sql`
-                UPDATE sessions SET is_valid = false 
-                WHERE token_hash = ${tokenHash}
-                RETURNING user_id
-            `;
+            // Get user_id first
+            const session = await queryOne<{ user_id: string }>(
+                'SELECT user_id FROM sessions WHERE token_hash = ?',
+                [tokenHash]
+            );
 
-            if (result.length > 0) {
-                await logAuditEvent(result[0].user_id, 'LOGOUT', req);
+            // Invalidate session
+            const sqlite = getSqliteClient();
+            const stmt = sqlite.prepare('UPDATE sessions SET is_valid = 0 WHERE token_hash = ?');
+            stmt.run(tokenHash);
+
+            if (session) {
+                await logAuditEvent(session.user_id, 'LOGOUT', req);
             }
 
             sendSuccess(res, null, 'Logout successful');
@@ -285,8 +289,6 @@ export class AuthController {
      * POST /api/auth/logout-all
      */
     static logoutAll = async (req: Request, res: Response): Promise<void> => {
-        const sql = getDbClient();
-
         try {
             const user = (req as any).user;
             if (!user) {
@@ -294,10 +296,9 @@ export class AuthController {
                 return;
             }
 
-            await sql`
-                UPDATE sessions SET is_valid = false 
-                WHERE user_id = ${user.id}
-            `;
+            const sqlite = getSqliteClient();
+            const stmt = sqlite.prepare('UPDATE sessions SET is_valid = 0 WHERE user_id = ?');
+            stmt.run(user.id);
 
             await logAuditEvent(user.id, 'LOGOUT_ALL_DEVICES', req);
 
@@ -320,12 +321,11 @@ export class AuthController {
                 return;
             }
 
-            const sql = getDbClient();
-            const fullUserResult = await sql`
-                SELECT id, username, email, name, avatar, role, last_login_at, created_at 
-                FROM users WHERE id = ${user.id}
-            `;
-            const fullUser = fullUserResult.length > 0 ? fullUserResult[0] as User : null;
+            const fullUser = await queryOne<User>(
+                `SELECT id, username, email, name, avatar, role, last_login_at, created_at 
+                FROM users WHERE id = ?`,
+                [user.id]
+            );
 
             if (!fullUser) {
                 sendUnauthorized(res, 'User not found.');
@@ -344,7 +344,6 @@ export class AuthController {
      * POST /api/auth/refresh
      */
     static refresh = async (req: Request, res: Response): Promise<void> => {
-        const sql = getDbClient();
         const config = getAuthConfig();
 
         try {
@@ -370,14 +369,11 @@ export class AuthController {
             }
 
             // Verify session exists and is valid
-            const sql = getDbClient();
-            const sessionResult = await sql`
-                SELECT * FROM sessions
-                WHERE id = ${payload.sessionId}
-                AND refresh_token_hash = ${hashToken(refreshToken)}
-                AND is_valid = true
-            `;
-            const session = sessionResult.length > 0 ? sessionResult[0] as Session : null;
+            const session = await queryOne<Session>(
+                `SELECT * FROM sessions
+                WHERE id = ? AND refresh_token_hash = ? AND is_valid = 1`,
+                [payload.sessionId, hashToken(refreshToken)]
+            );
 
             if (!session) {
                 sendUnauthorized(res, 'Session not found or invalid.');
@@ -385,8 +381,7 @@ export class AuthController {
             }
 
             // Get user
-            const userResult = await sql`SELECT * FROM users WHERE id = ${payload.userId}`;
-            const user = userResult.length > 0 ? userResult[0] as User : null;
+            const user = await queryOne<User>('SELECT * FROM users WHERE id = ?', [payload.userId]);
             if (!user || !user.is_active) {
                 sendUnauthorized(res, 'User not found or disabled.');
                 return;
@@ -397,15 +392,23 @@ export class AuthController {
                 this.generateTokens(user, session.id);
 
             // Update session
-            await sql`
+            const sqlite = getSqliteClient();
+            const stmt = sqlite.prepare(`
                 UPDATE sessions 
-                SET token_hash = ${hashToken(newAccessToken)},
-                    refresh_token_hash = ${hashToken(newRefreshToken)},
-                    expires_at = ${expiresAt},
-                    refresh_expires_at = ${refreshExpiresAt},
-                    last_used_at = CURRENT_TIMESTAMP
-                WHERE id = ${session.id}
-            `;
+                SET token_hash = ?,
+                    refresh_token_hash = ?,
+                    expires_at = ?,
+                    refresh_expires_at = ?,
+                    last_used_at = datetime('now')
+                WHERE id = ?
+            `);
+            stmt.run(
+                hashToken(newAccessToken),
+                hashToken(newRefreshToken),
+                expiresAt.toISOString(),
+                refreshExpiresAt.toISOString(),
+                session.id
+            );
 
             await logAuditEvent(user.id, 'TOKEN_REFRESHED', req);
 
@@ -426,7 +429,6 @@ export class AuthController {
      * POST /api/auth/change-password
      */
     static changePassword = async (req: Request, res: Response): Promise<void> => {
-        const sql = getDbClient();
         const config = getAuthConfig();
 
         try {
@@ -459,9 +461,7 @@ export class AuthController {
             }
 
             // Get full user data
-            const sql = getDbClient();
-            const fullUserResult = await sql`SELECT * FROM users WHERE id = ${user.id}`;
-            const fullUser = fullUserResult.length > 0 ? fullUserResult[0] as User : null;
+            const fullUser = await queryOne<User>('SELECT * FROM users WHERE id = ?', [user.id]);
             if (!fullUser) {
                 sendBadRequest(res, 'User not found.');
                 return;
@@ -479,21 +479,23 @@ export class AuthController {
             const newPasswordHash = await bcrypt.hash(newPassword, config.bcryptRounds);
 
             // Update password
-            await sql`
+            const sqlite = getSqliteClient();
+            const updateStmt = sqlite.prepare(`
                 UPDATE users
-                SET password_hash = ${newPasswordHash},
-                    password_changed_at = CURRENT_TIMESTAMP,
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE id = ${user.id}
-            `;
+                SET password_hash = ?,
+                    password_changed_at = datetime('now'),
+                    updated_at = datetime('now')
+                WHERE id = ?
+            `);
+            updateStmt.run(newPasswordHash, user.id);
 
             // Invalidate all sessions except current
             const currentToken = req.headers.authorization?.replace('Bearer ', '');
             if (currentToken) {
-                await sql`
-                    UPDATE sessions SET is_valid = false 
-                    WHERE user_id = ${user.id} AND token_hash != ${hashToken(currentToken)}
-                `;
+                const sessionStmt = sqlite.prepare(
+                    'UPDATE sessions SET is_valid = 0 WHERE user_id = ? AND token_hash != ?'
+                );
+                sessionStmt.run(user.id, hashToken(currentToken));
             }
 
             await logAuditEvent(user.id, 'PASSWORD_CHANGED', req);
@@ -519,13 +521,10 @@ export class AuthController {
             }
 
             // Verify session is still valid
-            const sql = getDbClient();
-            const sessionResult = await sql`
-                SELECT is_valid FROM sessions 
-                WHERE id = ${payload.sessionId} 
-                AND token_hash = ${hashToken(token)}
-            `;
-            const session = sessionResult.length > 0 ? sessionResult[0] as Session : null;
+            const session = await queryOne<{ is_valid: number }>(
+                `SELECT is_valid FROM sessions WHERE id = ? AND token_hash = ?`,
+                [payload.sessionId, hashToken(token)]
+            );
 
             if (!session || !session.is_valid) {
                 return null;

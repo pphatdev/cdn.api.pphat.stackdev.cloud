@@ -26,7 +26,7 @@ interface DatabaseSchema {
 }
 
 export class Database {
-    private static dbPath = path.join(process.cwd(), 'src',  'server', 'data', 'database.json');
+    private static dbPath = path.join(process.cwd(), 'src', 'data', 'database.json');
     private static db: DatabaseSchema | null = null;
 
     /**
