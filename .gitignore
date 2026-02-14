@@ -1,5 +1,13 @@
-dist
-node_modules
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+*.js.map
+*.d.ts.map
+
+# Environment & Configuration
 env.json
 .cache-*/
 .vscode
@@ -7,4 +15,75 @@ env.json
 storage/*
 !storage/example/
 src/data/database.json
-src/server/data/database.json
+
+# Database files
+src/data/*.db
+src/data/*.db-journal
+src/data/*.db-shm
+src/data/*.db-wal
+src/data/*.sqlite
+src/data/*.sqlite3
+
+# Storage & Uploads (keep example folder)
+storage/*
+!storage/example/
+!storage/.gitkeep
+uploads/
+temp/
+
+# Cache & Temporary files
+.cache/
+.cache-*/
+.temp/
+*.tmp
+*.log
+logs/
+*.pid
+*.seed
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+test-results/
+playwright-report/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# TypeScript
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Backup files
+*.backup
+*.bak
+*.old
+db-backup/
+

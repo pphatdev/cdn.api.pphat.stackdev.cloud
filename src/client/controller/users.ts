@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { Controller } from "./controller.js";
-import { getDbClient } from "../../server/utils/db.js";
+import { query } from "../../server/utils/db.js";
 
 export class UsersController extends Controller {
 
@@ -23,27 +23,13 @@ export class UsersController extends Controller {
                 return;
             }
 
-            const sql = getDbClient();
-            const usersResult = await sql`
+            const usersResult = await query<any>(`
                 SELECT
                     id, username, email, name, avatar, role,
                     is_active, last_login_at, created_at, updated_at
                 FROM users
                 ORDER BY created_at DESC
-            `;
-
-            const users = usersResult.map((userRow: any) => ({
-                id: userRow.id,
-                username: userRow.username,
-                email: userRow.email,
-                name: userRow.name,
-                avatar: userRow.avatar,
-                role: userRow.role,
-                is_active: userRow.is_active,
-                last_login_at: userRow.last_login_at,
-                created_at: userRow.created_at,
-                updated_at: userRow.updated_at
-            }));
+            `);
 
             // Render users page
             const usersData = {
@@ -51,7 +37,7 @@ export class UsersController extends Controller {
                 title: `Users Management - ${Controller.defaultConfig.title}`,
                 page: 'users',
                 currentPath,
-                users,
+                users: usersResult,
                 usersError: ""
             };
 

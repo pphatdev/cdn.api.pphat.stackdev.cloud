@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { DashboardController } from '../controller/dashboard.js';
@@ -45,7 +45,7 @@ app.get('/upload/history', UploadHistoryController.get);
 app.get('/users', UsersController.get);
 
 // Catch-all 404 handler - render not-found page with default config
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
     // Skip API routes - let them be handled by API router
     if (req.path.startsWith('/api')) {
         return next();
