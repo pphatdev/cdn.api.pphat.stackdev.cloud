@@ -49,7 +49,7 @@
                 : `file-card-dropdown-${String(title || 'item').replace(/[^a-zA-Z0-9_-]/g, '')}-${Math.random().toString(36).slice(2, 8)}`;
         %>
         <div class="absolute z-20 top-3 right-3">
-            <button type="button" data-dropdown-toggle="<%= dropdownIdValue %>" data-dropdown-placement="bottom-end" aria-expanded="false" class="p-2 bg-white rounded-lg opacity-0 focus-within:opacity-100 group-hover:opacity-100 transition-all duration-300 shadow-sm cursor-pointer">
+            <button type="button" data-dropdown-toggle="<%= dropdownIdValue %>" data-dropdown-placement="bottom-end" aria-expanded="false" class="p-2 bg-white rounded-lg sm:opacity-0 focus-within:opacity-100 group-hover:opacity-100 transition-all duration-300 shadow-sm cursor-pointer">
                 <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01"></path></svg>
             </button>
             <div id="<%= dropdownIdValue %>" class="hidden absolute right-0 mt-2 w-44 rounded-xl border border-slate-100 bg-white shadow-lg p-2 z-50 text-sm">

@@ -1,7 +1,7 @@
 <main class="flex-1 overflow-y-auto bg-background relative">
     <%- include('../components/header') %>
 
-    <div class="container mx-auto p-8">
+    <div class="max-w-5xl w-full lg:mx-auto max-sm:p-5 p-8">
         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-8">
             <div>
                 <%- include('../components/breadcrumbs', {
@@ -18,12 +18,12 @@
                 <p class="text-sm text-slate-500">View your recently accessed and uploaded files.</p>
             </div>
             <div class="flex items-center gap-3">
-                <button id="view-toggle" type="button" class="px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 flex items-center gap-2">
+                <button id="view-toggle" type="button" class="button py-2 bg-white border shadow-none border-slate-200 text-slate-700 hover:bg-slate-50 flex items-center gap-2">
                     <svg id="view-icon-grid" class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                     <svg id="view-icon-list" class="size-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
                     <span id="view-label">Grid</span>
                 </button>
-                <a href="/files" class="px-4 py-2 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-primary/80">Browse all files</a>
+                <a href="/files" class="button py-2 bg-primary whitespace-nowrap text-primary-foreground hover:bg-primary/80">Browse all files</a>
             </div>
         </div>
 
