@@ -548,7 +548,7 @@
         const fileUrl = `/api/file/preview/${encodeURIComponent(filename)}`;
         const imageUrl = `/api/image/${encodeURIComponent(filename)}`;
 
-        document.getElementById('direct-url').value = fileUrl;
+        document.getElementById('direct-url').value = `${baseUrl}${fileUrl}`;
 
         // HTML and Markdown embeds
         const htmlRow = document.getElementById('html-embed-row');
