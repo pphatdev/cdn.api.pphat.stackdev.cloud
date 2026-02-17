@@ -3,6 +3,7 @@ import { configured } from "../utils/config.js";
 import { sendNotFound } from "../utils/response.js";
 import { FilesController } from './files.controller.js';
 import { findFileInDirectories } from "../utils/directories.js";
+import { getMimeType } from "../utils/mine-types.js";
 import fs from 'fs';
 
 export class PreviewController {
@@ -34,11 +35,42 @@ export class PreviewController {
         const fullPath = await findFileInDirectories(filename as string);
 
         if (fullPath) {
+            const stats = fs.statSync(fullPath);
+            const ext = (filename as string).split('.').pop()?.toLowerCase() || '';
+            const mimeType = getMimeType(ext);
+
+            response.setHeader('Content-Type', mimeType);
+            response.setHeader('Accept-Ranges', 'bytes');
+            response.setHeader('Last-Modified', stats.mtime.toUTCString());
+
+            if (request.method === 'HEAD') {
+                response.setHeader('Content-Length', stats.size);
+                response.status(200).end();
+                return;
+            }
+
+            const range = request.headers.range;
+            if (range) {
+                const [startStr, endStr] = range.replace(/bytes=/, '').split('-');
+                const start = Number.parseInt(startStr, 10);
+                const end = endStr ? Number.parseInt(endStr, 10) : stats.size - 1;
+
+                if (Number.isNaN(start) || Number.isNaN(end) || start > end || start >= stats.size) {
+                    response.status(416).setHeader('Content-Range', `bytes */${stats.size}`).end();
+                    return;
+                }
+
+                response.status(206);
+                response.setHeader('Content-Range', `bytes ${start}-${end}/${stats.size}`);
+                response.setHeader('Content-Length', end - start + 1);
+                fs.createReadStream(fullPath, { start, end }).pipe(response);
+                return;
+            }
 
             // Sync file when accessed and wait for completion
             await FilesController.syncFile(fullPath);
-            const fileStream = fs.createReadStream(fullPath);
-            fileStream.pipe(response);
+            response.setHeader('Content-Length', stats.size);
+            fs.createReadStream(fullPath).pipe(response);
             return;
         }
         sendNotFound(response, 'File not found.');
