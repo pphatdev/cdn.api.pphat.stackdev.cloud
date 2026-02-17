@@ -545,8 +545,8 @@
     // Update URLs
     const updateUrls = (filename, isImage = false) => {
         const baseUrl = window.location.origin;
-        const fileUrl = `${baseUrl}/api/file/preview/${encodeURIComponent(filename)}`;
-        const imageUrl = `${baseUrl}/api/image/${encodeURIComponent(filename)}`;
+        const fileUrl = `/api/file/preview/${encodeURIComponent(filename)}`;
+        const imageUrl = `/api/image/${encodeURIComponent(filename)}`;
 
         document.getElementById('direct-url').value = fileUrl;
 
