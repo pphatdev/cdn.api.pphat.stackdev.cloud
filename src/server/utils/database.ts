@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import { FileUtils } from './files.js';
+import { and, eq, inArray, like, or } from 'drizzle-orm';
+import { getDbClient, getSqliteClient } from './db.js';
+import { files as filesTable } from '../../data/schema/schema.js';
 
 interface FileRecord {
     id: string;
@@ -19,222 +21,298 @@ interface FileRecord {
     metadata?: any;
 }
 
-interface DatabaseSchema {
-    files: FileRecord[];
-    version: string;
-    lastUpdated: string;
-}
-
 export class Database {
-    private static dbPath = path.join(process.cwd(), 'src', 'data', 'database.json');
-    private static db: DatabaseSchema | null = null;
+    private static initialized = false;
 
     /**
      * Initialize the database
      */
     static async initialize(): Promise<void> {
         try {
-            const dataDir = path.join(process.cwd(), 'src', 'server', 'data');
-
-            // Create data directory if it doesn't exist
-            if (!fs.existsSync(dataDir)) {
-                await FileUtils.ensureDirectoryWithPermissions(dataDir);
+            if (this.initialized) {
+                return;
             }
 
-            // Create database file if it doesn't exist
-            if (!fs.existsSync(this.dbPath)) {
-                const initialData: DatabaseSchema = {
-                    files: [],
-                    version: '1.0.0',
-                    lastUpdated: new Date().toISOString()
-                };
-                fs.writeFileSync(this.dbPath, JSON.stringify(initialData, null, 2), 'utf-8');
-                console.log('Database initialized at:', this.dbPath);
-            }
+            const sqlite = getSqliteClient();
+            sqlite.exec(`
+                CREATE TABLE IF NOT EXISTS files (
+                    id TEXT PRIMARY KEY,
+                    filename TEXT NOT NULL,
+                    original_filename TEXT NOT NULL,
+                    path TEXT NOT NULL,
+                    relative_path TEXT NOT NULL,
+                    folder_path TEXT NOT NULL,
+                    size INTEGER NOT NULL,
+                    extension TEXT NOT NULL,
+                    mime_type TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    modified_at TEXT NOT NULL,
+                    uploaded_at TEXT DEFAULT (datetime('now')),
+                    user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+                    tags TEXT,
+                    metadata TEXT
+                )
+            `);
 
-            // Load database into memory
-            await this.load();
+            sqlite.exec(`
+                CREATE TABLE IF NOT EXISTS uploads (
+                    id TEXT PRIMARY KEY,
+                    file_id TEXT REFERENCES files(id) ON DELETE CASCADE,
+                    user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+                    upload_type TEXT NOT NULL,
+                    status TEXT DEFAULT 'completed' CHECK (status IN ('pending', 'completed', 'failed')),
+                    ip_address TEXT,
+                    user_agent TEXT,
+                    uploaded_at TEXT DEFAULT (datetime('now'))
+                )
+            `);
+
+            sqlite.exec(`CREATE INDEX IF NOT EXISTS idx_files_filename ON files(filename)`);
+            sqlite.exec(`CREATE INDEX IF NOT EXISTS idx_files_extension ON files(extension)`);
+            sqlite.exec(`CREATE INDEX IF NOT EXISTS idx_files_user_id ON files(user_id)`);
+            sqlite.exec(`CREATE INDEX IF NOT EXISTS idx_files_uploaded_at ON files(uploaded_at)`);
+
+            this.initialized = true;
         } catch (error: any) {
             console.error('Error initializing database:', error.message);
             throw error;
         }
     }
 
-    /**
-     * Load database from file
-     */
-    static async load(): Promise<DatabaseSchema> {
+    private static serializeTags(tags?: string[] | null): string | null {
+        if (!tags || tags.length === 0) {
+            return null;
+        }
+        return JSON.stringify(tags);
+    }
+
+    private static serializeMetadata(metadata?: any): string | null {
+        if (metadata === undefined || metadata === null) {
+            return null;
+        }
+        return JSON.stringify(metadata);
+    }
+
+    private static parseJsonField<T>(value?: string | null): T | undefined {
+        if (!value) {
+            return undefined;
+        }
         try {
-            const data = fs.readFileSync(this.dbPath, 'utf-8');
-            this.db = JSON.parse(data);
-            return this.db!;
-        } catch (error: any) {
-            console.error('Error loading database:', error.message);
-            throw error;
+            return JSON.parse(value) as T;
+        } catch {
+            return undefined;
         }
     }
 
-    /**
-     * Save database to file
-     */
-    static async save(): Promise<void> {
-        try {
-            if (!this.db) {
-                await this.load();
-            }
+    private static normalizeRecord(row: any): FileRecord {
+        return {
+            id: row.id,
+            filename: row.filename,
+            originalFilename: row.originalFilename,
+            path: row.path,
+            relativePath: row.relativePath,
+            folderPath: row.folderPath,
+            size: row.size,
+            extension: row.extension,
+            mimeType: row.mimeType,
+            createdAt: row.createdAt,
+            modifiedAt: row.modifiedAt,
+            uploadedAt: row.uploadedAt,
+            tags: this.parseJsonField<string[]>(row.tags),
+            metadata: this.parseJsonField<any>(row.metadata)
+        };
+    }
 
-            this.db!.lastUpdated = new Date().toISOString();
-            fs.writeFileSync(this.dbPath, JSON.stringify(this.db, null, 2), 'utf-8');
-        } catch (error: any) {
-            console.error('Error saving database:', error.message);
-            throw error;
-        }
+    private static getDb() {
+        return getDbClient();
     }
 
     /**
      * Add a file record to the database
      */
     static async addFile(fileData: Omit<FileRecord, 'id'>): Promise<FileRecord> {
-        if (!this.db) {
-            await this.load();
-        }
+        await this.initialize();
+
+        const db = this.getDb();
 
         // Check if file already exists
-        const existingFile = this.db!.files.find(f =>
-            f.filename === fileData.filename && f.folderPath === fileData.folderPath
-        );
+        const existing = await db
+            .select()
+            .from(filesTable)
+            .where(and(eq(filesTable.filename, fileData.filename), eq(filesTable.folderPath, fileData.folderPath)))
+            .limit(1);
 
-        if (existingFile) {
-            // Update existing file instead of creating duplicate
+        if (existing.length > 0) {
             console.log('File already exists, updating record:', fileData.filename);
-            return await this.updateFile(existingFile.id, fileData) || existingFile;
+            const updated = await this.updateFile(existing[0].id, fileData);
+            return updated || this.normalizeRecord(existing[0]);
         }
 
         const id = this.generateId();
-        const record: FileRecord = {
+        await db.insert(filesTable).values({
+            id,
+            filename: fileData.filename,
+            originalFilename: fileData.originalFilename,
+            path: fileData.path,
+            relativePath: fileData.relativePath,
+            folderPath: fileData.folderPath,
+            size: fileData.size,
+            extension: fileData.extension,
+            mimeType: fileData.mimeType,
+            createdAt: fileData.createdAt,
+            modifiedAt: fileData.modifiedAt,
+            uploadedAt: fileData.uploadedAt,
+            tags: this.serializeTags(fileData.tags) || undefined,
+            metadata: this.serializeMetadata(fileData.metadata) || undefined
+        });
+
+        return {
             id,
             ...fileData
         };
-
-        this.db!.files.push(record);
-        await this.save();
-
-        // console.log('File added to database:', record.filename);
-        return record;
     }
 
     /**
      * Get file by filename
      */
     static async getFileByName(filename: string): Promise<FileRecord | null> {
-        if (!this.db) {
-            await this.load();
+        await this.initialize();
+
+        const db = this.getDb();
+        const results = await db
+            .select()
+            .from(filesTable)
+            .where(or(eq(filesTable.filename, filename), eq(filesTable.originalFilename, filename)))
+            .limit(1);
+
+        if (results.length === 0) {
+            return null;
         }
 
-        return this.db!.files.find(f => f.filename === filename || f.originalFilename === filename) || null;
+        return this.normalizeRecord(results[0]);
     }
 
     /**
      * Get file by ID
      */
     static async getFileById(id: string): Promise<FileRecord | null> {
-        if (!this.db) {
-            await this.load();
+        await this.initialize();
+
+        const db = this.getDb();
+        const results = await db
+            .select()
+            .from(filesTable)
+            .where(eq(filesTable.id, id))
+            .limit(1);
+
+        if (results.length === 0) {
+            return null;
         }
 
-        return this.db!.files.find(f => f.id === id) || null;
+        return this.normalizeRecord(results[0]);
     }
 
     /**
      * Get all files
      */
     static async getAllFiles(): Promise<FileRecord[]> {
-        if (!this.db) {
-            await this.load();
-        }
+        await this.initialize();
 
-        return this.db!.files;
+        const db = this.getDb();
+        const results = await db.select().from(filesTable);
+        return results.map((row) => this.normalizeRecord(row));
     }
 
     /**
      * Search files by query
      */
     static async searchFiles(query: string, type?: string): Promise<FileRecord[]> {
-        if (!this.db) {
-            await this.load();
+        await this.initialize();
+
+        const db = this.getDb();
+        const searchLike = `%${query}%`;
+
+        const baseFilter = or(
+            like(filesTable.filename, searchLike),
+            like(filesTable.originalFilename, searchLike),
+            like(filesTable.path, searchLike)
+        );
+
+        let typeFilter;
+        if (type) {
+            const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+            const officeExtensions = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pdf'];
+
+            if (type === 'image') {
+                typeFilter = inArray(filesTable.extension, imageExtensions);
+            } else if (type === 'office') {
+                typeFilter = inArray(filesTable.extension, officeExtensions);
+            } else {
+                typeFilter = eq(filesTable.extension, type.toLowerCase());
+            }
         }
 
-        const lowerQuery = query.toLowerCase();
-        return this.db!.files.filter(file => {
-            const matchesQuery =
-                file.filename.toLowerCase().includes(lowerQuery) ||
-                file.originalFilename.toLowerCase().includes(lowerQuery) ||
-                file.path.toLowerCase().includes(lowerQuery);
-
-            if (type) {
-                const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
-                const officeExtensions = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pdf'];
-
-                if (type === 'image') {
-                    return matchesQuery && imageExtensions.includes(file.extension);
-                } else if (type === 'office') {
-                    return matchesQuery && officeExtensions.includes(file.extension);
-                }
-                return matchesQuery && file.extension === type;
-            }
-
-            return matchesQuery;
-        });
+        const whereClause = typeFilter ? and(baseFilter, typeFilter) : baseFilter;
+        const results = await db.select().from(filesTable).where(whereClause);
+        return results.map((row) => this.normalizeRecord(row));
     }
 
     /**
      * Get files by folder path
      */
     static async getFilesByFolder(folderPath: string): Promise<FileRecord[]> {
-        if (!this.db) {
-            await this.load();
-        }
+        await this.initialize();
 
-        return this.db!.files.filter(f => f.folderPath === folderPath);
+        const db = this.getDb();
+        const results = await db
+            .select()
+            .from(filesTable)
+            .where(eq(filesTable.folderPath, folderPath));
+
+        return results.map((row) => this.normalizeRecord(row));
     }
 
     /**
      * Update file record
      */
     static async updateFile(id: string, updates: Partial<FileRecord>): Promise<FileRecord | null> {
-        if (!this.db) {
-            await this.load();
-        }
+        await this.initialize();
 
-        const index = this.db!.files.findIndex(f => f.id === id);
-        if (index === -1) {
-            return null;
-        }
-
-        this.db!.files[index] = {
-            ...this.db!.files[index],
+        const db = this.getDb();
+        const payload: any = {
             ...updates,
             modifiedAt: new Date().toISOString()
         };
 
-        await this.save();
-        console.log('File updated in database:', this.db!.files[index].filename);
-        return this.db!.files[index];
+        if ('tags' in payload) {
+            payload.tags = this.serializeTags(payload.tags) || undefined;
+        }
+        if ('metadata' in payload) {
+            payload.metadata = this.serializeMetadata(payload.metadata) || undefined;
+        }
+
+        await db.update(filesTable).set(payload).where(eq(filesTable.id, id));
+
+        const updated = await this.getFileById(id);
+        if (updated) {
+            console.log('File updated in database:', updated.filename);
+        }
+        return updated;
     }
 
     /**
      * Delete file record
      */
     static async deleteFile(filename: string): Promise<boolean> {
-        if (!this.db) {
-            await this.load();
-        }
+        await this.initialize();
 
-        const initialLength = this.db!.files.length;
-        this.db!.files = this.db!.files.filter(f => f.filename !== filename && f.originalFilename !== filename);
+        const db = this.getDb();
+        const result = await db
+            .delete(filesTable)
+            .where(or(eq(filesTable.filename, filename), eq(filesTable.originalFilename, filename)));
 
-        if (this.db!.files.length < initialLength) {
-            await this.save();
+        const changes = (result as any)?.changes ?? 0;
+        if (changes > 0) {
             console.log('File deleted from database:', filename);
             return true;
         }
@@ -246,11 +324,9 @@ export class Database {
      * Get database statistics
      */
     static async getStats(): Promise<any> {
-        if (!this.db) {
-            await this.load();
-        }
+        await this.initialize();
 
-        const files = this.db!.files;
+        const files = await this.getAllFiles();
         const totalSize = files.reduce((sum, f) => sum + f.size, 0);
         const fileTypes = files.reduce((acc, f) => {
             acc[f.extension] = (acc[f.extension] || 0) + 1;
@@ -262,8 +338,8 @@ export class Database {
             totalSize,
             totalSizeMB: (totalSize / (1024 * 1024)).toFixed(2),
             fileTypes,
-            lastUpdated: this.db!.lastUpdated,
-            version: this.db!.version
+            lastUpdated: new Date().toISOString(),
+            version: 'sqlite'
         };
     }
 
@@ -278,15 +354,26 @@ export class Database {
      * Backup database
      */
     static async backup(): Promise<string> {
+        await this.initialize();
+
         const backupDir = path.join(process.cwd(), 'src', 'data', 'backups');
         if (!fs.existsSync(backupDir)) {
-            await FileUtils.ensureDirectoryWithPermissions(backupDir);
+            fs.mkdirSync(backupDir, { recursive: true });
+        }
+
+        const sqlite = getSqliteClient();
+        const dbList = sqlite.prepare('PRAGMA database_list').all() as Array<{ name: string; file: string }>;
+        const mainDb = dbList.find((entry) => entry.name === 'main');
+        const dbFilePath = mainDb?.file;
+
+        if (!dbFilePath) {
+            throw new Error('Database file path not found');
         }
 
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const backupPath = path.join(backupDir, `database-backup-${timestamp}.json`);
+        const backupPath = path.join(backupDir, `database-backup-${timestamp}.db`);
 
-        fs.copyFileSync(this.dbPath, backupPath);
+        fs.copyFileSync(dbFilePath, backupPath);
         console.log('Database backed up to:', backupPath);
 
         return backupPath;
@@ -296,12 +383,10 @@ export class Database {
      * Clear all records (use with caution!)
      */
     static async clear(): Promise<void> {
-        if (!this.db) {
-            await this.load();
-        }
+        await this.initialize();
 
-        this.db!.files = [];
-        await this.save();
+        const db = this.getDb();
+        await db.delete(filesTable);
         console.log('Database cleared');
     }
 }
