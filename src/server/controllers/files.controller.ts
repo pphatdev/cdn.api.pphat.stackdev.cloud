@@ -100,8 +100,10 @@ export class FilesController {
             const filePath = `${dirPath}/${filename}`.replace(/\\/g, '/');
             await FileUtils.createFileWithPermissions(filePath, buffer);
 
+            const userId = (request as any).user?.id as string | undefined;
+
             // Sync file after upload
-            await FilesController.syncFile(filePath);
+            await FilesController.syncFile(filePath, filename, userId);
 
             // Prepare response info
             const fileInfo = {
@@ -140,6 +142,7 @@ export class FilesController {
             await FileUtils.ensureDirectoryWithPermissions(dirPath);
 
             const results = [];
+            const userId = (request as any).user?.id as string | undefined;
             for (const file of files) {
                 const { base64, filename, mimetype } = file;
                 if (!base64 || !filename || !mimetype) {
@@ -160,7 +163,7 @@ export class FilesController {
                     await FileUtils.createFileWithPermissions(filePath, buffer);
 
                     // Sync file after upload
-                    await FilesController.syncFile(filePath);
+                    await FilesController.syncFile(filePath, filename, userId);
 
                     results.push({
                         fileName: filename,
@@ -218,6 +221,8 @@ export class FilesController {
             }
             const sanitizedFiles = (files as Express.Multer.File[]).map(({ fieldname, ...fileData }) => fileData);
 
+            const userId = (request as any).user?.id as string | undefined;
+
             // reduce value of key "path" to be relative to storage directory
             for (const file of sanitizedFiles) {
                 // Save original filesystem path before overwriting
@@ -236,7 +241,7 @@ export class FilesController {
                 Object.assign(file, sanitizedFile);
 
                 // Sync file after upload using the original filesystem path
-                await FilesController.syncFile(originalFilePath, file.originalname);
+                await FilesController.syncFile(originalFilePath, file.originalname, userId);
             }
 
             sendSuccess(response, sanitizedFiles, 'Files uploaded successfully', 200);
@@ -248,7 +253,7 @@ export class FilesController {
      * @param filePath Path to the file to sync
      * @param originalFilename Optional original filename before any transformations
      */
-    static async syncFile(filePath: string, originalFilename?: string): Promise<void> {
+    static async syncFile(filePath: string, originalFilename?: string, userId?: string): Promise<void> {
         try {
             // Normalize path separators
             const normalizedPath = filePath.replace(/\\/g, '/');
@@ -311,6 +316,7 @@ export class FilesController {
                 createdAt: stats.birthtime.toISOString(),
                 modifiedAt: stats.mtime.toISOString(),
                 uploadedAt: new Date().toISOString(),
+                userId: userId || null,
                 tags: [storageFolder],
                 metadata: {
                     storageFolder: storageFolder

@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { FilesController, uploadFiles } from '../controllers/files.controller.js';
 import { PreviewController } from '../controllers/preview.controller.js';
 import { fileUploadRateLimiter } from '../middlewares/rate-limit.js';
+import { jwtAuthMiddleware } from '../middlewares/auth.js';
 
 const router = express.Router();
 
@@ -44,7 +45,7 @@ const router = express.Router();
  * - files: Array of files with base64, filename, mimetype
  *
 */
-router.post('/upload', fileUploadRateLimiter, (req, res) => {
+router.post('/upload', jwtAuthMiddleware, fileUploadRateLimiter, (req, res) => {
 
     /**
      * Single File Upload via JSON Body
