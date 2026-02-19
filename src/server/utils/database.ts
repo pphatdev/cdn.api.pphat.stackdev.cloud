@@ -17,6 +17,7 @@ interface FileRecord {
     createdAt: string;
     modifiedAt: string;
     uploadedAt: string;
+    userId?: string | null;
     tags?: string[];
     metadata?: any;
 }
@@ -118,6 +119,7 @@ export class Database {
             createdAt: row.createdAt,
             modifiedAt: row.modifiedAt,
             uploadedAt: row.uploadedAt,
+            userId: row.userId ?? null,
             tags: this.parseJsonField<string[]>(row.tags),
             metadata: this.parseJsonField<any>(row.metadata)
         };
@@ -162,6 +164,7 @@ export class Database {
             createdAt: fileData.createdAt,
             modifiedAt: fileData.modifiedAt,
             uploadedAt: fileData.uploadedAt,
+            userId: fileData.userId ?? null,
             tags: this.serializeTags(fileData.tags) || undefined,
             metadata: this.serializeMetadata(fileData.metadata) || undefined
         });
