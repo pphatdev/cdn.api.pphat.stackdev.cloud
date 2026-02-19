@@ -171,6 +171,8 @@ export class ImagesController {
             }
             const sanitizedFiles = (files as Express.Multer.File[]).map(({ fieldname, ...fileData }) => fileData);
 
+            const userId = (request as any).user?.id as string | undefined;
+
             // reduce value of key "path" to be relative to storage directory
             for (const file of sanitizedFiles) {
                 // Save original filesystem path before overwriting
@@ -188,7 +190,7 @@ export class ImagesController {
                 Object.assign(file, sanitizedFile);
 
                 // Sync file after upload using the original filesystem path
-                await FilesController.syncFile(originalFilePath, file.originalname);
+                await FilesController.syncFile(originalFilePath, file.originalname, userId);
             }
 
             sendSuccess(response, sanitizedFiles, 'Files uploaded successfully', 200);
