@@ -71,7 +71,7 @@ export const fileUploadRateLimiter = rateLimit({
  */
 export const loginRateLimiter = rateLimit({
     windowMs: limitedMins, // 15 minutes
-    max: 5, // 5 login attempts per window
+    max: 10, // 10 login attempts per window
     message: {
         status: 429,
         message: 'Too many login attempts. Please try again in 15 minutes.'

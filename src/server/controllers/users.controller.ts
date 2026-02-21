@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
+import multer from 'multer';
 import bcrypt from 'bcrypt';
-import { sendBadRequest, sendSuccess } from '../utils/response.js';
+import { sendBadRequest, sendSuccess, sendUnauthorized } from '../utils/response.js';
 import { query, queryOne, getSqliteClient } from '../utils/db.js';
 import { User } from '../types/user.js';
 import { getAuthConfig, logAuditEvent } from '../utils/auth.js';
+import { UploadController } from './upload.controller.js';
 
 export class UsersController {
     /**
@@ -260,6 +262,67 @@ export class UsersController {
         } catch (error: any) {
             console.error('Delete user error:', error);
             sendBadRequest(res, error.message || 'Failed to delete user.');
+        }
+    }
+
+    /**
+     * Upload user avatar
+     */
+    static async uploadAvatar(req: Request, res: Response): Promise<void> {
+        try {
+            const user = (req as any).user;
+            if (!user) {
+                sendUnauthorized(res, 'Authentication required.');
+                return;
+            }
+
+            const storage = 'avatars';
+            const upload = multer({
+                storage: UploadController.storage(storage),
+                limits: {
+                    fileSize: 5 * 1024 * 1024 // 5MB limit
+                },
+                fileFilter: (req, file, cb) => {
+                    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                    if (allowedTypes.includes(file.mimetype)) {
+                        cb(null, true);
+                    } else {
+                        cb(new Error('Invalid file type. Only JPG, PNG and WebP are allowed.'));
+                    }
+                }
+            }).single('avatar');
+
+            upload(req, res, async (err: any) => {
+                if (err instanceof multer.MulterError) {
+                    sendBadRequest(res, `Upload error: ${err.message}`);
+                    return;
+                } else if (err) {
+                    sendBadRequest(res, err.message);
+                    return;
+                }
+
+                if (!req.file) {
+                    sendBadRequest(res, 'No file uploaded.');
+                    return;
+                }
+
+                const avatarUrl = `/api/image/${req.file.filename}`;
+
+                // Update user avatar in database
+                const sqlite = getSqliteClient();
+                const stmt = sqlite.prepare('UPDATE users SET avatar = ?, updated_at = datetime(\'now\') WHERE id = ?');
+                stmt.run(avatarUrl, user.id);
+
+                await logAuditEvent(user.id, 'USER_AVATAR_UPLOADED', req, {
+                    avatarUrl
+                });
+
+                sendSuccess(res, { avatarUrl }, 'Avatar uploaded successfully');
+            });
+
+        } catch (error: any) {
+            console.error('Upload avatar error:', error);
+            sendBadRequest(res, error.message || 'Failed to upload avatar.');
         }
     }
 }

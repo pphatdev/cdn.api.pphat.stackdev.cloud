@@ -15,8 +15,8 @@ const router = express.Router();
  * @returns { accessToken, refreshToken, expiresAt, refreshExpiresAt, user }
  * 
  * @security
- * - Rate limited to 5 attempts per 15 minutes
- * - Account lockout after 5 failed attempts
+ * - Rate limited to 10 attempts per 15 minutes
+ * - Account lockout after 10 failed attempts
  * - Bcrypt password hashing (12 rounds)
  * - JWT tokens with expiration
  */
@@ -121,5 +121,14 @@ router.put('/users/:userId', jwtAuthMiddleware, adminOnlyMiddleware, UsersContro
  * @header Authorization: Bearer <accessToken>
  */
 router.delete('/users/:userId', jwtAuthMiddleware, adminOnlyMiddleware, UsersController.deleteUser);
+
+/**
+ * Upload current user avatar
+ * 
+ * @method POST /api/auth/me/avatar
+ * @header Authorization: Bearer <accessToken>
+ * @body { avatar: File }
+ */
+router.post('/me/avatar', jwtAuthMiddleware, UsersController.uploadAvatar);
 
 export default router;
