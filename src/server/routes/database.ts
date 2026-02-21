@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { sendSuccess } from '../utils/response.js';
 import { Database } from '../utils/database.js';
+import { jwtAuthMiddleware, requireRoles } from '../middlewares/auth.js';
 
 const router = express.Router();
 
@@ -8,7 +9,7 @@ const router = express.Router();
  * Get all files from database
  * @method GET /api/database/files
  */
-router.get('/files', async (req: Request, res: Response) => {
+router.get('/files', jwtAuthMiddleware, async (req: Request, res: Response) => {
     try {
         const files = await Database.getAllFiles();
         sendSuccess(res, files, 'Files retrieved from database', 200);
@@ -21,7 +22,7 @@ router.get('/files', async (req: Request, res: Response) => {
  * Get database statistics
  * @method GET /api/database/stats
  */
-router.get('/stats', async (req: Request, res: Response) => {
+router.get('/stats', jwtAuthMiddleware, async (req: Request, res: Response) => {
     try {
         const stats = await Database.getStats();
         sendSuccess(res, stats, 'Database statistics retrieved', 200);
@@ -34,7 +35,7 @@ router.get('/stats', async (req: Request, res: Response) => {
  * Search files in database
  * @method GET /api/database/search?q=query&type=type
  */
-router.get('/search', async (req: Request, res: Response) => {
+router.get('/search', jwtAuthMiddleware, async (req: Request, res: Response) => {
     try {
         const { q, type } = req.query;
         if (!q) {
@@ -52,7 +53,7 @@ router.get('/search', async (req: Request, res: Response) => {
  * Backup database
  * @method POST /api/database/backup
  */
-router.post('/backup', async (req: Request, res: Response) => {
+router.post('/backup', jwtAuthMiddleware, requireRoles('admin'), async (req: Request, res: Response) => {
     try {
         const backupPath = await Database.backup();
         sendSuccess(res, { backupPath }, 'Database backed up successfully', 200);

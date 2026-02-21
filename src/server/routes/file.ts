@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import { FilesController, uploadFiles } from '../controllers/files.controller.js';
 import { PreviewController } from '../controllers/preview.controller.js';
 import { fileUploadRateLimiter } from '../middlewares/rate-limit.js';
-import { jwtAuthMiddleware } from '../middlewares/auth.js';
+import { jwtAuthMiddleware, requireRoles } from '../middlewares/auth.js';
 
 const router = express.Router();
 
@@ -75,28 +75,28 @@ router.post('/upload', jwtAuthMiddleware, fileUploadRateLimiter, (req, res) => {
  * - q: Name of the file to search
  * - type: {image, office} Type of files to search (optional)
  */
-router.get('/search', FilesController.searchFileByName);
+router.get('/search', jwtAuthMiddleware, FilesController.searchFileByName);
 
 /**
  * Move file to directory endpoint
  *
  * @method PUT /api/file/move/:filename
  */
-router.put('/move/:filename', FilesController.moveFileToDir);
+router.put('/move/:filename', jwtAuthMiddleware, requireRoles('admin', 'user'), FilesController.moveFileToDir);
 
 /**
  * File delete endpoint
  *
  * @method DELETE /api/file/delete/:filename
 */
-router.delete('/delete/:filename', FilesController.deleteFile);
+router.delete('/delete/:filename', jwtAuthMiddleware, requireRoles('admin', 'user'), FilesController.deleteFile);
 
 /**
  * File download endpoint
  *
  * @method GET /api/file/download/:filename
 */
-router.get('/download/:filename', FilesController.downloadFile);
+router.get('/download/:filename', jwtAuthMiddleware, FilesController.downloadFile);
 
 /**
  * File preview endpoint
