@@ -1,7 +1,7 @@
 {
   "info": {
     "_postman_id": "0dc532dd-8e71-4b0c-ac99-a0d152f22958",
-    "name": "CDN API - assets.stackdev.cloud",
+    "name": "CDN API - cdn.api.pphat.stackdev.cloud",
     "description": "Complete API collection for CDN service including authentication, file uploads, image optimization, folder management, database operations, and migrations. Secured with JWT authentication and rate limiting.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "16827919"
@@ -204,6 +204,30 @@
               ]
             },
             "description": "Revoke a specific session by ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Avatar",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{url}}/auth/me/avatar",
+              "host": ["{{url}}"],
+              "path": ["auth", "me", "avatar"]
+            },
+            "description": "Upload a profile avatar for the currently authenticated user.\n\n**Requirements:**\n- Header: `Authorization: Bearer <accessToken>`\n- Body: `multipart/form-data` with `avatar` field (image/jpeg, image/png, image/webp)\n- Max Size: 5MB"
           },
           "response": []
         }
@@ -550,6 +574,98 @@
         }
       ],
       "description": "📂 Folder structure and navigation"
+    },
+    {
+      "name": "User Management (Admin)",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/auth/users",
+              "host": ["{{url}}"],
+              "path": ["auth", "users"]
+            },
+            "description": "Get a list of all users in the system.\n\n**Authentication:** Required (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"newuser\",\n    \"name\": \"New User\",\n    \"password\": \"InitialPass123!\",\n    \"role\": \"user\",\n    \"email\": \"user@example.com\",\n    \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{url}}/auth/users",
+              "host": ["{{url}}"],
+              "path": ["auth", "users"]
+            },
+            "description": "Create a new user account.\n\n**Authentication:** Required (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Updated Name\",\n    \"role\": \"admin\",\n    \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{url}}/auth/users/:userId",
+              "host": ["{{url}}"],
+              "path": ["auth", "users", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "123e4567-e89b-12d3-a456-426614174000"
+                }
+              ]
+            },
+            "description": "Update an existing user's information.\n\n**Authentication:** Required (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/auth/users/:userId",
+              "host": ["{{url}}"],
+              "path": ["auth", "users", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "123e4567-e89b-12d3-a456-426614174000"
+                }
+              ]
+            },
+            "description": "Delete a user from the system.\n\n**Authentication:** Required (Admin only)"
+          },
+          "response": []
+        }
+      ],
+      "description": "👥 Administrative user management"
     },
     {
       "name": "Database",

@@ -55,6 +55,7 @@ CDN API is a production-ready content delivery network service that provides int
 ## ✨ Features
 
 ### 🖼️ Image Management
+
 - **Intelligent Optimization**: Automatic image compression and format conversion
 - **Multi-format Support**: JPEG, PNG, WebP, AVIF, GIF, TIFF
 - **Responsive Images**: Generate multiple sizes for responsive design
@@ -62,6 +63,7 @@ CDN API is a production-ready content delivery network service that provides int
 - **Metadata Extraction**: EXIF data preservation and extraction
 
 ### 📁 File Management
+
 - **Secure Upload**: Validated file uploads with type checking
 - **Folder Organization**: Hierarchical folder structure support
 - **File Operations**: Move, delete, rename, and search files
@@ -71,6 +73,7 @@ CDN API is a production-ready content delivery network service that provides int
 - **Metadata Storage**: File metadata and tags in SQLite database
 
 ### 🔐 Authentication & Authorization
+
 - **JWT Authentication**: Secure token-based authentication
 - **Role-Based Access**: Admin, user, and viewer roles
 - **Session Management**: Active session tracking with refresh tokens
@@ -80,6 +83,7 @@ CDN API is a production-ready content delivery network service that provides int
 - **Default Admin**: Auto-created admin account for initial setup
 
 ### 💾 Database & Migrations
+
 - **SQLite Database**: Lightweight, serverless database with Drizzle ORM
 - **Type-Safe Queries**: Full TypeScript support with Drizzle
 - **Migration System**: Timestamp-based schema migration tracking
@@ -88,6 +92,7 @@ CDN API is a production-ready content delivery network service that provides int
 - **Schema Export**: Export database schema for documentation
 
 ### 🔒 Security & Performance
+
 - **Rate Limiting**: Configurable rate limits for all endpoints
   - Image uploads: 30 requests per 15 minutes
   - File uploads: 15 requests per 15 minutes
@@ -96,12 +101,14 @@ CDN API is a production-ready content delivery network service that provides int
 - **Input Validation**: Comprehensive request validation
 
 ### 📊 Monitoring & Analytics
+
 - **Storage Statistics**: Real-time storage usage analytics
 - **File Type Analysis**: Breakdown by file type and folder
 - **Largest Files Tracking**: Identify storage-heavy assets
 - **Performance Metrics**: Response time and throughput monitoring
 
 ### 🎨 Web Dashboard
+
 - **Authentication**: Login page with JWT-based authentication
 - **Dashboard**: Overview of storage usage and recent activity
 - **File Browser**: Visual interface for browsing and managing files with breadcrumb navigation
@@ -223,60 +230,62 @@ The server will be available at `http://localhost:3000` (or your configured port
 
 ```json
 {
-    "app": {
-        "name": "CDN API",
-        "env": "development"           // "development" or "production"
-    },
-    "port": 3000,                      // Server port
-    "directories": [
-        "./storage/**/**"               // Storage directory pattern
+  "app": {
+    "name": "CDN API",
+    "env": "development" // "development" or "production"
+  },
+  "port": 3000, // Server port
+  "directories": [
+    "./storage/**/**" // Storage directory pattern
+  ],
+  "allow": {
+    "origins": [
+      // Allowed CORS origins
+      "http://localhost:3000",
+      "http://localhost:5173"
     ],
-    "allow": {
-        "origins": [                    // Allowed CORS origins
-            "http://localhost:3000",
-            "http://localhost:5173"
-        ],
-        "patterns": [                   // Regex patterns for origins
-            "^https?://.*\\.stackdev\\.cloud$"
-        ]
-    },
-    "database": {
-        "dbPath": "src/data/app.db",   // SQLite database path
-        "autoRunMigrations": true,      // Run migrations on startup
-        "autoRunSeeds": false           // Run seeds on startup
-    },
-    "auth": {
-        "jwtSecret": "your-super-secret-jwt-key-min-32-characters-long",
-        "jwtExpiresIn": "1h",           // Access token expiration
-        "refreshTokenExpiresIn": "7d",  // Refresh token expiration
-        "bcryptRounds": 12,             // Password hashing rounds
-        "maxLoginAttempts": 5,          // Failed login limit
-        "lockoutDuration": 15,          // Account lockout minutes
-        "maxSessionsPerUser": 5         // Max concurrent sessions
-    }
+    "patterns": [
+      // Regex patterns for origins
+      "^https?://.*\\.stackdev\\.cloud$"
+    ]
+  },
+  "database": {
+    "dbPath": "src/data/app.db", // SQLite database path
+    "autoRunMigrations": true, // Run migrations on startup
+    "autoRunSeeds": false // Run seeds on startup
+  },
+  "auth": {
+    "jwtSecret": "your-super-secret-jwt-key-min-32-characters-long",
+    "jwtExpiresIn": "1h", // Access token expiration
+    "refreshTokenExpiresIn": "7d", // Refresh token expiration
+    "bcryptRounds": 12, // Password hashing rounds
+    "maxLoginAttempts": 5, // Failed login limit
+    "lockoutDuration": 15, // Account lockout minutes
+    "maxSessionsPerUser": 5 // Max concurrent sessions
+  }
 }
 ```
 
 ### Configuration Options
 
-| Option | Type | Description | Default |
-|--------|------|-------------|---------|
-| `app.name` | string | Application name | "CDN API" |
-| `app.env` | string | Environment mode | "development" |
-| `port` | number | Server port | 3000 |
-| `directories` | array | Storage directory patterns | `["./storage/**/**"]` |
-| `allow.origins` | array | Exact CORS origins | `[]` |
-| `allow.patterns` | array | Regex patterns for CORS | `[]` |
-| `database.dbPath` | string | SQLite database file path | "src/data/app.db" |
-| `database.autoRunMigrations` | boolean | Auto-run migrations on startup | true |
-| `database.autoRunSeeds` | boolean | Auto-run seeds on startup | false |
-| `auth.jwtSecret` | string | JWT secret key (min 32 chars) | Required |
-| `auth.jwtExpiresIn` | string | Access token TTL | "1h" |
-| `auth.refreshTokenExpiresIn` | string | Refresh token TTL | "7d" |
-| `auth.bcryptRounds` | number | Password hashing strength | 12 |
-| `auth.maxLoginAttempts` | number | Failed login threshold | 5 |
-| `auth.lockoutDuration` | number | Lockout duration (minutes) | 15 |
-| `auth.maxSessionsPerUser` | number | Max concurrent sessions per user | 5 |
+| Option                       | Type    | Description                      | Default               |
+| ---------------------------- | ------- | -------------------------------- | --------------------- |
+| `app.name`                   | string  | Application name                 | "CDN API"             |
+| `app.env`                    | string  | Environment mode                 | "development"         |
+| `port`                       | number  | Server port                      | 3000                  |
+| `directories`                | array   | Storage directory patterns       | `["./storage/**/**"]` |
+| `allow.origins`              | array   | Exact CORS origins               | `[]`                  |
+| `allow.patterns`             | array   | Regex patterns for CORS          | `[]`                  |
+| `database.dbPath`            | string  | SQLite database file path        | "src/data/app.db"     |
+| `database.autoRunMigrations` | boolean | Auto-run migrations on startup   | true                  |
+| `database.autoRunSeeds`      | boolean | Auto-run seeds on startup        | false                 |
+| `auth.jwtSecret`             | string  | JWT secret key (min 32 chars)    | Required              |
+| `auth.jwtExpiresIn`          | string  | Access token TTL                 | "1h"                  |
+| `auth.refreshTokenExpiresIn` | string  | Refresh token TTL                | "7d"                  |
+| `auth.bcryptRounds`          | number  | Password hashing strength        | 12                    |
+| `auth.maxLoginAttempts`      | number  | Failed login threshold           | 5                     |
+| `auth.lockoutDuration`       | number  | Lockout duration (minutes)       | 15                    |
+| `auth.maxSessionsPerUser`    | number  | Max concurrent sessions per user | 5                     |
 
 ### Storage Structure
 
@@ -348,6 +357,7 @@ npm run db:studio
 ```
 
 Then visit http://localhost:4983/ to:
+
 - Browse all tables and data
 - Run queries visually
 - Edit records directly
@@ -378,6 +388,7 @@ cp src/data/app.db src/data/app.db.backup
 ```
 
 Or use the API endpoint:
+
 ```bash
 curl -X POST http://localhost:3000/api/database/backup
 ```
@@ -410,6 +421,7 @@ npm run css
 ### Default Admin Credentials
 
 After running migrations, a default admin account is created:
+
 - **Username**: `admin`
 - **Password**: `admin123`
 - **Email**: `admin@stackdev.cloud`
@@ -482,33 +494,39 @@ curl http://localhost:3000/api/auth/me \
 
 ### Endpoints Overview
 
-| Category | Endpoint | Method | Description | Auth Required |
-|----------|----------|--------|-------------|---------------|
-| **Health** | `/` | GET | API welcome message | No |
-| **Health** | `/version` | GET | Get API version info | No |
-| **Auth** | `/auth/login` | POST | User login (rate limited) | No |
-| **Auth** | `/auth/logout` | POST | Logout current session | Yes |
-| **Auth** | `/auth/logout-all` | POST | Logout all sessions | Yes |
-| **Auth** | `/auth/me` | GET | Get current user info | Yes |
-| **Images** | `/image/upload` | POST | Upload images (rate limited) | Optional |
-| **Images** | `/image/*` | GET | Retrieve optimized images | No |
-| **Files** | `/file/upload` | POST | Upload files (rate limited) | Optional |
-| **Files** | `/file/search` | GET | Search files by name | No |
-| **Files** | `/file/move` | PUT | Move files/folders | Optional |
-| **Files** | `/file/delete` | DELETE | Delete files | Optional |
-| **Files** | `/file/download/*` | GET | Download files | No |
-| **Files** | `/file/preview/*` | GET | Preview documents | No |
-| **Folders** | `/folder` | GET | Get folder structure | No |
-| **Database** | `/database/files` | GET | Get files database | No |
-| **Database** | `/database/stats` | GET | Database statistics | No |
-| **Database** | `/database/search` | GET | Search database | No |
-| **Database** | `/database/backup` | POST | Backup database | Optional |
-| **Storage** | `/storage` | GET | Full storage statistics | No |
-| **Storage** | `/storage/summary` | GET | Quick storage summary | No |
+| Category     | Endpoint           | Method | Description                  | Auth Required |
+| ------------ | ------------------ | ------ | ---------------------------- | ------------- |
+| **Health**   | `/`                | GET    | API welcome message          | No            |
+| **Health**   | `/version`         | GET    | Get API version info         | No            |
+| **Auth**     | `/auth/login`      | POST   | User login (rate limited)    | No            |
+| **Auth**     | `/auth/logout`     | POST   | Logout current session       | Yes           |
+| **Auth**     | `/auth/logout-all` | POST   | Logout all sessions          | Yes           |
+| **Auth**     | `/auth/me`         | GET    | Get current user info        | Yes           |
+| **Auth**     | `/auth/me/avatar`  | POST   | Upload user avatar           | Yes           |
+| **Images**   | `/image/upload`    | POST   | Upload images (rate limited) | Optional      |
+| **Images**   | `/image/*`         | GET    | Retrieve optimized images    | No            |
+| **Files**    | `/file/upload`     | POST   | Upload files (rate limited)  | Optional      |
+| **Files**    | `/file/search`     | GET    | Search files by name         | No            |
+| **Files**    | `/file/move`       | PUT    | Move files/folders           | Optional      |
+| **Files**    | `/file/delete`     | DELETE | Delete files                 | Optional      |
+| **Files**    | `/file/download/*` | GET    | Download files               | No            |
+| **Files**    | `/file/preview/*`  | GET    | Preview documents            | No            |
+| **Folders**  | `/folder`          | GET    | Get folder structure         | No            |
+| **Database** | `/database/files`  | GET    | Get files database           | No            |
+| **Database** | `/database/stats`  | GET    | Database statistics          | No            |
+| **Database** | `/database/search` | GET    | Search database              | No            |
+| **Database** | `/database/backup` | POST   | Backup database              | Optional      |
+| **Users**    | `/auth/users`      | GET    | List all users (Admin)       | Yes           |
+| **Users**    | `/auth/users`      | POST   | Create new user (Admin)      | Yes           |
+| **Users**    | `/auth/users/:id`  | PUT    | Update user (Admin)          | Yes           |
+| **Users**    | `/auth/users/:id`  | DELETE | Delete user (Admin)          | Yes           |
+| **Storage**  | `/storage`         | GET    | Full storage statistics      | No            |
+| **Storage**  | `/storage/summary` | GET    | Quick storage summary        | No            |
 
 ### Detailed API Documentation
 
 For comprehensive API documentation with examples, see:
+
 - [Migration Guide](docs/how-to-use/MIGRATION_GUIDE.md) - Database migration system
 - [Image Upload Endpoint](docs/how-to-use/image-upload-endpoint.md)
 - [File Upload Endpoint](docs/how-to-use/file-upload-endpoint.md)
@@ -518,10 +536,12 @@ For comprehensive API documentation with examples, see:
 - [Move File Endpoint](docs/how-to-use/move-file-endpoint.md)
 - [Search Filename](docs/how-to-use/search-filename.md)
 - [Rate Limiting](docs/how-to-use/rate-limiting.md)
+- [Avatar Upload](docs/how-to-use/avatar-upload-endpoint.md)
 
 ### Postman Collection
 
 Import the Postman collection for testing:
+
 ```
 docs/collections/collection.postman_collection.json
 ```
@@ -530,19 +550,19 @@ docs/collections/collection.postman_collection.json
 
 The application includes a full-featured web interface accessible via browser:
 
-| Route | Description | Auth Required |
-|-------|-------------|---------------|
-| `/` | Dashboard overview with storage stats | Yes |
-| `/login` | User authentication page | No |
-| `/files` | File browser and manager | Yes |
-| `/files/*` | Navigate through folder structure | Yes |
-| `/starred` | Quick access to starred files | Yes |
-| `/recent` | Recently accessed files | Yes |
-| `/detail` | Detailed file information | Yes |
-| `/share` | Shared files management | Yes |
-| `/upload` | File upload interface | Yes |
-| `/upload/history` | Upload activity history | Yes |
-| `/users` | User management (Admin only) | Yes |
+| Route             | Description                           | Auth Required |
+| ----------------- | ------------------------------------- | ------------- |
+| `/`               | Dashboard overview with storage stats | Yes           |
+| `/login`          | User authentication page              | No            |
+| `/files`          | File browser and manager              | Yes           |
+| `/files/*`        | Navigate through folder structure     | Yes           |
+| `/starred`        | Quick access to starred files         | Yes           |
+| `/recent`         | Recently accessed files               | Yes           |
+| `/detail`         | Detailed file information             | Yes           |
+| `/share`          | Shared files management               | Yes           |
+| `/upload`         | File upload interface                 | Yes           |
+| `/upload/history` | Upload activity history               | Yes           |
+| `/users`          | User management (Admin only)          | Yes           |
 
 **Note**: Web authentication is handled via JWT tokens stored in browser cookies. Users are automatically redirected to `/login` if not authenticated.
 
@@ -553,6 +573,7 @@ The application includes a full-featured web interface accessible via browser:
 ### Project Scripts
 
 #### Development
+
 ```bash
 # Development server with hot reload
 npm run dev
@@ -571,6 +592,7 @@ npm start
 ```
 
 #### Database Management
+
 ```bash
 # Run all pending migrations
 npm run migrate:up
@@ -816,6 +838,7 @@ docs/collections/collection.postman_collection.json
 ### Testing Checklist
 
 #### Authentication Tests
+
 - [ ] User login with valid credentials
 - [ ] Login rate limiting (5 attempts)
 - [ ] Account locking after failed attempts
@@ -825,6 +848,7 @@ docs/collections/collection.postman_collection.json
 - [ ] Current user info retrieval
 
 #### File Operations Tests
+
 - [ ] Image upload with various formats (JPEG, PNG, WebP, TIFF)
 - [ ] File upload with different file types
 - [ ] File search by name
@@ -834,6 +858,7 @@ docs/collections/collection.postman_collection.json
 - [ ] Document preview generation
 
 #### System Tests
+
 - [ ] Rate limiting verification (all endpoints)
 - [ ] CORS headers validation
 - [ ] Storage statistics accuracy
@@ -843,6 +868,7 @@ docs/collections/collection.postman_collection.json
 - [ ] Session management
 
 #### Database Tests
+
 - [ ] Migration execution
 - [ ] Rollback functionality
 - [ ] Seed data integrity
@@ -902,6 +928,7 @@ footer
 Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
 Example:
+
 ```
 feat(storage): add file type filtering to storage stats
 
@@ -922,6 +949,7 @@ This project is licensed under the ISC License - see the [LICENSE](LICENSE) file
 ## 👨‍💻 Author
 
 **Sophat (PPhat)**
+
 - GitHub: [@pphatdev](https://github.com/pphatdev)
 - Website: [stackdev.cloud](https://stackdev.cloud)
 
