@@ -210,6 +210,19 @@
         return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
     };
 
+    const getAccessToken = () => {
+        const readCookie = (name) => {
+            const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+            if (match) return match[2];
+        };
+        return localStorage.getItem("accessToken") || readCookie("accessToken") || "";
+    };
+
+    const getAuthHeaders = () => {
+        const token = getAccessToken();
+        return token ? { 'Authorization': `Bearer ${token}` } : {};
+    };
+
     const timeAgo = (isoString) => {
         if (!isoString) return '—';
         const time = new Date(isoString).getTime();
@@ -523,7 +536,10 @@
                 const filename = btn.getAttribute('data-filename');
                 if (filename && confirm('Are you sure you want to delete this file?')) {
                     try {
-                        const res = await fetch(`/api/file/delete/${encodeURIComponent(filename)}`, { method: 'DELETE' });
+                        const res = await fetch(`/api/file/delete/${encodeURIComponent(filename)}`, { 
+                            method: 'DELETE',
+                            headers: getAuthHeaders()
+                        });
                         if (res.ok) {
                             loadFiles();
                         } else {
@@ -554,7 +570,9 @@
     // Load files
     const loadFiles = async () => {
         try {
-            const response = await fetch('/api/database/files');
+            const response = await fetch('/api/database/files', {
+                headers: getAuthHeaders()
+            });
             if (!response.ok) throw new Error('Failed to load files');
             const data = await response.json();
             allFiles = Array.isArray(data?.result) ? data.result : [];

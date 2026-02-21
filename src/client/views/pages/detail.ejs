@@ -439,6 +439,19 @@
     let zoomLevel = 100;
     let rotation = 0;
 
+    const getAccessToken = () => {
+        const readCookie = (name) => {
+            const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+            if (match) return match[2];
+        };
+        return localStorage.getItem("accessToken") || readCookie("accessToken") || "";
+    };
+
+    const getAuthHeaders = () => {
+        const token = getAccessToken();
+        return token ? { 'Authorization': `Bearer ${token}` } : {};
+    };
+
     // File type mappings
     const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico', 'tiff', 'tif', 'avif'];
     const videoExts = ['mp4', 'webm', 'ogg', 'ogv', 'mov', 'avi', 'mkv'];
@@ -613,7 +626,10 @@
             let fileSize = null;
             let lastModified = null;
             try {
-                const headRes = await fetch(fileUrl, { method: 'HEAD' });
+                const headRes = await fetch(fileUrl, { 
+                    method: 'HEAD',
+                    headers: getAuthHeaders()
+                });
                 if (headRes.ok) {
                     fileSize = parseInt(headRes.headers.get('content-length') || '0');
                     lastModified = headRes.headers.get('last-modified');
@@ -668,7 +684,9 @@
                 document.getElementById('preview-pdf').src = fileUrl;
                 pdfPreviewContainer.classList.remove('hidden');
             } else if (isCode || isText) {
-                const res = await fetch(fileUrl);
+                const res = await fetch(fileUrl, {
+                    headers: getAuthHeaders()
+                });
                 if (!res.ok) throw new Error('Failed to load file');
                 const text = await res.text();
                 document.getElementById('preview-text').textContent = text;

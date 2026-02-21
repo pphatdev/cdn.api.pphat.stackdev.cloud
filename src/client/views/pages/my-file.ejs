@@ -177,6 +177,19 @@
     </div>
 
     <script type="module">
+        const getAccessToken = () => {
+            const readCookie = (name) => {
+                const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+                if (match) return match[2];
+            };
+            return localStorage.getItem("accessToken") || readCookie("accessToken") || "";
+        };
+
+        const getAuthHeaders = () => {
+            const token = getAccessToken();
+            return token ? { 'Authorization': `Bearer ${token}` } : {};
+        };
+
         // Initialize delete action handlers
         const initDeleteActions = () => {
             document.querySelectorAll('[data-action="delete"]').forEach(btn => {
@@ -194,7 +207,8 @@
                     if (confirm(`Are you sure you want to delete "${filename}"?`)) {
                         try {
                             const res = await fetch(`/api/file/delete/${filename}`, {
-                                method: 'DELETE'
+                                method: 'DELETE',
+                                headers: getAuthHeaders()
                             });
 
                             if (res.ok) {
