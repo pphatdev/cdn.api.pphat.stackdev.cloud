@@ -7,6 +7,7 @@ type UserRow = {
     name: string;
     role: UserRole;
     is_active: boolean;
+    avatar?: string | null;
     last_login_at?: string | null;
     created_at?: string | null;
 };
@@ -190,9 +191,12 @@ function renderUsers() {
                 </td>
                 <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
-                            ${user.name.charAt(0).toUpperCase()}
-                        </div>
+                        ${user.avatar ? 
+                            `<img src="${user.avatar}" alt="${user.name}" class="w-10 h-10 rounded-full object-cover">` :
+                            `<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
+                                ${user.name.charAt(0).toUpperCase()}
+                            </div>`
+                        }
                         <div>
                             <div class="font-medium text-slate-900">${user.name}</div>
                             <div class="text-sm text-foreground/60">@${user.username}</div>
