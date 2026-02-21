@@ -193,7 +193,7 @@ function renderUsers() {
                 <td class="px-6 py-4 text-sm text-foreground/80">${user.email || '-'}</td>
                 <td class="px-6 py-4">
                     <span class="px-2 py-1 text-xs font-medium rounded-full ${getRoleBadgeClass(user.role)}">
-                        ${user.role}
+                        ${getRoleDisplayName(user.role)}
                     </span>
                 </td>
                 <td class="px-6 py-4">
@@ -231,6 +231,11 @@ function getRoleBadgeClass(role: UserRole): string {
         'viewer': 'bg-slate-100 text-slate-700'
     };
     return classes[role as keyof typeof classes] || classes.user;
+}
+
+function getRoleDisplayName(role: UserRole): string {
+    if (role === 'user') return 'Author';
+    return role.charAt(0).toUpperCase() + role.slice(1);
 }
 
 function formatDate(dateString?: string | null): string {

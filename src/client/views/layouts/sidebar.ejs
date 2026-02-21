@@ -11,6 +11,11 @@
 
     <nav class="space-y-1 mb-10">
         <% modules.forEach(function(module) { 
+            // Role-based visibility check
+            if (module.roles && (!locals.user || !module.roles.includes(locals.user.role))) {
+                return;
+            }
+
             const isActive = module.activeUrls 
                 ? module.activeUrls.some(u => currentPath === u || currentPath.startsWith(u + '/'))
                 : (currentPath === module.url || currentPath.startsWith(module.url + '/'));

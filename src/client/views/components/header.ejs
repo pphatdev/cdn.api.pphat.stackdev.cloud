@@ -46,7 +46,10 @@
                     </div>
                     <div>
                         <p id="user-name" class="text-sm font-semibold text-slate-900">User</p>
-                        <p id="user-email" class="text-xs text-slate-500">user@stackdev.cloud</p>
+                        <div class="flex items-center gap-2">
+                            <p id="user-email" class="text-xs text-slate-500">user@stackdev.cloud</p>
+                            <span id="user-role-badge" class="px-1.5 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider bg-primary/10 text-primary">Role</span>
+                        </div>
                     </div>
                 </div>
                 <div class="py-2">
@@ -84,6 +87,21 @@
             if (user) {
                 if (userName) userName.textContent = user.name;
                 if (userEmail) userEmail.textContent = user.email || "";
+                
+                const userRoleBadge = document.getElementById("user-role-badge");
+                if (userRoleBadge) {
+                    const role = user.role || 'user';
+                    userRoleBadge.textContent = role === 'user' ? 'Author' : role;
+                    
+                    // Simple color coding for roles
+                    if (role === 'admin') {
+                        userRoleBadge.className = "px-1.5 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider bg-orange-100 text-orange-700";
+                    } else if (role === 'viewer') {
+                        userRoleBadge.className = "px-1.5 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider bg-slate-100 text-slate-700";
+                    } else {
+                        userRoleBadge.className = "px-1.5 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider bg-primary/10 text-primary";
+                    }
+                }
                 
                 const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=0f766e&color=fff`;
                 const avatarUrl = user.avatar || defaultAvatar;
