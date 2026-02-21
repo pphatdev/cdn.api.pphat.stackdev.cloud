@@ -50,12 +50,15 @@ export const clientAuthMiddleware = async (req: Request, res: Response, next: Ne
         return;
     }
 
-    (req as any).user = {
+    const user = {
         id: payload.userId,
         username: payload.username,
         role: payload.role,
         sessionId: payload.sessionId
     };
+
+    (req as any).user = user;
+    res.locals.user = user;
 
     next();
 };
