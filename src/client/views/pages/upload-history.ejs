@@ -103,7 +103,9 @@
     </div>
 </main>
 
-<script>
+<script type="module">
+    import { authProvider } from '/utils/auth.js';
+
     const historyTable = document.getElementById('history-table');
     const historySearch = document.getElementById('history-search');
     const historyFilter = document.getElementById('history-filter');
@@ -254,7 +256,9 @@
     const loadHistory = async () => {
         if (!historyTable) return;
         try {
-            const response = await fetch('/api/database/files');
+            const response = await fetch('/api/database/files', {
+                headers: authProvider.getAuthHeaders()
+            });
             if (!response.ok) {
                 throw new Error('Failed to load uploads');
             }
@@ -320,7 +324,10 @@
                 log('Attempting to delete file:', filename);
                 if (filename && confirm('Are you sure you want to delete this file?')) {
                     try {
-                        const res = await fetch(`/api/file/delete/${filename}`, { method: 'DELETE' });
+                        const res = await fetch(`/api/file/delete/${filename}`, { 
+                            method: 'DELETE',
+                            headers: authProvider.getAuthHeaders()
+                        });
                         if (res.ok) {
                             loadHistory();
                         } else {

@@ -177,18 +177,7 @@
     </div>
 
     <script type="module">
-        const getAccessToken = () => {
-            const readCookie = (name) => {
-                const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-                if (match) return match[2];
-            };
-            return localStorage.getItem("accessToken") || readCookie("accessToken") || "";
-        };
-
-        const getAuthHeaders = () => {
-            const token = getAccessToken();
-            return token ? { 'Authorization': `Bearer ${token}` } : {};
-        };
+        import { authProvider } from '/utils/auth.js';
 
         // Initialize delete action handlers
         const initDeleteActions = () => {
@@ -208,7 +197,7 @@
                         try {
                             const res = await fetch(`/api/file/delete/${filename}`, {
                                 method: 'DELETE',
-                                headers: getAuthHeaders()
+                                headers: authProvider.getAuthHeaders()
                             });
 
                             if (res.ok) {

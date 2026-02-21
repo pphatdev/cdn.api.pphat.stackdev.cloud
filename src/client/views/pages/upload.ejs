@@ -152,7 +152,9 @@
     </div>
 </main>
 
-<script>
+<script type="module">
+    import { authProvider } from '/utils/auth.js';
+
     const uploadInput = document.getElementById('upload-input');
     const uploadList = document.getElementById('upload-list');
     const clearButton = document.getElementById('clear-upload');
@@ -189,18 +191,7 @@
         return new Date(isoString).toLocaleDateString();
     };
 
-    const getAccessToken = () => {
-        const readCookie = (name) => {
-            const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-            if (match) return match[2];
-        };
-        return localStorage.getItem("accessToken") || readCookie("accessToken") || "";
-    };
-
-    const getAuthHeaders = () => {
-        const token = getAccessToken();
-        return token ? { 'Authorization': `Bearer ${token}` } : {};
-    };
+    // Auth helpers removed as they are handled by AuthProvider
 
     const renderRecentUploads = (files) => {
         if (!recentUploads) return;
@@ -228,7 +219,7 @@
         if (!recentUploads) return;
         try {
             const response = await fetch('/api/database/files', {
-                headers: getAuthHeaders()
+                headers: authProvider.getAuthHeaders()
             });
             if (!response.ok) {
                 throw new Error('Failed to load uploads');
@@ -385,9 +376,9 @@
             xhr.open('POST', uploadForm.action, true);
 
             // Add Authorization header
-            const token = getAccessToken();
-            if (token) {
-                xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+            const headers = authProvider.getAuthHeaders();
+            if (headers.Authorization) {
+                xhr.setRequestHeader('Authorization', headers.Authorization);
             }
 
             if (storagePath && storagePath.value.trim()) {

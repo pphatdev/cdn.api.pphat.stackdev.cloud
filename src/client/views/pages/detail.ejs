@@ -416,7 +416,9 @@
     </div>
 </main>
 
-<script>
+<script type="module">
+    import { authProvider } from '/utils/auth.js';
+
     const loadBtn = document.getElementById('load-btn');
     const loadingState = document.getElementById('loading-state');
     const emptyState = document.getElementById('empty-state');
@@ -439,18 +441,7 @@
     let zoomLevel = 100;
     let rotation = 0;
 
-    const getAccessToken = () => {
-        const readCookie = (name) => {
-            const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-            if (match) return match[2];
-        };
-        return localStorage.getItem("accessToken") || readCookie("accessToken") || "";
-    };
-
-    const getAuthHeaders = () => {
-        const token = getAccessToken();
-        return token ? { 'Authorization': `Bearer ${token}` } : {};
-    };
+    // Auth helpers removed as they are handled by AuthProvider
 
     // File type mappings
     const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico', 'tiff', 'tif', 'avif'];
@@ -628,7 +619,7 @@
             try {
                 const headRes = await fetch(fileUrl, { 
                     method: 'HEAD',
-                    headers: getAuthHeaders()
+                    headers: authProvider.getAuthHeaders()
                 });
                 if (headRes.ok) {
                     fileSize = parseInt(headRes.headers.get('content-length') || '0');
@@ -685,7 +676,7 @@
                 pdfPreviewContainer.classList.remove('hidden');
             } else if (isCode || isText) {
                 const res = await fetch(fileUrl, {
-                    headers: getAuthHeaders()
+                    headers: authProvider.getAuthHeaders()
                 });
                 if (!res.ok) throw new Error('Failed to load file');
                 const text = await res.text();

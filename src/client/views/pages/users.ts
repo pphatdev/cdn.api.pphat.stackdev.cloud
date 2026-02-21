@@ -1,3 +1,5 @@
+import { authProvider } from '../../utils/auth.js';
+
 type UserRole = 'admin' | 'user' | 'viewer' | string;
 
 type UserRow = {
@@ -47,22 +49,7 @@ let currentPage = 1;
 const itemsPerPage = 10;
 let filteredUsers: UserRow[] = users;
 
-const readCookie = (name: string): string | undefined => {
-    return document.cookie
-        .split(";")
-        .map((cookie) => cookie.trim())
-        .find((cookie) => cookie.startsWith(`${name}=`))
-        ?.split("=")[1];
-};
-
-const getAccessToken = (): string => {
-    return localStorage.getItem("accessToken") || readCookie("accessToken") || "";
-};
-
-const buildAuthHeaders = (): Record<string, string> => {
-    const token = getAccessToken();
-    return token ? { Authorization: `Bearer ${token}` } : {};
-};
+// Auth helpers removed as they are handled by AuthProvider
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -82,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function fetchUsers() {
     try {
         const response = await fetch('/api/auth/users', {
-            headers: buildAuthHeaders()
+            headers: authProvider.getAuthHeaders()
         });
 
         // Check if response is ok
@@ -425,10 +412,10 @@ async function handleSubmit(e: Event) {
 
         const response = await fetch(url, {
             method,
-            headers: {
-                'Content-Type': 'application/json',
-                ...buildAuthHeaders()
-            },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...authProvider.getAuthHeaders()
+                },
             body: JSON.stringify(payload)
         });
 
@@ -458,7 +445,7 @@ window.deleteUser = async (userId: string) => {
     try {
         const response = await fetch(`/api/auth/users/${userId}`, {
             method: 'DELETE',
-            headers: buildAuthHeaders()
+            headers: authProvider.getAuthHeaders()
         });
 
         const result = await response.json();

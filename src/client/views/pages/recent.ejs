@@ -159,7 +159,9 @@
     </div>
 </main>
 
-<script>
+<script type="module">
+    import { authProvider } from '/utils/auth.js';
+
     // Elements
     const recentSearch = document.getElementById('recent-search');
     const recentFilter = document.getElementById('recent-filter');
@@ -210,18 +212,7 @@
         return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
     };
 
-    const getAccessToken = () => {
-        const readCookie = (name) => {
-            const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-            if (match) return match[2];
-        };
-        return localStorage.getItem("accessToken") || readCookie("accessToken") || "";
-    };
-
-    const getAuthHeaders = () => {
-        const token = getAccessToken();
-        return token ? { 'Authorization': `Bearer ${token}` } : {};
-    };
+    // Auth helpers removed as they are handled by AuthProvider
 
     const timeAgo = (isoString) => {
         if (!isoString) return '—';
@@ -538,7 +529,7 @@
                     try {
                         const res = await fetch(`/api/file/delete/${encodeURIComponent(filename)}`, { 
                             method: 'DELETE',
-                            headers: getAuthHeaders()
+                            headers: authProvider.getAuthHeaders()
                         });
                         if (res.ok) {
                             loadFiles();
@@ -571,7 +562,7 @@
     const loadFiles = async () => {
         try {
             const response = await fetch('/api/database/files', {
-                headers: getAuthHeaders()
+                headers: authProvider.getAuthHeaders()
             });
             if (!response.ok) throw new Error('Failed to load files');
             const data = await response.json();

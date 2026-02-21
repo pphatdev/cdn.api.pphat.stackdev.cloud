@@ -28,16 +28,22 @@
         </button>
 
         <div class="relative">
-            <button type="button" data-dropdown-toggle="user-menu" data-dropdown-placement="bottom-end" class="flex items-center gap-2 rounded-full border border-slate-200 bg-white p-0 shadow-sm hover:border-slate-300" aria-expanded="false" aria-haspopup="true">
-                <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=0f766e&color=fff" alt="Avatar" class="w-9 h-9 rounded-full">
-                <!-- <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg> -->
+            <button type="button" id="avatar-container" data-dropdown-toggle="user-menu" data-dropdown-placement="bottom-end" class="flex items-center gap-2 rounded-full border border-slate-200 bg-white p-0 shadow-sm hover:border-slate-300" aria-expanded="false" aria-haspopup="true">
+                <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=0f766e&color=fff" alt="Avatar" class="w-9 h-9 rounded-full object-cover">
+                <input type="file" id="avatar-input" class="hidden" accept="image/jpeg,image/png,image/webp">
             </button>
 
             <div id="user-menu" class="hidden absolute right-0 mt-2 w-64 rounded-2xl border border-slate-200 bg-white p-3 shadow-lg">
                 <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
-                    <img id="user-avatar-menu" src="https://ui-avatars.com/api/?name=User&background=0f766e&color=fff" alt="Avatar" class="w-10 h-10 rounded-full">
+                    <div class="relative group">
+                        <img id="user-avatar-menu" src="https://ui-avatars.com/api/?name=User&background=0f766e&color=fff" alt="Avatar" class="w-10 h-10 rounded-full object-cover">
+                        <button id="change-avatar-btn" class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white" title="Change Avatar">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
                     <div>
                         <p id="user-name" class="text-sm font-semibold text-slate-900">User</p>
                         <p id="user-email" class="text-xs text-slate-500">user@stackdev.cloud</p>
@@ -62,62 +68,58 @@
     </div>
 </header>
 
-<script>
-    (function () {
-        const logoutButton = document.getElementById("logout-button");
+<script type="module">
+    import { authProvider } from '/utils/auth.js';
+
+    document.addEventListener("DOMContentLoaded", () => {
         const userName = document.getElementById("user-name");
         const userEmail = document.getElementById("user-email");
         const userAvatar = document.getElementById("user-avatar");
         const userAvatarMenu = document.getElementById("user-avatar-menu");
+        const avatarInput = document.getElementById("avatar-input");
+        const changeAvatarBtn = document.getElementById("change-avatar-btn");
+        const logoutButton = document.getElementById("logout-button");
 
-        const readCookie = (name) => {
-            return document.cookie
-                .split(";")
-                .map((cookie) => cookie.trim())
-                .find((cookie) => cookie.startsWith(`${name}=`))
-                ?.split("=")[1];
-        };
+        authProvider.subscribe((user) => {
+            if (user) {
+                if (userName) userName.textContent = user.name;
+                if (userEmail) userEmail.textContent = user.email || "";
+                
+                const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=0f766e&color=fff`;
+                const avatarUrl = user.avatar || defaultAvatar;
 
-        const clearCookie = (name) => {
-            document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
-        };
-
-        try {
-            const storedUser = localStorage.getItem("user");
-            if (storedUser) {
-                const parsed = JSON.parse(storedUser);
-                if (parsed?.name && userName) userName.textContent = parsed.name;
-                if (parsed?.email && userEmail) userEmail.textContent = parsed.email;
-                if (parsed?.name && userAvatar && userAvatarMenu) {
-                    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(parsed.name)}&background=0f766e&color=fff`;
-                    userAvatar.src = avatarUrl;
-                    userAvatarMenu.src = avatarUrl;
-                }
+                if (userAvatar) userAvatar.src = avatarUrl;
+                if (userAvatarMenu) userAvatarMenu.src = avatarUrl;
             }
-        } catch (error) {
-            // Ignore localStorage errors
+        });
+
+        if (changeAvatarBtn && avatarInput) {
+            changeAvatarBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                avatarInput.click();
+            });
+
+            avatarInput.addEventListener("change", async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                try {
+                    changeAvatarBtn.disabled = true;
+                    await authProvider.uploadAvatar(file);
+                } catch (err) {
+                    console.error("Upload error:", err);
+                    alert(err.message || "Failed to upload avatar");
+                } finally {
+                    changeAvatarBtn.disabled = false;
+                    avatarInput.value = "";
+                }
+            });
         }
 
-        if (!logoutButton) return;
-
-        logoutButton.addEventListener("click", async () => {
-            const token = localStorage.getItem("accessToken") || readCookie("accessToken");
-
-            if (token) {
-                await fetch("/api/auth/logout", {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }).catch(() => null);
-            }
-
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
-            localStorage.removeItem("user");
-            clearCookie("accessToken");
-            clearCookie("refreshToken");
-            window.location.href = "/login";
-        });
-    })();
+        if (logoutButton) {
+            logoutButton.addEventListener("click", () => {
+                authProvider.logout();
+            });
+        }
+    });
 </script>
