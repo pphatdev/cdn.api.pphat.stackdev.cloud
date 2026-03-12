@@ -287,7 +287,7 @@
         <div class="rounded-2xl relative bg-white hover:shadow-lg shadow-primary/10 transition-all duration-300 overflow-hidden group border border-foreground/10">
             <div class="relative aspect-video bg-slate-50 flex items-center justify-center">
                 ${isImage ? `
-                    <img src="/api/image/${file.filename}?w=400&h=300" alt="${file.originalFilename || file.filename}" loading="lazy" class="w-full bg-primary/5 h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <img src="/api/image/assets/${encodeURIComponent(file.filename)}?fm=webp&q=80&w=250&fit=cover" alt="${file.originalFilename || file.filename}" loading="lazy" class="w-full bg-primary/5 h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                     <div class="hidden items-center justify-center w-full h-full ${typeColors[fileType]}">
                         ${typeIcons[fileType]}
                     </div>

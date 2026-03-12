@@ -550,7 +550,7 @@
     const updateUrls = (filename, isImage = false) => {
         const baseUrl = window.location.origin;
         const fileUrl = `/api/file/preview/${encodeURIComponent(filename)}`;
-        const imageUrl = `/api/image/${encodeURIComponent(filename)}`;
+        const imageUrl = `/api/image/assets/${encodeURIComponent(filename)}`;
 
         document.getElementById('direct-url').value = `${baseUrl}${fileUrl}`;
 
@@ -611,7 +611,7 @@
 
             // Build URLs
             const fileUrl = `/api/file/preview/${encodeURIComponent(filename)}`;
-            const imageUrl = `/api/image/${encodeURIComponent(filename)}`;
+            const imageUrl = `/api/image/assets/${encodeURIComponent(filename)}`;
 
             // Fetch file info via HEAD request
             let fileSize = null;
@@ -849,7 +849,7 @@
         if (height) params.push(`h=${height}`);
         if (fit) params.push(`fit=${fit}`);
 
-        const cdnUrl = `${baseUrl}/api/image/${encodeURIComponent(currentFile)}${params.length ? '?' + params.join('&') : ''}`;
+        const cdnUrl = `${baseUrl}/api/image/assets/${encodeURIComponent(currentFile)}${params.length ? '?' + params.join('&') : ''}`;
         document.getElementById('cdn-url').value = cdnUrl;
         document.getElementById('html-embed').value = `<img src="${cdnUrl}" alt="${currentFile}" />`;
         document.getElementById('markdown-embed').value = `![${currentFile}](${cdnUrl})`;

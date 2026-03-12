@@ -146,12 +146,13 @@
                 <% files.forEach(file => {
                     const fileInfo = getFileIcon(file.name);
                     const detailUrl = '/detail?file=' + encodeURIComponent(file.name);
+                    const imageAssetUrl = '/api/image/assets/' + encodeURIComponent(file.name) + '?fm=webp&q=80&w=250&fit=cover';
                 %>
                     <%- include('../components/file-card', {
                         title: file.name,
                         subtitle: formatDate(file.modifiedAt) + ' • ' + formatBytes(file.size),
                         isImage: fileInfo.isImage,
-                        imageSrc: fileInfo.isImage ? '/api/image/' + file.name + '?fm=webp&w=200&h=200&q=80' : undefined,
+                        imageSrc: fileInfo.isImage ? imageAssetUrl : undefined,
                         icon: fileInfo.icon,
                         previewUrl: detailUrl,
                         downloadUrl: '/api/file/download/' + encodeURIComponent(file.name),
