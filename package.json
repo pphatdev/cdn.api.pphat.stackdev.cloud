@@ -35,7 +35,7 @@
     "better-sqlite3": "^12.6.2",
     "docx-preview": "^0.3.7",
     "drizzle-kit": "latest",
-    "drizzle-orm": "^0.45.1",
+    "drizzle-orm": "^0.45.2",
     "ejs": "^4.0.1",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.2",
