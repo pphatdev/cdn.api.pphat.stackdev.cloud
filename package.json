@@ -44,7 +44,7 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.2.0",
     "puppeteer": "^24.33.0",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.4",
     "tiff.js": "^1.0.0",
     "ts-node": "^10.9.2"
   },
